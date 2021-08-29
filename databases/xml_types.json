@@ -1,0 +1,178 @@
+{
+    "Substation": {
+        "Location": "reference",
+        "PSRType": "reference",
+        "name": "str",
+        "alias": "str",
+        "objectNumber": "str",
+        "description": "str"
+    },
+    "Location": {
+        "CoordinateSystem": "reference",
+        "mainAddress": "str"
+    },
+    "PositionPoint": {
+        "Location": "reference",
+        "xPosition": "float64",
+        "yPosition": "float64",
+        "sequenceNumber": "int64"
+    },
+    "PSRType": {
+        "name": "str"
+    },
+    "VoltageLevel": {
+        "Substation": "reference",
+        "BaseVoltage": "reference",
+        "name": "str"
+    },
+    "Bay": {
+        "VoltageLevel": "reference",
+        "name": "str",
+        "description": "str"
+    },
+    "BaseVoltage": {
+        "nominalVoltage": "float64"
+    },
+    "CoordinateSystem": {
+        "crsUrn": "str"
+    },
+    "ACLineSegment": {
+        "Location": "reference",
+        "PSRType": "reference",
+        "BaseVoltage": "reference",
+        "name": "str",
+        "length": "float64",
+        "b0ch": "float64",
+        "bch": "float64",
+        "r": "float64",
+        "r0": "float64",
+        "x": "float64",
+        "x0": "float64",
+        "value": "float64",
+        "description": "str",
+        "objectNumber": "str",
+        "EquipmentContainer": "reference"
+    },
+    "Terminal": {
+        "ConductingEquipment": "reference",
+        "ConnectivityNode": "reference",
+        "sequenceNumber": "int64"
+    },
+    "ConnectivityNode": {},
+    "BusbarSection": {
+        "EquipmentContainer": "reference",
+        "BaseVoltage": "reference",
+        "Location": "reference",
+        "name": "str"
+    },
+    "GroundDisconnector": {
+        "Location": "reference",
+        "EquipmentContainer": "reference",
+        "name": "str",
+        "normalOpen": "bool",
+        "scadaident": "str",
+        "objectNumber": "str",
+        "BaseVoltage": "reference"
+    },
+    "Fuse": {
+        "Location": "reference",
+        "EquipmentContainer": "reference",
+        "name": "str",
+        "normalOpen": "bool",
+        "ratedCurrent": "float64",
+        "scadaident": "str",
+        "objectNumber": "str",
+        "BaseVoltage": "reference"
+    },
+    "Disconnector": {
+        "Location": "reference",
+        "EquipmentContainer": "reference",
+        "name": "str",
+        "normalOpen": "bool",
+        "ratedCurrent": "float64",
+        "scadaident": "str",
+        "objectNumber": "str",
+        "BaseVoltage": "reference"
+    },
+    "LoadBreakSwitch": {
+        "Location": "reference",
+        "EquipmentContainer": "reference",
+        "name": "str",
+        "normalOpen": "bool",
+        "ratedCurrent": "float64",
+        "scadaident": "str",
+        "objectNumber": "str",
+        "BaseVoltage"  : "reference"
+    },
+    "Breaker": {
+        "Location": "reference",
+        "EquipmentContainer": "reference",
+        "normalOpen": "bool",
+        "ratedCurrent": "float64",
+        "breakingCapacity": "float64",
+        "scadaident": "str",
+        "objectNumber": "str",
+        "BaseVoltage": "reference"  
+    },
+    "Jumper": {
+        "Location": "reference",
+        "EquipmentContainer": "reference",
+        "normalOpen": "bool",
+        "objectNumber": "str",
+        "BaseVoltage": "reference"
+    },
+    "PowerTransformer": {
+        "Location": "reference",
+        "EquipmentContainer": "reference",
+        "name": "str",
+        "objectNumber": "str"
+    },
+    "PowerTransformerEnd": {
+        "BaseVoltage": "reference",
+        "PowerTransformer": "reference",
+        "Terminal": "reference",
+        "endNumber": "int64",
+        "ratedU": "float64",
+        "ratedS": "float64",
+        "connectionKind": "str",
+        "phaseAngleClock": "str",
+        "loss": "float64",
+        "r": "float64",
+        "endBaseVoltage": "float64",
+        "lossZero": "float64",
+        "uk": "float64"
+    },
+    "RatioTapChanger": {
+        "TransformerEnd": "reference",
+        "stepVoltageIncrement": "float64",
+        "highStep": "float64",
+        "lowStep": "float64",
+        "neutralStep": "float64",
+        "neutralU": "float64",
+        "normalStep": "float64"
+    },
+    "EnergyConsumer": {
+        "Location": "reference",
+        "BaseVoltage": "reference",
+        "name": "str",
+        "objectNumber": "str",
+        "EquipmentContainer": "reference"
+    },
+    "UsagePoint": {
+        "Equipments": "reference",
+        "annualconsumption": "float64",
+        "objectNumber": "str",
+        "LoadGroup": "str",
+        "EquipmentContainer": "reference"
+    },
+    "PetersenCoil": {
+        "Location": "reference",
+        "EquipmentContainer": "reference",
+        "mode": "str",
+        "name": "str",
+        "r": "float64",
+        "nominalU": "float64",
+        "objectNumber": "str",
+        "BaseVoltage": "reference"
+    }
+}

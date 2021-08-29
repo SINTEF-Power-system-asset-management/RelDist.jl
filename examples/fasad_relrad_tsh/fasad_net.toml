@@ -1,0 +1,11 @@
+[files]
+transformer = "transformers.csv"
+branch = "lines.csv"
+switch = "switchgear.csv"
+gen = "gen.csv"
+bus = "nodes.csv"
+loaddata = "loads.csv"
+reldata = "reldata.csv"
+
+[configuration]
+baseMVA = 100.0

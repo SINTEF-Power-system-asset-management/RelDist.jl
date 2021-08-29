@@ -1,0 +1,9 @@
+{
+"consumer_type": "Handel og tjenester",
+"loadprofile_type": "varehandel",
+"start_time": "2015-01-01T00:00Z",
+"end_time": "2015-12-31T01:30Z",
+"p_ref": 0.8,
+"annual_consumption": 546803,
+"notified_interruption": false
+}

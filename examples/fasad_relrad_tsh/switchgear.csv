@@ -1,0 +1,12 @@
+f_bus;t_bus;breaker;closed
+48779;72485;True;True
+54708;98382;True;False
+44724;48779;False;True
+72485;18091;False;True
+267;30798;False;True
+30798;80587;False;True
+30798;8619;False;True
+7595;61870;False;True
+61870;36651;False;True
+96334;14923;False;False
+61870;82475;False;False

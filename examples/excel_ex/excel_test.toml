@@ -1,0 +1,13 @@
+name = "test"
+
+[files]
+bus = "bus.csv"
+branch = "branches.csv"
+gen = "gen.csv"
+switch = "switchgear.csv"
+loaddata = "loads.csv"
+transformer = "transformers.csv"
+reldata = "reldata.csv"
+
+[configuration]
+baseMVA = 100.0

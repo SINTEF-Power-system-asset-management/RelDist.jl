@@ -1,0 +1,32 @@
+{
+"Jordbruk": {
+		"day" : "Thursday",
+		"month": "January",
+		"hour": "06:00"
+	},
+"Husholdning": {
+		"day" : "hverdag",
+		"month" : "January",
+		"hour" : "16:00"
+	},
+"Industri": {
+		"day" : "hverdag",
+		"month" : "January",
+		"hour" : "10:00"
+	},
+"Handel og tjenester": {
+		"day" : "hverdag",
+		"month" : "January",
+		"hour" : "10:00"
+	},
+"Offentlig virksomhet": {
+		"day" : "hverdag",
+		"month" : "January",
+		"hour" : "10:00"
+	},
+"Industri med eldrevne prosesser": {
+		"day" : "hverdag",
+		"month" : "January",
+		"hour" : "10:00"
+	}
+}

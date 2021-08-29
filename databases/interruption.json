@@ -1,0 +1,9 @@
+{
+"consumer_type": "household",
+"loadprofile_type": "husholdning",
+"start_time": "2015-10-02T00:00Z",
+"end_time": "2015-10-02T01:30Z",
+"p_ref": 0.8,
+"annual_consumption": 11563.225658,
+"notified_interruption": false
+}

@@ -1,0 +1,33 @@
+# Configuration file for the FaSaD prototype. Test grid that Tonje Skoglund
+# Hermansen has used in example calculations in Excel. The prototype should
+# reproduce the results of Tonje's Excel files.
+
+format = 'fasad' # Format of the input data. Either 'fasad' or 'skagerak'.
+
+name = 'TSH-grid' # Name of the grid
+transmission_grid = 'trans_grid' # Name of transmission grid node
+
+# The car is assumed to move along the grid lines at a constant speed [km/h]:
+effective_car_speed = 30
+
+# When the car is already at a known switch, the time it takes between giving
+# the order to move car and when it actually starts moving [min]:
+driving_startup_time = 3
+
+# Minimum time until the car arrives at the first manual switch [min]:
+turnout_time = 30
+
+# Minimum time until sectioning starts [min]:
+response_time = 5
+
+# Fault indicator maximum fault order. Must be a non-negative integer or 'all':
+indicator_max_fault_order = 0
+
+[files]
+	# List of files needed to run FASaD
+	transformers = ['TSH-grid_transformers.csv']
+	lines = ['TSH-grid_lines.csv']
+	switchgear = ['TSH-grid-no-indicators_switchgear.csv']
+	nodes = ['TSH-grid-no-indicators_nodes.csv']
+	delivery_points = ['TSH-grid_delivery_points.csv']
+	fault_indicators = []
