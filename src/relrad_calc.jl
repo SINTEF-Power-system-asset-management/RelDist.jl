@@ -1,5 +1,5 @@
 using RelRad
-using LightGraphs
+using Graphs
 using PowerGraphs
 using DataFrames
 using MetaGraphs
@@ -103,7 +103,7 @@ end
             network::RadialPowerGraph,
             net_map::graphMap,
             IC::Array,
-            e::LightGraphs.SimpleGraphs.SimpleEdge{Int64},
+            e::Graphs.SimpleGraphs.SimpleEdge{Int64},
             L::Array)
 
             Performs the sectioning of the branch and returns the permanent interruption costs
@@ -353,7 +353,7 @@ function get_edge_pos(e, edge_pos, filtered_branches)
     end
 end
 
-function edge2branch(g::AbstractMetaGraph, e::LightGraphs.SimpleGraphs.SimpleEdge{Int64})::Branch
+function edge2branch(g::AbstractMetaGraph, e::Graphs.SimpleGraphs.SimpleEdge{Int64})::Branch
     s = get_bus_name(g, src(e))
     d = get_bus_name(g, dst(e))
     return Branch(s,d)
