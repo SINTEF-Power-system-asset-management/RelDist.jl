@@ -1,5 +1,3 @@
-using RelRad
-
 case_path = joinpath(@__DIR__, "cases") 
 
 interruption = read_interruption(joinpath(case_path, "interruption.json"))

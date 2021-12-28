@@ -1,4 +1,3 @@
-using RelRad
 using PowerGraphs
 using Test
 

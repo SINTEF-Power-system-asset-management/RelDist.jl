@@ -1,4 +1,3 @@
-using RelRad
 
 interruption = read_interruption(joinpath(@__DIR__, "../databases/interruption.json"))
 cost_functions = read_cost_functions(COST_FUN)

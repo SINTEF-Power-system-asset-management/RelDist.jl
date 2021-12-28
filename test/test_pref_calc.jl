@@ -1,4 +1,3 @@
-using RelRad
 
 lastprofiler_filename = joinpath(@__DIR__, "../databases/lastprofiler.csv")
 referencetime_filename =  joinpath(@__DIR__, "../databases/referansetidspunkt.json")

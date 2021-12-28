@@ -1,5 +1,5 @@
+using RelDist
 using Test
-using RelRad
 
 @testset "Testing IO" begin
     include("test_IO.jl")

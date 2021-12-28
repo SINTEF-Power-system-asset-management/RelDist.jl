@@ -1,4 +1,3 @@
-using RelRad
 using Graphs
 using PowerGraphs
 using DataFrames

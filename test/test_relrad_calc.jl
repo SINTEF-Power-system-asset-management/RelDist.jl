@@ -1,6 +1,4 @@
-using RelRad
 using PowerGraphs
-using Test
 using JLD2
 
 interruption_filename = joinpath(@__DIR__, "../databases/interruption_FASIT2.json")
