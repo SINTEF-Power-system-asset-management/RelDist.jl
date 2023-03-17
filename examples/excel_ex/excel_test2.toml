@@ -5,7 +5,7 @@ bus = "bus2.csv"
 branch = "branches2.csv"
 gen = "gen.csv"
 switch = "switchgear2.csv"
-loaddata = "loads.csv"
+load = "loads.csv"
 transformer = "transformers.csv"
 reldata = "reldata2.csv"
 

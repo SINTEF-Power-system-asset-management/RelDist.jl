@@ -1,5 +1,5 @@
 using Graphs
-using PowerGraphs
+using SintPowerGraphs
 using DataFrames
 using MetaGraphs
 import Base.==
@@ -59,8 +59,8 @@ function relrad_calc(interruption::Interruption,
                     cost_functions::Dict{String, PieceWiseCost}, 
                     network::RadialPowerGraph, 
                     filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))::Tuple{Array{Float64,2},Array{Float64,2},Array{Any,1},DataFrame}
-    Q = []  # Empty array
-	L = string.(network.mpc.loaddata.bus)
+    Q = []  # Empty arrayjh
+	L = string.(network.mpc.load.bus)
     edge_pos_df = store_edge_pos(network)
     IC = zeros(length(L), nrow(network.mpc.branch))
     ICt = zeros(length(L), nrow(network.mpc.branch))

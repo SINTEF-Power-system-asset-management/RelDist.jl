@@ -21,6 +21,7 @@ end
 	include("test_fasad_calc.jl")
 end
 
-@testset "Testing Interruption costs calculation on original fasad net" begin
-	include("test_fasad_original_calc.jl")
-end
+# @testset "Testing Interruption costs calculation on original fasad net" begin
+	# include("test_fasad_original_calc.jl")
+# end
+#

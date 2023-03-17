@@ -1,4 +1,4 @@
-using PowerGraphs
+using SintPowerGraphs
 using Test
 
 interruption_filename = joinpath(@__DIR__, "../databases/interruption_FASIT2.json")

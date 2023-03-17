@@ -1,4 +1,4 @@
-using PowerGraphs
+using SintPowerGraphs
 using JLD2
 
 interruption_filename = joinpath(@__DIR__, "../databases/interruption_FASIT2.json")
