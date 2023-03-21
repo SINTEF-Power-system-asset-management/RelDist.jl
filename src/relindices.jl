@@ -72,6 +72,13 @@ function get_corr_factor(corr_factor::CorrFactor,
 end
 
 """Calculates the KILE"""
+function calculate_kile(p_ref::Real,
+                        t::Real,
+                        λ::Real,
+                        cost_function::PieceWiseCost,
+                        corr::Real)
+    return λ*corr*p_ref*f(cost_function, t)
+end
 function calculate_kile(interruption::Interruption,
                         cost_functions::Dict{String, PieceWiseCost},
                         corr_factors::CorrFactor)
@@ -82,14 +89,26 @@ function calculate_kile(interruption::Interruption,
     return corr*f(cost_function, duration)*interruption.customer.p_ref
 end
 
-function calculate_kile(interruption::Interruption,
-                        cost_functions::Dict{String, PieceWiseCost},
-                        failure_rate::Float64,
-                        p_ref::Float64,
-                        t::Float64
-                        )
-    corr = 1  # considering the failure occurring at reference time
-    duration = t
-    cost_function = cost_functions[interruption.customer.consumer_type]
-    return corr*failure_rate*f(cost_function, duration)*p_ref
+"""
+    calculate_rel_indices calculates the unavailability and ENS.
+
+    The equations are as follows:
+    
+    U = λ⋅t
+    ENS = U⋅P
+"""
+function calculate_rel_indices(λ::Real, t::Real, P::Real)
+    U = λ*t
+    ENS = U*P
+    
+    return U, ENS
+end
+
+function set_rel_res!(res::RelStruct, λ::Real, t::Real, P::Real,
+        cost_function::PieceWiseCost,
+        l_pos::Integer, edge_pos::Integer)
+    U, ENS = calculate_rel_indices(λ, P, t)
+
+    CENS = calculate_kile(P, t, λ, cost_function, 1)
+    set_res!(res, t, U, ENS, CENS, l_pos, edge_pos)
 end

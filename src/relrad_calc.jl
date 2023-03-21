@@ -3,15 +3,6 @@ using SintPowerGraphs
 using DataFrames
 using MetaGraphs
 import Base.==
-# using Plots, GraphRecipes
-
-# function src(e::Tuple)
-#     return e[1]
-# end
-
-# function dst(e::Tuple)
-#     return e[2]
-# end
 
 struct Branch{T} <:AbstractEdge{T}
     src::T
@@ -28,19 +19,6 @@ end
 
 (==)(e1::Branch, e2::Branch) = (e1.src == e2.src && e1.dst == e2.dst)
 
-
-
-# reverse(e::T) where T<:Branch = T(dst(e), src(e))
-# ==(e1::Branch, e2::Branch) = (src(e1) == src(e2) && dst(e1) == dst(e2))
-
-# function src(e::Branch)
-#     return e.source
-# end
-
-# function dst(e::Branch)
-#     return e.dest
-# end
-
 """
     relrad_calc(interruption::Interruption, cost_functions::Dict{String, PieceWiseCost}, network::RadialPowerGraph)
 
@@ -52,18 +30,18 @@ end
         - network: Data Structure with network data
 
         # Output
-        - IC: Costs for permanent interruption, defined for each load and each failed branch
-        - ICt: Costs for temporary interruption, defined for each load and each failed branch
+        - res: Costs for permanent interruption, defined for each load and each failed branch
+        - resₜ: Costs for temporary interruption, defined for each load and each failed branch
 """
 function relrad_calc(interruption::Interruption, 
                     cost_functions::Dict{String, PieceWiseCost}, 
                     network::RadialPowerGraph, 
-                    filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))::Tuple{Array{Float64,2},Array{Float64,2},Array{Any,1},DataFrame}
+                    filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
     Q = []  # Empty arrayjh
 	L = string.(network.mpc.load.bus)
     edge_pos_df = store_edge_pos(network)
-    IC = zeros(length(L), nrow(network.mpc.branch))
-    ICt = zeros(length(L), nrow(network.mpc.branch))
+    res = RelStruct(length(L), nrow(network.mpc.branch))
+    resₜ = RelStruct(length(L), nrow(network.mpc.branch))
     push_adj(Q, network.radial, 1) # I explore only the original radial topology for failures effect (avoid loops of undirected graph)
                                         # By definition the radial topology is built with 1 as root node
     # I select all the transformers
@@ -79,20 +57,22 @@ function relrad_calc(interruption::Interruption,
         edge_pos = get_edge_pos(e,edge_pos_df, filtered_branches)
         rel_data = get_branch_data(network, :reldata, e.src, e.dst)
         
-        IC = section(interruption, cost_functions, network, edge_pos, IC, e, L, F)
+        section!(res, interruption, cost_functions, network, edge_pos, e, L, F)
+        
         l_pos = 0
         for l in L
             l_pos += 1
 			bus_data = get_bus_data(network, l)
-            ICt[l_pos, edge_pos] = calculate_kile(interruption, cost_functions,
-												  float(rel_data.temporaryFaultFrequency[1]),
-												  float(bus_data.Pd[1]),
-												  float(rel_data.temporaryFaultTime[1])
-                                    )
+            set_rel_res!(resₜ,
+                         rel_data.temporaryFaultFrequency[1],
+                         rel_data.temporaryFaultTime[1],
+                         bus_data.Pd[1],
+                         cost_functions[interruption.customer.consumer_type],
+                         l_pos, edge_pos)
         end
         push_adj(Q, network.radial, e)
     end
-    return IC, ICt, L, edge_pos_df
+    return res, resₜ, L, edge_pos_df
 end
 
 
@@ -101,7 +81,7 @@ end
             cost_functions::Dict{String, PieceWiseCost},
             network::RadialPowerGraph,
             net_map::graphMap,
-            IC::Array,
+            res::RelStruc,
             e::Graphs.SimpleGraphs.SimpleEdge{Int64},
             L::Array)
 
@@ -114,19 +94,15 @@ end
             - net_map:: Data structure with graph-network mapping
             - e: failed network edge
             - L: Array of loads
-
-            # Output
-            - IC: Costs for permanent interruption, defined for each load and each failed branch
-
 """
-function section(interruption::Interruption,
+function section!(res::RelStruct,
+        interruption::Interruption,
         cost_functions::Dict{String, PieceWiseCost},
         network::RadialPowerGraph,
         edge_pos::Int,
-        IC::Array,
         e::Branch,
         L::Array,
-        F::Array)::Array{Float64,2}
+        F::Array)
     # R = calc_R(network, net_map, e)
     
     # e_original = e # Failed branch
@@ -145,7 +121,7 @@ function section(interruption::Interruption,
         end
 
     else
-        return IC # if it is a switch, return IC as it is (switches never fail at the moment)
+        return # if it is a switch, return as it is (switches never fail at the moment)
     end
 
     X = union(R_set...)
@@ -158,15 +134,12 @@ function section(interruption::Interruption,
         else
             t = sectioning_time
         end
-		bus_data = get_bus_data(network, l)
-        IC[l_pos,edge_pos] = calculate_kile(interruption,
-                                cost_functions,
-								float(permanent_failure_frequency[1]),
-								float(bus_data.Pd[1]),
-								float(t[1])
-                                )
+        bus_data = get_bus_data(network, l)
+        set_rel_res!(res, permanent_failure_frequency[1], t[1],
+                     bus_data.Pd[1],
+                     cost_functions[interruption.customer.consumer_type],
+                     l_pos, edge_pos)
     end
-    return IC
 end
 
 function get_sectioning_time(isolated_graph::AbstractMetaGraph, network::RadialPowerGraph)
