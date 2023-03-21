@@ -9,7 +9,9 @@ interruption = read_interruption(interruption_filename)
 cost_functions = read_cost_functions(cost_filename)
 network =  RadialPowerGraph(network_filename)
 
-IC, ICt, L, edge_pos = relrad_calc(interruption, cost_functions, network)
+res, resₜ, L, edge_pos = relrad_calc(interruption, cost_functions, network)
+IC = res.CENS
+ICt = resₜ.CENS
 IC_sum = sum(IC;dims=2)
 ICt_sum = sum(ICt;dims=2)
 println(IC_sum)
