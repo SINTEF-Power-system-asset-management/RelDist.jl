@@ -24,7 +24,7 @@ mutable struct Bound
 end
 
 """Check if a float is within a bound"""
-function Base.in(number::Float64, bound::Bound)::Bool
+function Base.in(number::Real, bound::Bound)::Bool
     return number < bound.upper && number >= bound.lower
 end
 
@@ -36,7 +36,7 @@ mutable struct Piece
 end
 
 """Evaluate a linear cost function."""
-function f(x::Piece, t::Float64)::Float64
+function f(x::Piece, t::Real)::Float64
     return x.constant + x.slope*t
 end
 
@@ -46,7 +46,7 @@ mutable struct PieceWiseCost
 end
 
 """Evaluate a piecewise linear cost function."""
-function f(x::PieceWiseCost, t::Float64)::Float64
+function f(x::PieceWiseCost, t::Real)::Float64
     for piece in x.pieces
         if t in piece.bound
             return f(piece, t)

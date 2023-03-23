@@ -1,0 +1,7 @@
+ID;f_bus;t_bus;repairTime;temporaryFaultFrequency;permanentFaultFrequency;sectioningTime;temporaryFaultTime;capacity
+K1;T1;L1;15;240;0.1;0.1;2
+K2;L1;L2;15;240;0.05;0.05;1
+K3;L1;L3;7;240;0.15;0.15;3
+K4;L3;L4;7;240;0.1;0.1;2
+K5;L2;T2;10;240;0;0;1
+K6;L3;T2;10;240;0;0;1
