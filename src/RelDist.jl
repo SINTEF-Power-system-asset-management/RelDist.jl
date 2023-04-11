@@ -1,5 +1,8 @@
 module RelDist
 
+include("load.jl")
+export get_loads
+
 include("relres.jl")
 export RelStruct, set_res!
 

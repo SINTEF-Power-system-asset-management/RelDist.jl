@@ -2,6 +2,7 @@ using Graphs
 using SintPowerGraphs
 using DataFrames
 using MetaGraphs
+using Logging
 import Base.==
 
 struct Branch{T} <:AbstractEdge{T}
@@ -38,12 +39,12 @@ function relrad_calc(interruption::Interruption,
                     network::RadialPowerGraph, 
                     filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
     Q = []  # Empty arrayjh
-	L = string.(network.mpc.load.bus)
+	L = get_loads(network.mpc)
     edge_pos_df = store_edge_pos(network)
     res = RelStruct(length(L), nrow(network.mpc.branch))
     resₜ = RelStruct(length(L), nrow(network.mpc.branch))
-    push_adj(Q, network.radial, 1) # I explore only the original radial topology for failures effect (avoid loops of undirected graph)
-                                        # By definition the radial topology is built with 1 as root node
+    push_adj(Q, network.radial, network.radial[network.ref_bus, :name])
+    # I explore only the original radial topology for failures effect (avoid loops of undirected graph)
     # I select all the transformers
     # F = get_transformers(network)
     # I take only the first transformer (trying to assign a single supply point)
@@ -54,6 +55,7 @@ function relrad_calc(interruption::Interruption,
     F = get_slack(network) # get list of substations (not distribution transformers). If not present, I use as slack the slack bus declared
     while !isempty(Q)
         e = pop!(Q)
+        @info "Processing line $e"
         edge_pos = get_edge_pos(e,edge_pos_df, filtered_branches)
         rel_data = get_branch_data(network, :reldata, e.src, e.dst)
         
@@ -61,12 +63,12 @@ function relrad_calc(interruption::Interruption,
         
         l_pos = 0
         for l in L
+
             l_pos += 1
-			bus_data = get_bus_data(network, l)
             set_rel_res!(resₜ,
                          rel_data.temporaryFaultFrequency[1],
                          rel_data.temporaryFaultTime[1],
-                         bus_data.Pd[1],
+                         l.P,
                          cost_functions[interruption.customer.consumer_type],
                          l_pos, edge_pos)
         end
@@ -108,11 +110,11 @@ function section!(res::RelStruct,
     # e_original = e # Failed branch
     #sectioning_time = 0.0 # I assign a local variable that will be update within the while loop
     repair_time = get_branch_data(network, :reldata, e.src, e.dst).repairTime
-    permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency
+    permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
 
     R_set = []
 
-    if !is_switch(network, e.src, e.dst)
+    if permanent_failure_frequency >= 0
         isolated_graph, reconfigured_network, sectioning_time = traverse_and_get_sectioning_time(network, e)
         for f in F
             R = Set(calc_R(network, reconfigured_network, f))
@@ -121,7 +123,7 @@ function section!(res::RelStruct,
         end
 
     else
-        return # if it is a switch, return as it is (switches never fail at the moment)
+        return # If the line has no permanent failure frequency we skip it.
     end
 
     X = union(R_set...)
@@ -129,14 +131,13 @@ function section!(res::RelStruct,
     l_pos = 0
     for l in L
         l_pos += 1
-        if !(l in X) 
+        if !(l.bus in X) 
             t = repair_time
         else
             t = sectioning_time
         end
-        bus_data = get_bus_data(network, l)
-        set_rel_res!(res, permanent_failure_frequency[1], t[1],
-                     bus_data.Pd[1],
+        set_rel_res!(res, permanent_failure_frequency, t[1],
+                     l.P,
                      cost_functions[interruption.customer.consumer_type],
                      l_pos, edge_pos)
     end
@@ -214,7 +215,12 @@ function traverse(g::MetaGraph, start::Int = 0, dfs::Bool = true)::Vector{Int}
     return seen
 end
 
+"""
+    traverse_and_get_sectioning_time
 
+    Finds the switch that isolates a fault and the part of the network connected to
+    this switch.
+"""
 function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch)
 	g = network.G
     newgraph = MetaDiGraph()
@@ -222,7 +228,6 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch)
     set_indexing_prop!(newgraph, :name)
     s = get_node_number(network.G, string(e.src))
     seen = Vector{Int}([])
-    visit = Vector{Int}([s])
 
     reindex = Dict{Int,Int}()
     i = 1
@@ -230,6 +235,17 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch)
 
     add_vertex!(newgraph)
     set_prop!(newgraph, i, :name, string(e.src)) # get_prop(g, src(e), :name))
+    n = get_node_number(network.G, e.dst)
+    if get_prop(g, Edge(s, n), :switch) == -1
+        visit =  Vector{Int}([s])
+    else
+        # The edge is a switch. This means that the isolated graph wil be just this edge.
+        visit =  Vector{Int}([]) # Stop the loop
+        i+=1
+        push!(reindex, n=>i)
+        update_isolated_and_reconfigured!(g, newgraph, copy_g,
+                                          reindex, Edge(s, n), n, s)
+    end
 
     while !isempty(visit)
         next = pop!(visit)
@@ -245,12 +261,8 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch)
                     end
                     i+=1
                     push!(reindex, n=>i)
-                    add_vertex!(newgraph)
-                    set_prop!(newgraph, reindex[n], :name, get_prop(g, n, :name))
-
-                    add_edge!(newgraph, reindex[next], reindex[n])
-                    set_prop!(newgraph, reindex[next], reindex[n], :switch, get_prop(g, e, :switch))
-                    rem_edge!(copy_g, e)
+                    update_isolated_and_reconfigured!(g, newgraph, copy_g,
+                                                      reindex, e, n, next)
                 end
             end
 
@@ -258,6 +270,16 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch)
     end
     sectioning_time = get_sectioning_time(newgraph, network)
     return newgraph, copy_g, sectioning_time
+end
+
+function update_isolated_and_reconfigured!(g::MetaDiGraph, newgraph::MetaDiGraph, copy_g::MetaGraph,
+        reindex::Dict{Int, Int}, e::Edge, n::Int, next::Int)
+    add_vertex!(newgraph)
+    set_prop!(newgraph, reindex[n], :name, get_prop(g, n, :name))
+
+    add_edge!(newgraph, reindex[next], reindex[n])
+    set_prop!(newgraph, reindex[next], reindex[n], :switch, get_prop(g, e, :switch))
+    rem_edge!(copy_g, e)
 end
 
 function get_slack(network::RadialPowerGraph)::Array{Any}

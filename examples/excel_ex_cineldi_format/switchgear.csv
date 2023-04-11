@@ -1,0 +1,9 @@
+f_bus;t_bus;breaker;closed
+trans_grid;bus_1;true;true
+bus_1;bus_2;false;true
+bus_2;bus_3;false;true
+bus_3;bus_4;false;true
+bus_1;bus_a;false;true
+bus_2;bus_b;false;true
+bus_3;bus_c;false;true
+bus_4;bus_d;false;true
