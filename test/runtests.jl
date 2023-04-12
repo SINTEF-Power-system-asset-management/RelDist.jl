@@ -15,10 +15,12 @@ end
 
 @testset "Testing Interruption costs calculation on basic radial net" begin
     include("test_relrad_calc.jl")
+    include("test_relrad_calc_CINELDI.jl")
 end
 
 @testset "Testing Interruption costs calculation on fasad net" begin
 	include("test_fasad_calc.jl")
+	include("test_fasad_calc_CINELDI.jl")
 end
 
 # @testset "Testing Interruption costs calculation on original fasad net" begin

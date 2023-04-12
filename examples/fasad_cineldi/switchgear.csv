@@ -5,5 +5,6 @@ K1b;L1;T1;false;true
 K2a;L1;L2;false;true
 K3a;L1;L3;false;true
 K3b;L3;L1;false;true
-K5a;L2;T2;false;false
-K6a;L3;T2;false;false
+K4a;L3;L4;false;true
+K5a;L2;T1;false;false
+K6a;L3;T1;false;false
