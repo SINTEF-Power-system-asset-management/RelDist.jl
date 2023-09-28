@@ -1,0 +1,9 @@
+ID;f_bus;t_bus;r;x;b;rateA;rateB;rateC;ratio;angle
+line_1;trans_grid;bus_1;0;0;0;0;0;0;0;0
+line_2;bus_1;bus_2;0;0;0;0;0;0;0;0
+line_3;bus_2;bus_3;0;0;0;0;0;0;0;0
+line_4;bus_3;bus_4;0;0;0;0;0;0;0;0
+section_a;bus_1;bus_a;0;0;0;0;0;0;0;0
+section_b;bus_2;bus_b;0;0;0;0;0;0;0;0
+section_c;bus_3;bus_c;0;0;0;0;0;0;0;0
+section_d;bus_4;bus_d;0;0;0;0;0;0;0;0
