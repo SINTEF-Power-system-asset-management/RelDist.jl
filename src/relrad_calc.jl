@@ -290,6 +290,7 @@ function get_slack(network::RadialPowerGraph)::Array{Any}
     end
     if isempty(F)
         F = [network.ref_bus]
+        append!(F, network.reserves)
     end
     return F
 end
