@@ -4,7 +4,7 @@ include("load.jl")
 export get_loads
 
 include("relres.jl")
-export RelStruct, set_res!
+export RelStruct, set_res!, ResFrames
 
 include("relindices.jl")
 export get_corr_factor, calculate_kile, set_rel_res!
