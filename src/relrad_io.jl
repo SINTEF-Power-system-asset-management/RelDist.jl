@@ -52,9 +52,12 @@ function read_cost_functions(io::IOStream)::Dict{String, PieceWiseCost}
             if range[2] == "inf"
                 range[2] = Inf
             end
+            # If a time shit ( t-shift ) is defined use it otherwise set it to 0
+            shift = "shift" in keys(value) ? value["shift"][index] : 0
             push!(pieces, Piece(Bound(range[1], range[2]),
-                                  value["constants"][index],
-                                        value["slopes"][index]))
+                                value["constants"][index],
+                                value["slopes"][index],
+                                shift))
         end
         piecewise_cost[key] = PieceWiseCost(pieces)
     end

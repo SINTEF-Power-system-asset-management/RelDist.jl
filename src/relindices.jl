@@ -33,11 +33,12 @@ mutable struct Piece
     bound::Bound
     constant::Float64
     slope::Float64
+    shift::Real
 end
 
 """Evaluate a linear cost function."""
 function f(x::Piece, t::Real)::Float64
-    return x.constant + x.slope*t
+    return x.constant + x.slope*(t-x.shift)
 end
 
 """Store a linear cost function"""
