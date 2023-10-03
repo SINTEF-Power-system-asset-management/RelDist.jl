@@ -1,5 +1,5 @@
 {
-"consumer_type": "household",
+"consumer_type": "residential",
 "loadprofile_type": "husholdning",
 "start_time": "2015-10-02T00:00Z",
 "end_time": "2015-10-02T01:30Z",
