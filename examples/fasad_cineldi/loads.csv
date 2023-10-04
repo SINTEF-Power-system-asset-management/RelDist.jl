@@ -1,5 +1,5 @@
-ID;bus;P;ref_demand
-LL1;L1;5;5
-LL2;L2;4;4
-LL3;L3;3;3
-LL4;L4;2;2
+ID;bus;P;ref_demand;type
+LL1;L1;5;5;residential
+LL2;L2;4;4;residential
+LL3;L3;3;3;residential
+LL4;L4;2;2;residential

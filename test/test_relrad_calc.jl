@@ -1,7 +1,6 @@
 using SintPowerGraphs
 using JLD2
 
-interruption_filename = joinpath(@__DIR__, "../databases/interruption_FASIT2.json")
 network_filename = joinpath(@__DIR__, "../examples/excel_ex/excel_test.toml")
 cost_filename = joinpath(@__DIR__, "../databases/cost_functions_dummy.json")
 

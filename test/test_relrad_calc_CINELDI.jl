@@ -19,6 +19,11 @@ println(ICt_sum)
 @save "L.jld2" L
 @save "edge_pos.jld2" edge_pos
 
-IC_sum_target = [48.74; 68.695; 75.9; 83.12]
+IC_sum_target = [53.15; 68.695; 75.9; 83.12]
+@testset "Verifying unavailability" begin
+U_target = 13.15
+@test isapprox(sum(res.U), U_target)
+end
+
 epsilon = 0.0001
 @test (sum(IC_sum - IC_sum_target)<epsilon)
