@@ -1,15 +1,13 @@
 using SintPowerGraphs
 using JLD2
 
-interruption_filename = joinpath(@__DIR__, "../databases/interruption_FASIT2.json")
 network_filename = joinpath(@__DIR__, "../examples/excel_ex/excel_test.toml")
 cost_filename = joinpath(@__DIR__, "../databases/cost_functions_dummy.json")
 
-interruption = read_interruption(interruption_filename)
 cost_functions = read_cost_functions(cost_filename)
 network =  RadialPowerGraph(network_filename)
 
-res, resₜ, L, edge_pos = relrad_calc(interruption, cost_functions, network)
+res, resₜ, L, edge_pos = relrad_calc(cost_functions, network)
 IC = res.CENS
 ICt = resₜ.CENS
 IC_sum = sum(IC;dims=2)

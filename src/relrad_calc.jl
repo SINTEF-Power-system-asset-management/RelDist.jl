@@ -21,12 +21,11 @@ end
 (==)(e1::Branch, e2::Branch) = (e1.src == e2.src && e1.dst == e2.dst)
 
 """
-    relrad_calc(interruption::Interruption, cost_functions::Dict{String, PieceWiseCost}, network::RadialPowerGraph)
+    relrad_calc(cost_functions::Dict{String, PieceWiseCost}, network::RadialPowerGraph)
 
         Returns the load interruption costs
 
         # Arguments
-        - interruption: Data Structure with customer type information
         - cost_functions: Dictionary with cost information
         - network: Data Structure with network data
 
@@ -34,8 +33,7 @@ end
         - res: Costs for permanent interruption, defined for each load and each failed branch
         - resₜ: Costs for temporary interruption, defined for each load and each failed branch
 """
-function relrad_calc(interruption::Interruption, 
-                    cost_functions::Dict{String, PieceWiseCost}, 
+function relrad_calc(cost_functions::Dict{String, PieceWiseCost}, 
                     network::RadialPowerGraph, 
                     filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
     Q = []  # Empty arrayjh
@@ -59,7 +57,7 @@ function relrad_calc(interruption::Interruption,
         edge_pos = get_edge_pos(e,edge_pos_df, filtered_branches)
         rel_data = get_branch_data(network, :reldata, e.src, e.dst)
         
-        section!(res, interruption, cost_functions, network, edge_pos, e, L, F)
+        section!(res, cost_functions, network, edge_pos, e, L, F)
         
         l_pos = 0
         for l in L
@@ -69,7 +67,7 @@ function relrad_calc(interruption::Interruption,
                          rel_data.temporaryFaultFrequency[1],
                          rel_data.temporaryFaultTime[1],
                          l.P,
-                         cost_functions[interruption.customer.consumer_type],
+                         cost_functions[l.type],
                          l_pos, edge_pos)
         end
         push_adj(Q, network.radial, e)
@@ -79,8 +77,7 @@ end
 
 
 """
-    section(interruption::Interruption,
-            cost_functions::Dict{String, PieceWiseCost},
+    section(cost_functions::Dict{String, PieceWiseCost},
             network::RadialPowerGraph,
             net_map::graphMap,
             res::RelStruc,
@@ -90,7 +87,6 @@ end
             Performs the sectioning of the branch and returns the permanent interruption costs
 
             # Arguments
-            - interruption: Data Structure with customer type information
             - cost_functions: Dictionary with cost information
             - network: Data Structure with network data
             - net_map:: Data structure with graph-network mapping
@@ -98,7 +94,6 @@ end
             - L: Array of loads
 """
 function section!(res::RelStruct,
-        interruption::Interruption,
         cost_functions::Dict{String, PieceWiseCost},
         network::RadialPowerGraph,
         edge_pos::Int,
@@ -138,7 +133,7 @@ function section!(res::RelStruct,
         end
         set_rel_res!(res, permanent_failure_frequency, t[1],
                      l.P,
-                     cost_functions[interruption.customer.consumer_type],
+                     cost_functions[l.type],
                      l_pos, edge_pos)
     end
 end
@@ -329,7 +324,7 @@ function store_edge_pos(network::RadialPowerGraph)
         return insertcols!(select(network.mpc.branch, "f_bus"=>"f_bus", "t_bus"=>"t_bus", "ID"=>"name"), 1,:index =>1:size(network.mpc.branch)[1])
     else
         # Here I am creating artificially a name column equal to the index
-        return insertcols!(insertcols!(select(network.mpc.branch, "f_bus"=>"f_bus", "t_bus"=>"t_bus"),1,:name=>1:size(network.mpc.branch)[1]), 1,:index =>1:size(network.mpc.branch)[1])
+        return insertcols!(insertcols!(select(network.mpc.branch, "f_bus"=>"f_bus", "t_bus"=>"t_bus"),1,:name=>string.(1:size(network.mpc.branch, 1))), 1,:index =>1:size(network.mpc.branch)[1])
     end
 end
 

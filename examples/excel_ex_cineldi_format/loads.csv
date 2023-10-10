@@ -1,5 +1,5 @@
-ID;bus;P;ref_demand
-load_a;bus_a;5;5
-load_b;bus_b;4;4
-load_c;bus_c;3;3
-load_d;bus_d;2;2
+ID;bus;P;ref_demand;type
+load_a;bus_a;5;5;residential
+load_b;bus_b;4;4;residential
+load_c;bus_c;3;3;agriculture
+load_d;bus_d;2;2;agriculture

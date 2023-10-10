@@ -14,6 +14,7 @@ mutable struct RelStruct
     t::Matrix{<:Real}
     U::Matrix{<:Real}
     ENS::Matrix{<:Real}
+    IC::Matrix{<:Real}
     CENS::Matrix{<:Real}
 end
 
@@ -28,17 +29,19 @@ function RelStruct(n_loads::Integer, n_branch::Integer)
     RelStruct(zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
+              zeros(n_loads, n_branch),
               zeros(n_loads, n_branch))
 end
 
 """
     Set entries in the result matrix.
 """
-function set_res!(res::RelStruct, t::Real, U::Real, ENS::Real, CENS::Real,
-        load_pos::Integer, edge_pos::Integer)
+function set_res!(res::RelStruct, t::Real, U::Real, ENS::Real, IC::Real,
+		CENS::Real, load_pos::Integer, edge_pos::Integer)
     res.t[load_pos, edge_pos] = t
     res.U[load_pos, edge_pos] = U
     res.ENS[load_pos, edge_pos] = ENS
+    res.IC[load_pos, edge_pos] = IC
     res.CENS[load_pos, edge_pos] = CENS
 end
 
@@ -54,13 +57,14 @@ end
 mutable struct ResFrames
     U::DataFrame
     ENS::DataFrame
+    IC::DataFrame
     CENS::DataFrame
     load_agg::DataFrame
     branch_agg::DataFrame
 end
 
 function ResFrames()
-    ResFrames(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
+	ResFrames(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
 end
 
 function ResFrames(res::RelStruct, rest::RelStruct, edge_pos::DataFrame,
@@ -72,7 +76,7 @@ function ResFrames(res::RelStruct, rest::RelStruct, edge_pos::DataFrame,
     branch_agg = DataFrame(ID=edge_pos.name)
     load_agg = DataFrame(ID=load_labels)
 
-    for field in [:U, :ENS, :CENS]
+    for field in [:U, :ENS, :IC, :CENS]
         frame = DataFrame(
                           getfield(res, field) + getfield(rest, field),
                           edge_pos.name, makeunique=true)

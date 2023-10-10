@@ -4,7 +4,7 @@ using Query
 @testset "Test reading of interruption data." begin
 	interruption = read_interruption(joinpath(@__DIR__, "../databases/interruption.json"))
     @test interruption.start_time == ZonedDateTime(DateTime(2015, 10, 2, 0, 0), tz"Z")
-    @test interruption.customer.consumer_type == "household"
+    @test interruption.customer.consumer_type == "residential"
     @test interruption.customer.p_ref == 0.8
     @test interruption.notified_interruption == false
 end
@@ -20,7 +20,7 @@ end
                                                     HOUR_FACTORS)
     q1 = @from corr in corr_factors.month begin
         @where corr.month == "August"
-        @select corr.household
+        @select corr.residential
         @collect
     end
     @test q1[1] == 0.6
