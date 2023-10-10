@@ -324,7 +324,7 @@ function store_edge_pos(network::RadialPowerGraph)
         return insertcols!(select(network.mpc.branch, "f_bus"=>"f_bus", "t_bus"=>"t_bus", "ID"=>"name"), 1,:index =>1:size(network.mpc.branch)[1])
     else
         # Here I am creating artificially a name column equal to the index
-        return insertcols!(insertcols!(select(network.mpc.branch, "f_bus"=>"f_bus", "t_bus"=>"t_bus"),1,:name=>1:size(network.mpc.branch)[1]), 1,:index =>1:size(network.mpc.branch)[1])
+        return insertcols!(insertcols!(select(network.mpc.branch, "f_bus"=>"f_bus", "t_bus"=>"t_bus"),1,:name=>string.(1:size(network.mpc.branch, 1))), 1,:index =>1:size(network.mpc.branch)[1])
     end
 end
 
