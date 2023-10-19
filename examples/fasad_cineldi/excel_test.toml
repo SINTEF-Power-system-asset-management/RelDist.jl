@@ -7,6 +7,7 @@ gen = "gen.csv"
 switch = "switchgear.csv"
 load = "loads.csv"
 reldata = "reldata.csv"
+transformer = "transformers.csv"
 
 [configuration]
 baseMVA = 100.0
