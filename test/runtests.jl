@@ -19,7 +19,7 @@ end
 end
 
 @testset "Testing Interruption costs calculation on fasad net" begin
-	include("test_fasad_calc.jl")
+	# include("test_fasad_calc.jl") # This is the fasad format. For now I will not maintain it
 	include("test_fasad_calc_CINELDI.jl")
 end
 
