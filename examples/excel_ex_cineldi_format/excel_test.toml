@@ -1,12 +1,12 @@
 name = "test"
 
 [files]
-bus = "bus.csv"
-branch = "branches.csv"
-gen = "gen.csv"
-switch = "switchgear.csv"
-load = "loads.csv"
-reldata = "reldata.csv"
+bus = "case_data/bus.csv"
+branch = "case_data/branches.csv"
+gen = "case_data/gen.csv"
+switch = "case_data/switchgear.csv"
+load = "case_data/loads.csv"
+reldata = "case_data/reldata.csv"
 
 [configuration]
 baseMVA = 100.0

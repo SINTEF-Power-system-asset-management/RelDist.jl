@@ -1,7 +1,0 @@
-name,from,to,transformer_type,apparent_power_limit
-T1,trans_grid,T1-K1a,secondary,10
-T2,trans_grid,T2-E2,secondary,8
-TL1,NL1,L1,distribution,1
-TL2,NL2,L2,distribution,2
-TL3,NL3,L3,distribution,3
-TL4,NL4,L4,distribution,4
