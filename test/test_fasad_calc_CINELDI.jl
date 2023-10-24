@@ -14,6 +14,6 @@ ICt_sum = sum(ICt;dims=2)
 println(IC_sum)
 println(ICt_sum)
 
-IC_sum_target = [0.13375; 0.107; 0.08025; 0.8369]
-epsilon = sum(IC_sum_target) # [kWh]. I take 0.1% of expected total interrupted energy as maximum error in calculation
+IC_sum_target = [0.18; 0.94; 0.11; 0.86]
+epsilon = sum(IC_sum_target)*0.1/100 # [kWh]. I take 0.1% of expected total interrupted energy as maximum error in calculation
 @test (abs(sum(IC_sum - IC_sum_target))<epsilon)
