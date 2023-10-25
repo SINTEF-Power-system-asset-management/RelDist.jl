@@ -7,7 +7,8 @@ cost_filename = joinpath(@__DIR__, "../databases/cost_functions_dummy.json")
 cost_functions = read_cost_functions(cost_filename)
 network =  RadialPowerGraph(network_filename)
 
-res, rest = relrad_calc(cost_functions, network)
+
+res, rest = relrad_calc(cost_functions, network, Traverse(consider_cap=false))
 ENS = res.ENS
 ENSt = rest.ENS
 ENS_sum = sum(ENS+ENSt;dims=2)

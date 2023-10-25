@@ -21,6 +21,11 @@ end
 
 (==)(e1::Branch, e2::Branch) = (e1.src == e2.src && e1.dst == e2.dst)
 
+struct Feeder
+    bus::String
+    rateA::Real
+end
+
 """
     relrad_calc(cost_functions::Dict{String, PieceWiseCost}, network::RadialPowerGraph)
 
@@ -52,7 +57,7 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
     # I set a dummy transformer with as secondary the desired slack bus
     # F = [RelRad.Branch("0","b74dfe84-9304-4cba-98bb-b0608706d60c")]   
     i = 0
-    F = get_slack(network) # get list of substations (not distribution transformers). If not present, I use as slack the slack bus declared
+    F = get_slack(network, config.consider_cap) # get list of substations (not distribution transformers). If not present, I use as slack the slack bus declared
     while !isempty(Q)
         e = pop!(Q)
         @info "Processing line $e"
@@ -102,10 +107,7 @@ function section!(res::RelStruct,
         e::Branch,
         L::Array,
         F::Array)
-    # R = calc_R(network, net_map, e)
     
-    # e_original = e # Failed branch
-    #sectioning_time = 0.0 # I assign a local variable that will be update within the while loop
     repair_time = get_branch_data(network, :reldata, e.src, e.dst).repairTime
     permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
 
@@ -116,7 +118,6 @@ function section!(res::RelStruct,
         for f in F
             R = Set(calc_R(network, reconfigured_network, f))
             push!(R_set, R)
-            # append!(t_sect, get_branch_data(network, :reldata, src(e), dst(e)).sectioning_time)
         end
 
     else
@@ -187,9 +188,9 @@ end
 """ Calculate reachable vertices starting from a given edge"""
 function calc_R(network::RadialPowerGraph,
                 g::MetaGraph,
-                b::Union{String,Int})::Array{Any}
-    v = get_node_number(network.G, b)
-    vlist = traverse(g, v)
+                b::Feeder)::Array{Any}
+    v = get_node_number(network.G, b.bus)
+    vlist = traverse(g, v, b.rateA)
     return [get_bus_name(network.G, bus) for bus in vlist]
 end
 
@@ -308,19 +309,33 @@ function update_isolated_and_reconfigured!(g::MetaDiGraph, newgraph::MetaDiGraph
     rem_edge!(reconfigured_g, e)
 end
 
-function get_slack(network::RadialPowerGraph)::Array{Any}
+"""
+    Returns the buses that can supply loads.
+"""
+function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
     transformers = network.mpc.transformer
     F = []
     for e in eachrow(transformers)
-        push!(F, Branch(e.f_bus, e.t_bus, e.rateA))
+        push!(F, Branch(e.f_bus, e.t_bus, consider_cap ? e.rateA : Inf))
     end
     if isempty(F)
-        F = [network.ref_bus]
-        append!(F, network.reserves)
+        F = [Feeder(network.ref_bus,
+                    consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf)]
+        for reserve in network.reserves
+            append!(F,
+                    Feeder(reserve,
+                           consider_cap ? get_feeder_cap(network, feeder) : Inf))
+        end
     end
     return F
 end
 
+""""
+    Returns the capacity of a feeder.
+"""
+function get_feeder_cap(network::RadialPowerGraph, feeder::String)::Real
+    network.mpc.gen[network.mpc.gen.bus.==network.ref_bus, :Pmax][1]
+end
 
 function are_edges_equal(e_input, e_test)::Bool
     return e_input == e_test || e_input == reverse(e_test)
