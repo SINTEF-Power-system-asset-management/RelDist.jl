@@ -240,15 +240,33 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch)
     add_vertex!(newgraph)
     set_prop!(newgraph, i, :name, string(e.src)) # get_prop(g, src(e), :name))
     n = get_node_number(network.G, e.dst)
-    if get_prop(g, Edge(s, n), :switch) == -1
-        visit =  Vector{Int}([s])
-    else
-        # The edge is a switch. This means that the isolated graph wil be just this edge.
+    switch_buses = get_prop(g, Edge(s, n), :switch_buses)
+    if length(switch_buses) == 2
+        # Both sides of the edge have switches, the fault is therefore isolated
+        # by removing this edge.
         visit =  Vector{Int}([]) # Stop the loop
         i+=1
         push!(reindex, n=>i)
         update_isolated_and_reconfigured!(g, newgraph, reconfigured_g,
                                           reindex, Edge(s, n), n, s)
+    elseif length(switch_buses) == 1
+        # Only one side of the edge has a switch, we need to continue
+        # to look for swithces.
+        
+        # Add the edge to the isolated graph
+        i+=1
+        push!(reindex, n=>i)
+        update_isolated_and_reconfigured!(g, newgraph, reconfigured_g,
+                                          reindex, Edge(s, n), n, s)
+        
+        # Find the direction to continue the search
+        s = e.src==switch_buses[1] ? get_node_number(network.G, string(e.dst)) : get_node_number(network.G, string(e.src))
+        visit =  Vector{Int}([s])
+
+        # Mark the bus with the switch as seen.
+        push!(seen, get_node_number(network.G, switch_buses[1]))
+    else
+        visit =  Vector{Int}([s])
     end
 
     while !isempty(visit)
