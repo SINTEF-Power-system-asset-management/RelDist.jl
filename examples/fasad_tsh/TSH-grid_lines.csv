@@ -1,7 +1,0 @@
-name,from,to,apparent_power_limit,repair_time,failure_frequency_permanent,failure_frequency_temporary,length
-K1,K1b-K1,K1-K1c,15,240,0.1,0.1,2
-K2,K2a-K2,NL2,15,240,0.05,0.05,1
-K3,K3a-K3,K3-K3b,7,240,0.15,0.15,3
-K4,K4a-K4,NL4,7,240,0.1,0.1,2
-K5,NT2,K5-K5a,10,240,0,0,1
-K6,NT2,K6-K6a,10,240,0,0,1

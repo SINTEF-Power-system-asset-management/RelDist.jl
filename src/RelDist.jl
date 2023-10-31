@@ -1,5 +1,8 @@
 module RelDist
 
+include("config.jl")
+export Traverse
+
 include("load.jl")
 export get_loads
 

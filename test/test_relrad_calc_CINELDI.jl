@@ -15,9 +15,6 @@ ICt_sum = sum(ICt;dims=2)
 println(IC_sum)
 println(ICt_sum)
 
-@save "IC.jld2" IC
-@save "L.jld2" L
-@save "edge_pos.jld2" edge_pos
 
 IC_sum_target = [53.15; 68.695; 75.9; 83.12]
 @testset "Verifying unavailability" begin
