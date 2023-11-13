@@ -115,6 +115,9 @@ function section!(res::RelStruct,
 
     if permanent_failure_frequency >= 0
         reconfigured_network, sectioning_time = traverse_and_get_sectioning_time(network, e)
+        # for e in isolated_edges
+            # rem_edge!(reconfigured_network, e)
+        # end
         for f in F
             R = Set(calc_R(network, reconfigured_network, f))
             push!(R_set, R)
@@ -209,53 +212,19 @@ function traverse(g::MetaGraph, start::Int = 0,
 end
 
 """
-    traverse_and_get_sectioning_time
-
-    Finds the switch that isolates a fault and the part of the network connected to
-    this switch.
+    Traverse the in a direction until all isolating switches are found.
 """
-function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
-    switch_failures::Bool=false)
-	g = network.G
-	reconfigured_g = MetaGraph(copy(g)) # This graph must be undirected
-    s = get_node_number(network.G, string(e.src))
-    seen = Vector{Int}([])
+function find_isolating_switches(network::RadialPowerGraph, g::MetaDiGraph,
+        reconfigured_network::MetaGraph, visit::Vector{Int}, seen::Vector{Int})
     t_sec = 0
-
-    n = get_node_number(network.G, e.dst)
-    switch_buses = get_prop(g, Edge(s, n), :switch_buses)
-    if length(switch_buses) == 2
-        # Both sides of the edge have switches, the fault is therefore isolated
-        # by removing this edge.
-        visit =  Vector{Int}([]) # Stop the loop
-        t_sec = get_sectioning_time(network, e) 
-        rem_edge!(reconfigured_g, Edge(s, n))
-    elseif length(switch_buses) == 1
-        # Only one side of the edge has a switch, we need to continue
-        # to look for swithces.
-        
-        # Add the edge to the isolated graph
-        # Find the direction to continue the search
-        s = e.src==switch_buses[1] ? get_node_number(network.G, string(e.dst)) : get_node_number(network.G, string(e.src))
-        visit =  Vector{Int}([s])
-
-        # Mark the bus with the switch as seen.
-        push!(seen, get_node_number(network.G, switch_buses[1]))
-        
-        # Add sectioning time of the switch
-        t_sec = get_sectioning_time(network, e)
-        rem_edge!(reconfigured_g, Edge(s, n))
-    else
-        visit =  Vector{Int}([s])
-    end
-
     while !isempty(visit)
         next = pop!(visit)
         if !(next in seen)
             push!(seen, next)
             for n in all_neighbors(g, next)
                 e = Edge(next, n) in edges(g) ? Edge(next, n) : Edge(n, next)
-                rem_edge!(reconfigured_g, e)
+                # push!(isolated_edges, e)
+                rem_edge!(reconfigured_network, e)
                 if !(n in seen) & (n != network.ref_bus)
                     if get_prop(g, e, :switch) == -1 # it is not a switch, I keep exploring the graph
                         append!(visit, n)
@@ -266,10 +235,56 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
                     end
                 end
             end
-
         end
     end
-    return reconfigured_g, t_sec
+    return t_sec
+end
+
+"""
+    traverse_and_get_sectioning_time
+
+    Finds the switch that isolates a fault and the part of the network connected to
+    this switch.
+"""
+function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
+    switch_failures::Bool=false)
+    # isolated_edges = []
+	g = network.G
+	reconfigured_network = MetaGraph(copy(network.G)) # This graph must be undirected
+    s = get_node_number(network.G, string(e.src))
+
+    n = get_node_number(network.G, e.dst)
+    switch_buses = get_prop(g, Edge(s, n), :switch_buses)
+    visit_u =  Vector{Int}([]) # Vertices to check upstream
+    visit_d =  Vector{Int}([]) # Vertices to ched downstream
+    if length(switch_buses) >= 1
+        # There is at least one switch on the branch
+        if e.src ∉ switch_buses
+            # There is no switch at the source, we have to search upstream
+            visit_u = Vector{Int}([s])
+        elseif e.dst ∉ switch_buses
+            # There is no switch at the destination, we have to search downstream
+            visit_d = Vector{Int}([n])
+        else
+            @warn "Branch $e has switche(s) not associated with its buses"
+        end
+            
+        # Both sides of the edge have switches, the fault is therefore isolated
+        # by removing this edge.
+        t_sec = get_sectioning_time(network, e) 
+    else
+        visit_u =  Vector{Int}([s])
+        visit_d =  Vector{Int}([n])
+        t_sec = 0
+    end
+    rem_edge!(reconfigured_network, Edge(s, n))
+    # Search upstream
+    t = find_isolating_switches(network, g, reconfigured_network, visit_u, copy(visit_d))
+    t_sec = t_sec > t ? t_sec : t
+    
+    # Search downstream
+    t = find_isolating_switches(network, g, reconfigured_network, visit_d, copy(visit_u))
+    return reconfigured_network, t_sec > t ? t_sec : t
 end
 
 """
