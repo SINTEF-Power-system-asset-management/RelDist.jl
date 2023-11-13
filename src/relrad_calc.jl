@@ -262,15 +262,12 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
         if e.src ∉ switch_buses
             # There is no switch at the source, we have to search upstream
             visit_u = Vector{Int}([s])
-        elseif e.dst ∉ switch_buses
+        end
+        if e.dst ∉ switch_buses
             # There is no switch at the destination, we have to search downstream
             visit_d = Vector{Int}([n])
-        else
-            @warn "Branch $e has switche(s) not associated with its buses"
         end
             
-        # Both sides of the edge have switches, the fault is therefore isolated
-        # by removing this edge.
         t_sec = get_sectioning_time(network, e) 
     else
         visit_u =  Vector{Int}([s])
