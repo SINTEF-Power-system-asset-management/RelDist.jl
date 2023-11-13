@@ -114,7 +114,7 @@ function section!(res::RelStruct,
     R_set = []
 
     if permanent_failure_frequency >= 0
-        isolated_graph, reconfigured_network, sectioning_time = traverse_and_get_sectioning_time(network, e)
+        reconfigured_network, sectioning_time = traverse_and_get_sectioning_time(network, e)
         for f in F
             R = Set(calc_R(network, reconfigured_network, f))
             push!(R_set, R)
@@ -128,7 +128,7 @@ function section!(res::RelStruct,
 
     l_pos = 0
     for l in L
-        l_pos += 1
+        l_pos += 1;false
         if !(l.bus in X) 
             t = repair_time
         else
@@ -141,25 +141,13 @@ function section!(res::RelStruct,
     end
 end
 
-function get_sectioning_time(isolated_graph::AbstractMetaGraph, network::RadialPowerGraph)
-    sectioning_time = 0.0
-    switches_iter = filter_edges(isolated_graph, (g,x)->(get_prop(g, x, :switch) >= 0))
-    for switch in switches_iter
-        e = edge2branch(isolated_graph, switch)
-        t = get_branch_data(network, :reldata, :sectioningTime, e.src, e.dst)
-		t = isnothing(t) ? get_branch_data(network, :switch, :switchingTime, e.src, e.dst)[1] : t[1]
-		if t > sectioning_time
-            sectioning_time = t
-        end
-        rem_edge!(isolated_graph, switch)
-        # for v in [switch.src, switch.dst]
-        #     if size(all_neighbors(isolated_graph,v))[1]==0
-        #         rem_vertex!(isolated_graph,v)
-        #     end
-        # end
-    end
-    
-    return sectioning_time
+function get_sectioning_time(network::RadialPowerGraph, e::Edge)
+    get_sectioning_time(network, edge2branch(network.G, e))
+end
+
+function get_sectioning_time(network::RadialPowerGraph, e::Branch)
+    t = get_branch_data(network, :reldata, :sectioningTime, e.src, e.dst)
+    isnothing(t) ? get_branch_data(network, :switch, :switchingTime, e.src, e.dst)[1] : t[1]
 end
 
 
@@ -226,46 +214,37 @@ end
     Finds the switch that isolates a fault and the part of the network connected to
     this switch.
 """
-function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch)
+function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
+    switch_failures::Bool=false)
 	g = network.G
-    newgraph = MetaDiGraph()
 	reconfigured_g = MetaGraph(copy(g)) # This graph must be undirected
-    set_indexing_prop!(newgraph, :name)
     s = get_node_number(network.G, string(e.src))
     seen = Vector{Int}([])
+    t_sec = 0
 
-    reindex = Dict{Int,Int}()
-    i = 1
-    push!(reindex, s=>i)
-
-    add_vertex!(newgraph)
-    set_prop!(newgraph, i, :name, string(e.src)) # get_prop(g, src(e), :name))
     n = get_node_number(network.G, e.dst)
     switch_buses = get_prop(g, Edge(s, n), :switch_buses)
     if length(switch_buses) == 2
         # Both sides of the edge have switches, the fault is therefore isolated
         # by removing this edge.
         visit =  Vector{Int}([]) # Stop the loop
-        i+=1
-        push!(reindex, n=>i)
-        update_isolated_and_reconfigured!(g, newgraph, reconfigured_g,
-                                          reindex, Edge(s, n), n, s)
+        t_sec = get_sectioning_time(network, e) 
+        rem_edge!(reconfigured_g, Edge(s, n))
     elseif length(switch_buses) == 1
         # Only one side of the edge has a switch, we need to continue
         # to look for swithces.
         
         # Add the edge to the isolated graph
-        i+=1
-        push!(reindex, n=>i)
-        update_isolated_and_reconfigured!(g, newgraph, reconfigured_g,
-                                          reindex, Edge(s, n), n, s)
-        
         # Find the direction to continue the search
         s = e.src==switch_buses[1] ? get_node_number(network.G, string(e.dst)) : get_node_number(network.G, string(e.src))
         visit =  Vector{Int}([s])
 
         # Mark the bus with the switch as seen.
         push!(seen, get_node_number(network.G, switch_buses[1]))
+        
+        # Add sectioning time of the switch
+        t_sec = get_sectioning_time(network, e)
+        rem_edge!(reconfigured_g, Edge(s, n))
     else
         visit =  Vector{Int}([s])
     end
@@ -276,37 +255,21 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch)
             push!(seen, next)
             for n in all_neighbors(g, next)
                 e = Edge(next, n) in edges(g) ? Edge(next, n) : Edge(n, next)
+                rem_edge!(reconfigured_g, e)
                 if !(n in seen) & (n != network.ref_bus)
                     if get_prop(g, e, :switch) == -1 # it is not a switch, I keep exploring the graph
                         append!(visit, n)
                     else
                         push!(seen, n) # it is a switch, I stop exploring the graph (visit does not increase)
+                        t = get_sectioning_time(network, e)
+                        t_sec = t < t_sec ? t_sec : t
                     end
-                    i+=1
-                    push!(reindex, n=>i)
-                    update_isolated_and_reconfigured!(g, newgraph, reconfigured_g,
-                                                      reindex, e, n, next)
                 end
             end
 
         end
     end
-    sectioning_time = get_sectioning_time(newgraph, network)
-    return newgraph, reconfigured_g, sectioning_time
-end
-
-function update_isolated_and_reconfigured!(g::MetaDiGraph, newgraph::MetaDiGraph, reconfigured_g::MetaGraph,
-        reindex::Dict{Int, Int}, e::Edge, n::Int, next::Int)
-    add_vertex!(newgraph)
-    for prop in [:name, :load]
-        set_prop!(newgraph, reindex[n], prop, get_prop(g, n, prop))
-    end
-
-    add_edge!(newgraph, reindex[next], reindex[n])
-    for prop in [:switch, :rateA]
-        set_prop!(newgraph, reindex[next], reindex[n], prop, get_prop(g, e, prop))
-    end
-    rem_edge!(reconfigured_g, e)
+    return reconfigured_g, t_sec
 end
 
 """

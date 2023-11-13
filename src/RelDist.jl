@@ -1,7 +1,7 @@
 module RelDist
 
 include("config.jl")
-export Traverse
+export Traverse, Failures, RelDistConf
 
 include("load.jl")
 export get_loads
