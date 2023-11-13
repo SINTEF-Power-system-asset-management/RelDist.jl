@@ -43,19 +43,14 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
                     network::RadialPowerGraph,
                     config::Traverse=Traverse(),
                     filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
-    Q = []  # Empty arrayjh
+    Q = []  # Empty arrayj
 	L = get_loads(network.mpc)
     edge_pos_df = store_edge_pos(network)
-    res = RelStruct(length(L), nrow(network.mpc.branch))
-    resₜ = RelStruct(length(L), nrow(network.mpc.branch))
+    n_cases = 2
+    res = Dict("base" => RelStruct(length(L), nrow(network.mpc.branch)),
+               "temp" => RelStruct(length(L), nrow(network.mpc.branch)))
     push_adj(Q, network.radial, network.radial[network.ref_bus, :name])
     # I explore only the original radial topology for failures effect (avoid loops of undirected graph)
-    # I select all the transformers
-    # F = get_transformers(network)
-    # I take only the first transformer (trying to assign a single supply point)
-    # F = [get_transformers(network)[1]]
-    # I set a dummy transformer with as secondary the desired slack bus
-    # F = [RelRad.Branch("0","b74dfe84-9304-4cba-98bb-b0608706d60c")]   
     i = 0
     F = get_slack(network, config.consider_cap) # get list of substations (not distribution transformers). If not present, I use as slack the slack bus declared
     while !isempty(Q)
@@ -70,7 +65,7 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
         for l in L
 
             l_pos += 1
-            set_rel_res!(resₜ,
+            set_rel_res!(res["temp"],
                          rel_data.temporaryFaultFrequency[1],
                          rel_data.temporaryFaultTime[1],
                          l.P,
@@ -79,7 +74,7 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
         end
         push_adj(Q, network.radial, e)
     end
-    return res, resₜ, L, edge_pos_df
+    return res, L, edge_pos_df
 end
 
 
@@ -100,47 +95,60 @@ end
             - e: failed network edge
             - L: Array of loads
 """
-function section!(res::RelStruct,
+function section!(res::Dict{String, RelStruct},
         cost_functions::Dict{String, PieceWiseCost},
         network::RadialPowerGraph,
         edge_pos::Int,
         e::Branch,
         L::Array,
-        F::Array)
+        F::Array,
+        switch_failures::Bool=false)
     
     repair_time = get_branch_data(network, :reldata, e.src, e.dst).repairTime
     permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
+    cases = switch_failures ? ["base", "upstream", "downstream"] : ["base"]
 
-    R_set = []
 
     if permanent_failure_frequency >= 0
-        reconfigured_network, sectioning_time = traverse_and_get_sectioning_time(network, e)
-        # for e in isolated_edges
-            # rem_edge!(reconfigured_network, e)
-        # end
-        for f in F
-            R = Set(calc_R(network, reconfigured_network, f))
-            push!(R_set, R)
-        end
+        reconfigured_network, t_sec, isolated_edges, t_f = traverse_and_get_sectioning_time(network, e)
+        for (i, case) in enumerate(cases)
+            R_set = []
+            # For the cases with switch failures we remove the extra edges
+            if i > 1
+                t_sec = t_f[i]
+                for e in isolated_edges[i]
+                    rem_edge!(reconfigured_network, e)
+                end
+            end
+            for f in F
+                R = Set(calc_R(network, reconfigured_network, f))
+                push!(R_set, R)
+            end
+            if i > 1
+                for e in isolated_edges[i]
+                    add_edge!(reconfigured_network, e)
+                end
+            end
 
+
+            X = union(R_set...)
+
+            l_pos = 0
+            for l in L
+                l_pos += 1;
+                if !(l.bus in X) 
+                    t = repair_time
+                else
+                    t = t_sec
+                end
+                set_rel_res!(res[case], permanent_failure_frequency, t[1],
+                             l.P,
+                             cost_functions[l.type],
+                             l_pos, edge_pos)
+            end
+        end
     else
         return # If the line has no permanent failure frequency we skip it.
-    end
-
-    X = union(R_set...)
-
-    l_pos = 0
-    for l in L
-        l_pos += 1;false
-        if !(l.bus in X) 
-            t = repair_time
-        else
-            t = sectioning_time
-        end
-        set_rel_res!(res, permanent_failure_frequency, t[1],
-                     l.P,
-                     cost_functions[l.type],
-                     l_pos, edge_pos)
     end
 end
 
@@ -307,14 +315,14 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     end
     rem_edge!(reconfigured_network, Edge(s, n))
     # Search upstream
-    t, isolated_edges, t_s_failed = find_isolating_switches(
+    t, isolated_upstream, t_upstream = find_isolating_switches(
                                         network, g, reconfigured_network, visit_u, copy(visit_d))
     t_sec = t_sec > t ? t_sec : t
     
     # Search downstream
-    t, isolated_edges, t_s_failed = find_isolating_switches(
+    t, isolated_downstream, t_downstream = find_isolating_switches(
                                         network, g, reconfigured_network, visit_d, copy(visit_u))
-    return reconfigured_network, t_sec > t ? t_sec : t
+    return reconfigured_network, t_sec > t ? t_sec : t, [isolated_upstream, isolated_downstream], [t_upstream, t_downstream]
 end
 
 """
