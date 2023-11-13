@@ -41,25 +41,30 @@ end
 """
 function relrad_calc(cost_functions::Dict{String, PieceWiseCost}, 
                     network::RadialPowerGraph,
-                    config::Traverse=Traverse(),
+                    config::RelDistConf=RelDistConf(),
                     filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
     Q = []  # Empty arrayj
 	L = get_loads(network.mpc)
     edge_pos_df = store_edge_pos(network)
-    n_cases = 2
     res = Dict("base" => RelStruct(length(L), nrow(network.mpc.branch)),
                "temp" => RelStruct(length(L), nrow(network.mpc.branch)))
+    
+    if config.failures.switch_failures
+        for case in ["upstream", "downstream"] 
+            res[case] = RelStruct(length(L), nrow(network.mpc.branch))
+        end
+    end
     push_adj(Q, network.radial, network.radial[network.ref_bus, :name])
     # I explore only the original radial topology for failures effect (avoid loops of undirected graph)
     i = 0
-    F = get_slack(network, config.consider_cap) # get list of substations (not distribution transformers). If not present, I use as slack the slack bus declared
+    F = get_slack(network, config.traverse.consider_cap) # get list of substations (not distribution transformers). If not present, I use as slack the slack bus declared
     while !isempty(Q)
         e = pop!(Q)
         @info "Processing line $e"
         edge_pos = get_edge_pos(e,edge_pos_df, filtered_branches)
         rel_data = get_branch_data(network, :reldata, e.src, e.dst)
         
-        section!(res, cost_functions, network, edge_pos, e, L, F)
+        section!(res, cost_functions, network, edge_pos, e, L, F, config.failures.switch_failures)
         
         l_pos = 0
         for l in L
@@ -115,8 +120,8 @@ function section!(res::Dict{String, RelStruct},
             R_set = []
             # For the cases with switch failures we remove the extra edges
             if i > 1
-                t_sec = t_f[i]
-                for e in isolated_edges[i]
+                t_sec = t_f[i-1]
+                for e in isolated_edges[i-1]
                     rem_edge!(reconfigured_network, e)
                 end
             end
@@ -125,7 +130,7 @@ function section!(res::Dict{String, RelStruct},
                 push!(R_set, R)
             end
             if i > 1
-                for e in isolated_edges[i]
+                for e in isolated_edges[i-1]
                     add_edge!(reconfigured_network, e)
                 end
             end

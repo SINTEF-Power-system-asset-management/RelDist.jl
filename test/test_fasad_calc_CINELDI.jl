@@ -8,7 +8,7 @@ cost_functions = read_cost_functions(cost_filename)
 network =  RadialPowerGraph(network_filename)
 
 
-res, _, _ = relrad_calc(cost_functions, network, Traverse(consider_cap=false))
+res, _, _ = relrad_calc(cost_functions, network, RelDistConf(traverse=Traverse(consider_cap=false)))
 ENS = res["base"].ENS
 ENSt = res["temp"].ENS
 ENS_sum = sum(ENS+ENSt;dims=2)
