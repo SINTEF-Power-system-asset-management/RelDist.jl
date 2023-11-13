@@ -153,7 +153,6 @@ function get_sectioning_time(network::RadialPowerGraph, e::Branch)
     isnothing(t) ? get_branch_data(network, :switch, :switchingTime, e.src, e.dst)[1] : t[1]
 end
 
-
 function get_names(mg)
     names = []
     for bus in 1:nv(mg)
@@ -165,7 +164,6 @@ end
 function myplot(network, names)
     graphplot(network, names = names, nodeshape=:circle, nodesize=0.1, curves=false, fontsize=7)
 end
-
 
 """ Calculate reachable vertices starting from a given edge"""
 function calc_R(network::RadialPowerGraph,
@@ -215,29 +213,62 @@ end
     Traverse the in a direction until all isolating switches are found.
 """
 function find_isolating_switches(network::RadialPowerGraph, g::MetaDiGraph,
-        reconfigured_network::MetaGraph, visit::Vector{Int}, seen::Vector{Int})
+        reconfigured_network::MetaGraph, visit::Vector{Int}, seen::Vector{Int},
+        switch_failures::Bool=false)
+    # Initialise variable to keep track of sectioning time
     t_sec = 0
+    t_s_failed = 0
+    isolated_edges = []
+    
+    # Initialise variable to keep track of first switch
+    switch_found = false
+    # Variable to keep track of whether or not to change the configured
+    # network or not.
+    switch_failed = false
     while !isempty(visit)
         next = pop!(visit)
         if !(next in seen)
             push!(seen, next)
             for n in all_neighbors(g, next)
                 e = Edge(next, n) in edges(g) ? Edge(next, n) : Edge(n, next)
-                # push!(isolated_edges, e)
-                rem_edge!(reconfigured_network, e)
+                
+                #  In case a switch has already failed we add the edge to a list
+                #  of failed edges. If no edges have failed pre
+                if switch_failed
+                    push!(isolated_edges, e)
+                else
+                    rem_edge!(reconfigured_network, e)
+                end
                 if !(n in seen) & (n != network.ref_bus)
                     if get_prop(g, e, :switch) == -1 # it is not a switch, I keep exploring the graph
                         append!(visit, n)
                     else
-                        push!(seen, n) # it is a switch, I stop exploring the graph (visit does not increase)
-                        t = get_sectioning_time(network, e)
-                        t_sec = t < t_sec ? t_sec : t
+                        # We have found a switch
+                        switch_found = true
+                        if !switch_failures || switch_failed
+                            # it is a switch, I stop exploring the graph (visit does not increase)
+                            push!(seen, n) 
+                        end
+                        
+                        if switch_failed 
+                            # We are past the depth of the first isolating switch(es)
+                            t = get_sectioning_time(network, e)
+                            t_s_failed = t < t_s_failed ? t_s_failed : t
+                        else
+                            # We are at the depth of the first isolating switch(es)
+                            t = get_sectioning_time(network, e)
+                            t_sec = t < t_sec ? t_sec : t
+                        end
                     end
                 end
             end
+            if switch_found
+                # We found a switch at this depth. We don't have to go deeper.
+                switch_failed = true
+            end
         end
     end
-    return t_sec
+    return t_sec, isolated_edges, t_s_failed
 end
 
 """
@@ -276,11 +307,13 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     end
     rem_edge!(reconfigured_network, Edge(s, n))
     # Search upstream
-    t = find_isolating_switches(network, g, reconfigured_network, visit_u, copy(visit_d))
+    t, isolated_edges, t_s_failed = find_isolating_switches(
+                                        network, g, reconfigured_network, visit_u, copy(visit_d))
     t_sec = t_sec > t ? t_sec : t
     
     # Search downstream
-    t = find_isolating_switches(network, g, reconfigured_network, visit_d, copy(visit_u))
+    t, isolated_edges, t_s_failed = find_isolating_switches(
+                                        network, g, reconfigured_network, visit_d, copy(visit_u))
     return reconfigured_network, t_sec > t ? t_sec : t
 end
 
