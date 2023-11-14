@@ -35,3 +35,6 @@ indicator_max_fault_order = 0
 	bus = 'CINELDI_MV_reference_grid_base_bus.csv'
 	load = 'CINELDI_MV_reference_system_load_point.csv'
 	#fault_indicators = []
+
+[failures]
+	switch_failures = true

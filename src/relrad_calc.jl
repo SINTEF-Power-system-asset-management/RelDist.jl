@@ -48,6 +48,9 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
     edge_pos_df = store_edge_pos(network)
     res = Dict("base" => RelStruct(length(L), nrow(network.mpc.branch)),
                "temp" => RelStruct(length(L), nrow(network.mpc.branch)))
+
+    # Set missing automatic switching timtes to zero
+    network.mpc.switch.t_remote .= coalesce.(network.mpc.switch.t_remote, Inf)
     
     if config.failures.switch_failures
         for case in ["upstream", "downstream"] 
@@ -120,7 +123,7 @@ function section!(res::Dict{String, RelStruct},
             R_set = []
             # For the cases with switch failures we remove the extra edges
             if i > 1
-                t_sec = t_f[i-1]
+                t_sec = t_f[i-1switch_failures]
                 for e in isolated_edges[i-1]
                     rem_edge!(reconfigured_network, e)
                 end
@@ -157,13 +160,21 @@ function section!(res::Dict{String, RelStruct},
     end
 end
 
-function get_sectioning_time(network::RadialPowerGraph, e::Edge)
-    get_sectioning_time(network, edge2branch(network.G, e))
+function get_switching_time(network::RadialPowerGraph, e::Edge)
+    get_switching_time(network, edge2branch(network.G, e))
 end
 
-function get_sectioning_time(network::RadialPowerGraph, e::Branch)
-    t = get_branch_data(network, :reldata, :sectioningTime, e.src, e.dst)
-    isnothing(t) ? get_branch_data(network, :switch, :switchingTime, e.src, e.dst)[1] : t[1]
+function get_switching_time(network::RadialPowerGraph, e::Branch)
+    get_switching_time(network.mpc, e)
+end
+
+function get_switching_time(mpc::Case, e::Branch)
+    switches = mpc.switch[mpc.switch.f_bus.==e.src .&& mpc.switch.t_bus.==e.dst, :]
+    if any(switches.t_remote.==Inf)
+        return findmax(switches.t_manual)[1]
+    else
+        return findmax(switches.t_remote)[1]
+    end
 end
 
 function get_names(mg)
@@ -269,11 +280,11 @@ function find_isolating_switches(network::RadialPowerGraph, g::MetaDiGraph,
                         
                         if switch_failed 
                             # We are past the depth of the first isolating switch(es)
-                            t = get_sectioning_time(network, e)
+                            t = get_switching_time(network, e)
                             t_s_failed = t < t_s_failed ? t_s_failed : t
                         else
                             # We are at the depth of the first isolating switch(es)
-                            t = get_sectioning_time(network, e)
+                            t = get_switching_time(network, e)
                             t_sec = t < t_sec ? t_sec : t
                         end
                     end
@@ -328,7 +339,7 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
             switch_dst = false
         end
             
-        t_sec = get_sectioning_time(network, e) 
+        t_sec = get_switching_time(network, e) 
     else
         visit_u =  Vector{Int}([s])
         visit_d =  Vector{Int}([n])
