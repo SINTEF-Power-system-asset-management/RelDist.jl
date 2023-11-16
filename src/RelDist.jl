@@ -6,6 +6,9 @@ export Traverse, Failures, RelDistConf
 include("load.jl")
 export get_loads
 
+include("branch_types.jl")
+export Switch, get_minimum_switching_time, Branch
+
 include("relres.jl")
 export RelStruct, set_res!, ResFrames
 
