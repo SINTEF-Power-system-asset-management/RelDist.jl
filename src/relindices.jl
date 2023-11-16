@@ -112,5 +112,5 @@ function set_rel_res!(res::RelStruct, λ::Real, t::Real, P::Real,
 
     IC = calculate_kile(P, t, λ, cost_function, 1)
     # IC*λ gices CENS/year
-    set_res!(res, t, U, ENS, IC, IC*λ, l_pos, edge_pos)
+    set_res!(res, λ, t, P, U, ENS, IC, IC*λ, l_pos, edge_pos)
 end

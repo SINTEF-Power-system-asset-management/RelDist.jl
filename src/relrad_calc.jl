@@ -3,28 +3,7 @@ using SintPowerGraphs
 using DataFrames
 using MetaGraphs
 using Logging
-import Base.==
 
-struct Branch{T} <:AbstractEdge{T}
-    src::T
-    dst::T
-    rateA::Real
-end
-
-function Branch(t::Tuple)
-    Branch(t[1], t[2], rateA)
-end
-
-function reverse(edge::Branch)
-    return Branch(edge.dst, edge.src, edge.rateA)
-end
-
-(==)(e1::Branch, e2::Branch) = (e1.src == e2.src && e1.dst == e2.dst)
-
-struct Feeder
-    bus::String
-    rateA::Real
-end
 
 """
     relrad_calc(cost_functions::Dict{String, PieceWiseCost}, network::RadialPowerGraph)
@@ -57,6 +36,11 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
             res[case] = RelStruct(length(L), nrow(network.mpc.branch))
         end
     end
+    
+    if config.failures.communication_failure
+        res["comm_fail"] = RelStruct(length(L), nrow(network.mpc.branch))
+    end
+
     push_adj(Q, network.radial, network.radial[network.ref_bus, :name])
     # I explore only the original radial topology for failures effect (avoid loops of undirected graph)
     i = 0
@@ -67,7 +51,7 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
         edge_pos = get_edge_pos(e,edge_pos_df, filtered_branches)
         rel_data = get_branch_data(network, :reldata, e.src, e.dst)
         
-        section!(res, cost_functions, network, edge_pos, e, L, F, config.failures.switch_failures)
+        section!(res, cost_functions, network, edge_pos, e, L, F, config.failures)
         
         l_pos = 0
         for l in L
@@ -110,20 +94,20 @@ function section!(res::Dict{String, RelStruct},
         e::Branch,
         L::Array,
         F::Array,
-        switch_failures::Bool=false)
+        failures::Failures)
     
     repair_time = get_branch_data(network, :reldata, e.src, e.dst).repairTime
     permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
-    cases = switch_failures ? ["base", "upstream", "downstream"] : ["base"]
+    cases = failures.switch_failures ? ["base", "upstream", "downstream"] : ["base"]
 
 
     if permanent_failure_frequency >= 0
-        reconfigured_network, t_sec, isolated_edges, t_f = traverse_and_get_sectioning_time(network, e, switch_failures)
+        reconfigured_network, isolating_switch, isolated_edges, backup_switches = traverse_and_get_sectioning_time(network, e, failures.switch_failures)
         for (i, case) in enumerate(cases)
             R_set = []
             # For the cases with switch failures we remove the extra edges
             if i > 1
-                t_sec = t_f[i-1switch_failures]
+                isolating_switch = backup_switches[i-1]
                 for e in isolated_edges[i-1]
                     rem_edge!(reconfigured_network, e)
                 end
@@ -138,6 +122,7 @@ function section!(res::Dict{String, RelStruct},
                 end
             end
 
+            res[case].switch[edge_pos] = isolating_switch
 
             X = union(R_set...)
 
@@ -147,12 +132,25 @@ function section!(res::Dict{String, RelStruct},
                 if !(l.bus in X) 
                     t = repair_time
                 else
-                    t = t_sec
+                    t = get_minimum_switching_time(isolating_switch)
                 end
                 set_rel_res!(res[case], permanent_failure_frequency, t[1],
                              l.P,
                              cost_functions[l.type],
                              l_pos, edge_pos)
+                # This is a long one, but bear with me. In case we are considering communication failures we have the same
+                # isolated network as in the base case. Hence, the two first boolean chekcs. When the outage time of the
+                # load is equal to the repair time it means that the load was not isolated by a switch and is should not
+                # be included in these calculations. Similarly, if the switch is not operated reomtely, it does not depend on
+                # communication and should not be included here.
+                if failures.communication_failure && case == "base" && t != repair_time && isolating_switch.t_remote != Inf
+                    set_rel_res!(res["comm_fail"], permanent_failure_frequency, isolating_switch.t_manual,
+                                 l.P,
+                                 cost_functions[l.type],
+                                 l_pos, edge_pos)
+                end
+
+
             end
         end
     else
@@ -160,21 +158,29 @@ function section!(res::Dict{String, RelStruct},
     end
 end
 
-function get_switching_time(network::RadialPowerGraph, e::Edge)
-    get_switching_time(network, edge2branch(network.G, e))
+function get_switch(network::RadialPowerGraph, e::Edge)
+    get_switch(network, edge2branch(network.G, e))
 end
 
-function get_switching_time(network::RadialPowerGraph, e::Branch)
-    get_switching_time(network.mpc, e)
+function get_switch(network::RadialPowerGraph, e::Branch)
+    get_switch(network.mpc, e)
 end
 
-function get_switching_time(mpc::Case, e::Branch)
+function get_switch(mpc::Case, e::Branch)
     switches = mpc.switch[mpc.switch.f_bus.==e.src .&& mpc.switch.t_bus.==e.dst, :]
-    if any(switches.t_remote.==Inf)
-        return findmax(switches.t_manual)[1]
+    # If any of the swithces are not remote. I assume that the slowest switch
+    # available for siwtching is a manual switch. If all swithces are remote
+    # I assume that teh slowst switch is a remote switch
+    drop_switch = switches.t_remote.==Inf
+    if any(drop_switch)
+        # There is at least one switch that is not remote
+        idx = findmax(switches[drop_switch, :t_manual])[2]
+        switch = switches[drop_switch, :][idx, :]
     else
-        return findmax(switches.t_remote)[1]
+        idx = findmax(switches.t_remote)[2]
+        switch = switches[idx, :]
     end
+    return Switch(switch.f_bus, switch.t_bus, switch.t_manual, switch.t_remote)
 end
 
 function get_names(mg)
@@ -240,8 +246,8 @@ function find_isolating_switches(network::RadialPowerGraph, g::MetaDiGraph,
         reconfigured_network::MetaGraph, visit::Vector{Int}, seen::Vector{Int},
         switch_found::Bool, switch_failures::Bool=false)
     # Initialise variable to keep track of sectioning time
-    t_sec = 0
-    t_s_failed = 0
+    isolating_switch = Switch("0", "0", 0, 0)
+    backup_switch = Switch("0", "0", 0, 0)
     isolated_edges = []
    
     # If we already have found a switch we should already mark it as failed.
@@ -280,12 +286,12 @@ function find_isolating_switches(network::RadialPowerGraph, g::MetaDiGraph,
                         
                         if switch_failed 
                             # We are past the depth of the first isolating switch(es)
-                            t = get_switching_time(network, e)
-                            t_s_failed = t < t_s_failed ? t_s_failed : t
+                            temp = get_switch(network, e)
+                            backup_switch = temp < backup_switch ? backup_switch : temp
                         else
                             # We are at the depth of the first isolating switch(es)
-                            t = get_switching_time(network, e)
-                            t_sec = t < t_sec ? t_sec : t
+                            temp = get_switch(network, e)
+                            isolating_switch = temp < isolating_switch ? isolating_switch : temp
                         end
                     end
                 end
@@ -296,7 +302,7 @@ function find_isolating_switches(network::RadialPowerGraph, g::MetaDiGraph,
             end
         end
     end
-    return t_sec, isolated_edges, t_s_failed
+    return isolating_switch, isolated_edges, backup_switch
 end
 
 """
@@ -339,7 +345,7 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
             switch_dst = false
         end
             
-        t_sec = get_switching_time(network, e) 
+        isolating_switch = get_switch(network, e) 
     else
         visit_u =  Vector{Int}([s])
         visit_d =  Vector{Int}([n])
@@ -349,16 +355,16 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     end
     rem_edge!(reconfigured_network, Edge(s, n))
     # Search upstream
-    t, isolated_upstream, t_upstream = find_isolating_switches(
+    temp, isolated_upstream, backup_upstream = find_isolating_switches(
                                         network, g, reconfigured_network, visit_u, copy(visit_d),
                                         switch_src, switch_failures)
-    t_sec = t_sec > t ? t_sec : t
+    isolating_switch = temp < isolating_switch ? isolating_switch : temp
     
     # Search downstream
-    t, isolated_downstream, t_downstream = find_isolating_switches(
+    temp, isolated_downstream, backup_downstream = find_isolating_switches(
                                         network, g, reconfigured_network, visit_d, copy(visit_u),
                                         switch_dst, switch_failures)
-    return reconfigured_network, t_sec > t ? t_sec : t, [isolated_upstream, isolated_downstream], [t_upstream, t_downstream]
+    return reconfigured_network, temp < isolating_switch ? isolating_switch : temp, [isolated_upstream, isolated_downstream], [backup_upstream, backup_downstream]
 end
 
 """

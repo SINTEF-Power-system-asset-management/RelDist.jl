@@ -12,10 +12,13 @@
 """
 mutable struct RelStruct
     t::Matrix{<:Real}
+    λ::Matrix{<:Real}
+    P::Matrix{<:Real}
     U::Matrix{<:Real}
     ENS::Matrix{<:Real}
     IC::Matrix{<:Real}
     CENS::Matrix{<:Real}
+    switch::Vector{Switch}
 end
 
 """
@@ -30,15 +33,21 @@ function RelStruct(n_loads::Integer, n_branch::Integer)
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
-              zeros(n_loads, n_branch))
+              zeros(n_loads, n_branch),
+              zeros(n_loads, n_branch),
+              zeros(n_loads, n_branch),
+              [Switch() for switch in 1:n_branch])
 end
 
 """
     Set entries in the result matrix.
 """
-function set_res!(res::RelStruct, t::Real, U::Real, ENS::Real, IC::Real,
-		CENS::Real, load_pos::Integer, edge_pos::Integer)
+function set_res!(res::RelStruct, t::Real, λ::Real, P::Real, U::Real,
+        ENS::Real, IC::Real, CENS::Real,
+        load_pos::Integer, edge_pos::Integer)
     res.t[load_pos, edge_pos] = t
+    res.λ[load_pos, edge_pos] = λ
+    res.P[load_pos, edge_pos] = P
     res.U[load_pos, edge_pos] = U
     res.ENS[load_pos, edge_pos] = ENS
     res.IC[load_pos, edge_pos] = IC
