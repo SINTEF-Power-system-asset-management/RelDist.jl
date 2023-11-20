@@ -38,7 +38,7 @@ function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
         F = [Feeder(network.ref_bus,
                     consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf)]
         for reserve in network.reserves
-            append!(F,
+            push!(F,
                     Feeder(reserve,
                            consider_cap ? get_feeder_cap(network, feeder) : Inf))
         end
@@ -53,13 +53,12 @@ end
     that supplies the network through a normally closed switch.
 """
 function slack_is_ref_bus(network::RadialPowerGraph, b::Branch)
-    ref = network.mpc.bus[network.mpc.ref_bus, :ID]
+   ref = network.mpc.bus[network.mpc.ref_bus, :ID]
     b.src == ref || b.dst == ref
 end
 
-function slack_is_ref_bus(network::RadialPowerGraph, b::Branch)
-    ref = network.mpc.bus[network.mpc.ref_bus, :ID]
-    b.src == ref || b.dst == ref
+function slack_is_ref_bus(network::RadialPowerGraph, f::Feeder)
+    any(network.mpc.bus[network.mpc.ref_bus, :ID].==f.bus)
 end
 
 function create_slack_name(b::Branch)

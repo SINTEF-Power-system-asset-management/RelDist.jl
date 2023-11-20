@@ -189,6 +189,9 @@ end
 
 function get_switch(mpc::Case, e::Branch)
     switches = mpc.switch[mpc.switch.f_bus.==e.src .&& mpc.switch.t_bus.==e.dst, :]
+    if isempty(switches)
+        return Switch(e.src, e.dst, -Inf, -Inf)
+    end
     # If any of the swithces are not remote. I assume that the slowest switch
     # available for siwtching is a manual switch. If all swithces are remote
     # I assume that teh slowst switch is a remote switch
@@ -338,6 +341,9 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
 	g = network.G
 	reconfigured_network = MetaGraph(copy(network.G)) # This graph must be undirected
     s = get_node_number(network.G, string(e.src))
+
+    # Create an empty isolating switch
+    isolating_switch = Switch() 
 
     n = get_node_number(network.G, e.dst)
     switch_buses = get_prop(g, Edge(s, n), :switch_buses)
