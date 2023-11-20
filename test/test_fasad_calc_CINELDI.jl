@@ -9,7 +9,8 @@ network =  RadialPowerGraph(network_filename)
 
 conf = RelDistConf(traverse=Traverse(consider_cap=false),
                    failures=Failures(switch_failures=true,
-                                    communication_failure=true))
+                                    communication_failure=true,
+                                   reserve_failure=true))
 
 res, _, _ = relrad_calc(cost_functions, network, conf)
 ENS = res["base"].ENS
@@ -29,6 +30,8 @@ end
 
 # Check communication failure
 @test abs(sum(res["comm_fail"].ENS) - sum([0.02083, 0, 0.0125, 0.0083]))<epsilon
+# Check reserve failure
+@test abs(sum(res["reserve_trans_grid-T2"].ENS) - sum([2.10833, 2.48333, 1.265, 1.6267]))<epsilon
 
 # Check if it works when we consider capacity
 res, _, _ = relrad_calc(cost_functions, network)

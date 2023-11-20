@@ -1,4 +1,6 @@
 using Graphs
+using SintPowerGraphs
+using MetaGraphs
 import Base.==
 import Base.<
 
@@ -21,6 +23,68 @@ end
 struct Feeder
     bus::String
     rateA::Real
+end
+
+"""
+    Returns the buses that can supply loads.
+"""
+function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
+    transformers = network.mpc.transformer
+    F = []
+    for e in eachrow(transformers)
+        push!(F, Branch(e.f_bus, e.t_bus, consider_cap ? e.rateA : Inf))
+    end
+    if isempty(F)
+        F = [Feeder(network.ref_bus,
+                    consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf)]
+        for reserve in network.reserves
+            append!(F,
+                    Feeder(reserve,
+                           consider_cap ? get_feeder_cap(network, feeder) : Inf))
+        end
+    end
+    return F
+end
+
+
+"""
+    Check if a transformer that can be used to supply the network is
+    connected to the reference bus. The reference bus is the bus
+    that supplies the network through a normally closed switch.
+"""
+function slack_is_ref_bus(network::RadialPowerGraph, b::Branch)
+    ref = network.mpc.bus[network.mpc.ref_bus, :ID]
+    b.src == ref || b.dst == ref
+end
+
+function slack_is_ref_bus(network::RadialPowerGraph, b::Branch)
+    ref = network.mpc.bus[network.mpc.ref_bus, :ID]
+    b.src == ref || b.dst == ref
+end
+
+function create_slack_name(b::Branch)
+    b.src*"-"*b.dst
+end
+
+function create_slack_name(f::Feeder)
+    f.bus
+end
+
+""""
+    Returns the capacity of a feeder.
+"""
+function get_feeder_cap(network::RadialPowerGraph, feeder::String)::Real
+    network.mpc.gen[network.mpc.gen.bus.==network.ref_bus, :Pmax][1]
+end
+
+function are_edges_equal(e_input, e_test)::Bool
+    return e_input == e_test || e_input == reverse(e_test)
+end
+
+function edge2branch(g::AbstractMetaGraph, e::Graphs.SimpleGraphs.SimpleEdge{Int64})::Branch
+    s = get_bus_name(g, src(e))
+    d = get_bus_name(g, dst(e))
+    return Branch(s,d, get_prop(g, src(e), dst(e), :rateA))
 end
 
 struct Switch 

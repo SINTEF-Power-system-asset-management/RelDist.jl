@@ -13,6 +13,8 @@ case = Case(network_filename)
 network = RadialPowerGraph(case)
 
 conf = RelDistConf(traverse=Traverse(consider_cap=false),
-                   failures=Failures(switch_failures=true))
+                   failures=Failures(switch_failures=true,
+                                    communication_failure=true,
+                                   reserve_failure=true))
 res, L, edge_pos = relrad_calc(cost_functions, network, conf)
 

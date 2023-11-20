@@ -7,7 +7,7 @@ include("load.jl")
 export get_loads
 
 include("branch_types.jl")
-export Switch, get_minimum_switching_time, Branch
+export Switch, get_minimum_switching_time, Branch, get_slack, slack_is_ref_bus, get_feeder_cap, are_edges_equal, edge2branch, create_slack_name
 
 include("relres.jl")
 export RelStruct, set_res!, ResFrames

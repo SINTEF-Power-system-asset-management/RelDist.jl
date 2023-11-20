@@ -30,14 +30,20 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
 
     # Set missing automatic switching timtes to zero
     network.mpc.switch.t_remote .= coalesce.(network.mpc.switch.t_remote, Inf)
+
+    # Define the cases we are going to run
+    cases = ["base"]
     
     if config.failures.switch_failures
         for case in ["upstream", "downstream"] 
             res[case] = RelStruct(length(L), nrow(network.mpc.branch))
+            push!(cases, case)
         end
     end
     
     if config.failures.communication_failure
+        # This case is not run in the section function. I therefore,
+        # don't add it to the  case list.
         res["comm_fail"] = RelStruct(length(L), nrow(network.mpc.branch))
     end
 
@@ -45,13 +51,24 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
     # I explore only the original radial topology for failures effect (avoid loops of undirected graph)
     i = 0
     F = get_slack(network, config.traverse.consider_cap) # get list of substations (not distribution transformers). If not present, I use as slack the slack bus declared
+    
+    if config.failures.reserve_failure
+        for f in F
+            if !slack_is_ref_bus(network, f)
+                name = "reserve_"*create_slack_name(f)
+                res[name] = RelStruct(length(L), nrow(network.mpc.branch))
+                push!(cases, name)
+            end
+        end
+    end
+
     while !isempty(Q)
         e = pop!(Q)
         @info "Processing line $e"
         edge_pos = get_edge_pos(e,edge_pos_df, filtered_branches)
         rel_data = get_branch_data(network, :reldata, e.src, e.dst)
         
-        section!(res, cost_functions, network, edge_pos, e, L, F, config.failures)
+        section!(res, cost_functions, network, edge_pos, e, L, F, cases, config.failures)
         
         l_pos = 0
         for l in L
@@ -94,32 +111,38 @@ function section!(res::Dict{String, RelStruct},
         e::Branch,
         L::Array,
         F::Array,
+        cases::Array,
         failures::Failures)
     
     repair_time = get_branch_data(network, :reldata, e.src, e.dst).repairTime
     permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
-    cases = failures.switch_failures ? ["base", "upstream", "downstream"] : ["base"]
-
 
     if permanent_failure_frequency >= 0
         reconfigured_network, isolating_switch, isolated_edges, backup_switches = traverse_and_get_sectioning_time(network, e, failures.switch_failures)
         for (i, case) in enumerate(cases)
             R_set = []
             # For the cases with switch failures we remove the extra edges
-            if i > 1
+            if case ∈ ["upstream", "downstream"]
+                remember_switch = isolating_switch
                 isolating_switch = backup_switches[i-1]
                 for e in isolated_edges[i-1]
                     rem_edge!(reconfigured_network, e)
                 end
             end
             for f in F
-                R = Set(calc_R(network, reconfigured_network, f))
-                push!(R_set, R)
+                # If we are considering reserve failures and the name of the reserve
+                # is the same as the case, we will skip to add the reachable loads
+                # to the reachable matrix.
+                if !(failures.reserve_failure && "reserve_"*create_slack_name(f) == case)
+                    R = Set(calc_R(network, reconfigured_network, f))
+                    push!(R_set, R)
+                end
             end
-            if i > 1
+            if case ∈ ["upstream", "downstream"]
                 for e in isolated_edges[i-1]
                     add_edge!(reconfigured_network, e)
                 end
+                isolating_switch = remember_switch
             end
 
             res[case].switch[edge_pos] = isolating_switch
@@ -149,8 +172,6 @@ function section!(res::Dict{String, RelStruct},
                                  cost_functions[l.type],
                                  l_pos, edge_pos)
                 end
-
-
             end
         end
     else
@@ -268,7 +289,7 @@ function find_isolating_switches(network::RadialPowerGraph, g::MetaDiGraph,
                 #  In case a switch has already failed we add the edge to a list
                 #  of failed edges. If no edges have failed previously we modfiy
                 #  the reconfigured_network
-                if switch_failed
+                if switch_failed && n .!== seen[1]
                     push!(isolated_edges, e)
                 else
                     rem_edge!(reconfigured_network, e)
@@ -356,7 +377,7 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     rem_edge!(reconfigured_network, Edge(s, n))
     # Search upstream
     temp, isolated_upstream, backup_upstream = find_isolating_switches(
-                                        network, g, reconfigured_network, visit_u, copy(visit_d),
+                                                                       network, g, reconfigured_network, copy(visit_u), copy(visit_d),
                                         switch_src, switch_failures)
     isolating_switch = temp < isolating_switch ? isolating_switch : temp
     
@@ -365,38 +386,6 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
                                         network, g, reconfigured_network, visit_d, copy(visit_u),
                                         switch_dst, switch_failures)
     return reconfigured_network, temp < isolating_switch ? isolating_switch : temp, [isolated_upstream, isolated_downstream], [backup_upstream, backup_downstream]
-end
-
-"""
-    Returns the buses that can supply loads.
-"""
-function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
-    transformers = network.mpc.transformer
-    F = []
-    for e in eachrow(transformers)
-        push!(F, Branch(e.f_bus, e.t_bus, consider_cap ? e.rateA : Inf))
-    end
-    if isempty(F)
-        F = [Feeder(network.ref_bus,
-                    consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf)]
-        for reserve in network.reserves
-            append!(F,
-                    Feeder(reserve,
-                           consider_cap ? get_feeder_cap(network, feeder) : Inf))
-        end
-    end
-    return F
-end
-
-""""
-    Returns the capacity of a feeder.
-"""
-function get_feeder_cap(network::RadialPowerGraph, feeder::String)::Real
-    network.mpc.gen[network.mpc.gen.bus.==network.ref_bus, :Pmax][1]
-end
-
-function are_edges_equal(e_input, e_test)::Bool
-    return e_input == e_test || e_input == reverse(e_test)
 end
 
 
@@ -447,8 +436,3 @@ function get_edge_pos(e, edge_pos, filtered_branches)
     end
 end
 
-function edge2branch(g::AbstractMetaGraph, e::Graphs.SimpleGraphs.SimpleEdge{Int64})::Branch
-    s = get_bus_name(g, src(e))
-    d = get_bus_name(g, dst(e))
-    return Branch(s,d, get_prop(g, src(e), dst(e), :rateA))
-end
