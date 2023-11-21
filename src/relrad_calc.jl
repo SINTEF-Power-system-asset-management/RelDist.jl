@@ -158,18 +158,18 @@ function section!(res::Dict{String, RelStruct},
                     t = get_minimum_switching_time(isolating_switch)
                 end
                 set_rel_res!(res[case], permanent_failure_frequency, t[1],
-                             l.P,
-                             cost_functions[l.type],
+                             l.P, cost_functions[l.type],
                              l_pos, edge_pos)
-                # This is a long one, but bear with me. In case we are considering communication failures we have the same
-                # isolated network as in the base case. Hence, the two first boolean chekcs. When the outage time of the
-                # load is equal to the repair time it means that the load was not isolated by a switch and is should not
-                # be included in these calculations. Similarly, if the switch is not operated reomtely, it does not depend on
-                # communication and should not be included here.
-                if failures.communication_failure && case == "base" && t != repair_time && isolating_switch.t_remote != Inf
-                    set_rel_res!(res["comm_fail"], permanent_failure_frequency, isolating_switch.t_manual,
-                                 l.P,
-                                 cost_functions[l.type],
+                # In case we are considering communication failures we have the same 
+                # isolated network as in the base case. 
+                if failures.communication_failure && case == "base"
+                    # In case we the outage time is not equal to the component repair time 
+                    # set it to the manual switching time of the isolating switch.
+                    if  t != repair_time 
+                        t = isolating_switch.t_manual
+                    end
+                    set_rel_res!(res["comm_fail"], permanent_failure_frequency,
+                                 t[1], l.P, cost_functions[l.type],
                                  l_pos, edge_pos)
                 end
             end

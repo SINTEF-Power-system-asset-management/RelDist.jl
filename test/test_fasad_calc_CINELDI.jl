@@ -29,7 +29,7 @@ for key in keys(ENS)
 end
 
 # Check communication failure
-@test abs(sum(res["comm_fail"].ENS) - sum([0.02083, 0, 0.0125, 0.0083]))<epsilon
+@test abs(sum(res["comm_fail"].ENS[:, 2]) - sum([0.02083, 0.8, 0.0125, 0.0083]))<epsilon
 # Check reserve failure
 @test abs(sum(res["reserve_trans_grid-T2"].ENS) - sum([2.10833, 2.48333, 1.265, 1.6267]))<epsilon
 
