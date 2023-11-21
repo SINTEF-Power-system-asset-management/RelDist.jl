@@ -76,7 +76,7 @@ function ResFrames()
 	ResFrames(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
 end
 
-function ResFrames(res::RelStruct, rest::RelStruct, edge_pos::DataFrame,
+function ResFrames(res::Dict{String, RelStruct}, edge_pos::DataFrame,
         L::Vector{RelDist.Load})
     # Put everything into nice dataframes
     res_new = ResFrames()
@@ -86,9 +86,11 @@ function ResFrames(res::RelStruct, rest::RelStruct, edge_pos::DataFrame,
     load_agg = DataFrame(ID=load_labels)
 
     for field in [:U, :ENS, :IC, :CENS]
-        frame = DataFrame(
-                          getfield(res, field) + getfield(rest, field),
+        frame = DataFrame(zeros(length(L), size(edge_pos, 1)),
                           edge_pos.name, makeunique=true)
+        for key in keys(res)
+            frame .+= getfield(res[key], field)
+        end
         insertcols!(frame, 1, :L=>load_labels);
         setfield!(res_new, field, frame)
 

@@ -12,9 +12,5 @@ case = Case(network_filename)
 
 network = RadialPowerGraph(case)
 
-res, rest, L, edge_pos = relrad_calc(cost_functions, network)
-
-rest.ENS
-
-res.ENS'
+res, L, edge_pos = relrad_calc(cost_functions, network)
 

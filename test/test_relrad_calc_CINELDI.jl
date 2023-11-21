@@ -23,4 +23,4 @@ U_target = 13.15
 end
 
 epsilon = 0.0001
-@test (sum(IC_sum - IC_sum_target)<epsilon)
+@test isapprox(sum(IC_sum), sum(IC_sum_target), atol=epsilon)
