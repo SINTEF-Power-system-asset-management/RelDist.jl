@@ -19,6 +19,7 @@ mutable struct RelStruct
     IC::Matrix{<:Real}
     CENS::Matrix{<:Real}
     switch::Vector{Switch}
+    prob::Real
 end
 
 """
@@ -28,7 +29,7 @@ end
         n_loads: Number of loads in the case.
         n_branch: Number of branches.
 """
-function RelStruct(n_loads::Integer, n_branch::Integer)
+function RelStruct(n_loads::Integer, n_branch::Integer, prob::Real)
     RelStruct(zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
@@ -36,7 +37,12 @@ function RelStruct(n_loads::Integer, n_branch::Integer)
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
-              [Switch() for switch in 1:n_branch])
+              [Switch() for switch in 1:n_branch],
+              prob)
+end
+
+function RelStruct(n_loads::Integer, n_branch::Integer)
+    RelStruct(n_loads, n_branch, 1)
 end
 
 """

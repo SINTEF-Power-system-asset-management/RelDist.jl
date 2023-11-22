@@ -25,26 +25,31 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
     Q = []  # Empty arrayj
 	L = get_loads(network.mpc)
     edge_pos_df = store_edge_pos(network)
-    res = Dict("base" => RelStruct(length(L), nrow(network.mpc.branch)),
-               "temp" => RelStruct(length(L), nrow(network.mpc.branch)))
-
+    res = Dict("temp" => RelStruct(length(L), nrow(network.mpc.branch)))
     # Set missing automatic switching timtes to zero
     network.mpc.switch.t_remote .= coalesce.(network.mpc.switch.t_remote, Inf)
 
     # Define the cases we are going to run
     cases = ["base"]
     
-    if config.failures.switch_failures
+    # the probability of the base case if we don't have any other cases.
+    base_prob = 1
+    
+    if config.failures.switch_failure_prob > 0
         for case in ["upstream", "downstream"] 
-            res[case] = RelStruct(length(L), nrow(network.mpc.branch))
+            res[case] = RelStruct(length(L), nrow(network.mpc.branch),
+                                 config.failures.switch_failure_prob)
             push!(cases, case)
+            base_prob -= config.failures.switch_failure_prob
         end
     end
     
-    if config.failures.communication_failure
+    if config.failures.communication_failure_prob > 0
         # This case is not run in the section function. I therefore,
         # don't add it to the  case list.
-        res["comm_fail"] = RelStruct(length(L), nrow(network.mpc.branch))
+        res["comm_fail"] = RelStruct(length(L), nrow(network.mpc.branch),
+                                    config.communication_failure_prob)
+        base_prob -= config.communication_failure_prob
     end
 
     push_adj(Q, network.radial, network.radial[network.ref_bus, :name])
@@ -52,16 +57,21 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
     i = 0
     F = get_slack(network, config.traverse.consider_cap) # get list of substations (not distribution transformers). If not present, I use as slack the slack bus declared
     
-    if config.failures.reserve_failure
+    if config.failures.reserve_failure_prob > 0
         for f in F
             if !slack_is_ref_bus(network, f)
                 name = "reserve_"*create_slack_name(f)
-                res[name] = RelStruct(length(L), nrow(network.mpc.branch))
+                res[name] = RelStruct(length(L), nrow(network.mpc.branch),
+                                     config.failures.reserve_failure_prob)
                 push!(cases, name)
+                base_prob -= config.reserve_failure_prob
             end
         end
     end
 
+    res["base"] = RelStruct(length(L), nrow(network.mpc.branch)),
+
+    
     while !isempty(Q)
         e = pop!(Q)
         @info "Processing line $e"

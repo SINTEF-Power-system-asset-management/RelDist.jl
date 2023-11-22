@@ -7,9 +7,9 @@ using Configurations
 end
 
 @option "Failures" struct Failures
-    switch_failures::Bool = false
-    communication_failure::Bool = false
-    reserve_failure::Bool = false
+    switch_failure_prob::Real = 0.0
+    communication_failure_prob::Real = 0.0
+    reserve_failure_prob::Real = 0.0
 end
 
 @option "Configuration for running RelDist.j" struct RelDistConf
