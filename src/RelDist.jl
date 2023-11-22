@@ -13,7 +13,7 @@ include("relres.jl")
 export RelStruct, set_res!, ResFrames
 
 include("relindices.jl")
-export get_corr_factor, calculate_kile, set_rel_res!
+export get_corr_factor, calculate_kile, set_rel_res!, f_lin, f_piece
 
 include("relrad_io.jl")
 export read_interruption, read_cost_functions, read_correction_factors_from_csv, read_loadprofile

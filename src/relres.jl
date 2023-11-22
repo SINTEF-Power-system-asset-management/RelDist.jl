@@ -42,7 +42,7 @@ end
 """
     Set entries in the result matrix.
 """
-function set_res!(res::RelStruct, t::Real, λ::Real, P::Real, U::Real,
+function set_res!(res::RelStruct, λ::Real, t::Real, P::Real, U::Real,
         ENS::Real, IC::Real, CENS::Real,
         load_pos::Integer, edge_pos::Integer)
     res.t[load_pos, edge_pos] = t

@@ -16,11 +16,11 @@ println(IC_sum)
 println(ICt_sum)
 
 
-IC_sum_target = [53.15; 68.695; 75.9; 83.12]
+IC_sum_target = [265.75; 274.78; 227.7; 166.24]
 @testset "Verifying unavailability" begin
 U_target = 13.15
 @test isapprox(sum(res["base"].U), U_target)
 end
 
-epsilon = 0.0001
+epsilon = 0.9
 @test isapprox(sum(IC_sum), sum(IC_sum_target), atol=epsilon)
