@@ -95,7 +95,7 @@ function ResFrames(res::Dict{String, RelStruct}, edge_pos::DataFrame,
         frame = DataFrame(zeros(length(L), size(edge_pos, 1)),
                           edge_pos.name, makeunique=true)
         for key in keys(res)
-            frame .+= getfield(res[key], field)
+            frame .+= getfield(res[key], field)*res[key].prob
         end
         insertcols!(frame, 1, :L=>load_labels);
         setfield!(res_new, field, frame)

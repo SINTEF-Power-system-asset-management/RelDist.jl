@@ -18,16 +18,17 @@ rename!(network.mpc.reldata, :lambda_temp => :temporaryFaultFrequency)
 rename!(network.mpc.reldata, :sectioning_time => :sectioningTime)
 
 # Add switch data for the smart healing stuff
-network.mpc.switch[!, :t_remote] .= 1/3600 # I set the remote switching time to 1 second
+network.mpc.switch[!, :t_remote] .= 0.5 #1/3600 # I set the remote switching time to 1 second
 network.mpc.switch[!, :t_manual] .= 0.5 # I set the manual switching time to 30 minutes
 
 # Code should read this
-network.reserves = ["36", "62", "88"]
+# network.reserves = ["36", "62", "88"]
+network.reserves = ["62"]
 
-conf = RelDistConf(traverse=Traverse(consider_cap=false),
-                   failures=Failures(switch_failures=true,
-                                    communication_failure=true,
-                                   reserve_failure=true))
+conf = RelDistConf(traverse=Traverse(consider_cap=true),
+                   failures=Failures(switch_failure_prob=0.01,
+                                    communication_failure_prob=0.01,
+                                   reserve_failure_prob=0.01))
 
 res, L, edge_pos = relrad_calc(cost_functions, network, conf)
 

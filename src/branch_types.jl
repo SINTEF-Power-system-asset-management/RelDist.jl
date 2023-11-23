@@ -40,7 +40,7 @@ function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
         for reserve in network.reserves
             push!(F,
                     Feeder(reserve,
-                           consider_cap ? get_feeder_cap(network, feeder) : Inf))
+                           consider_cap ? get_feeder_cap(network, reserve) : Inf))
         end
     end
     return F

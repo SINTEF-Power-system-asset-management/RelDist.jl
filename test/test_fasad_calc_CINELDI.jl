@@ -8,9 +8,9 @@ cost_functions = read_cost_functions(cost_filename)
 network =  RadialPowerGraph(network_filename)
 
 conf = RelDistConf(traverse=Traverse(consider_cap=false),
-                   failures=Failures(switch_failures=true,
-                                    communication_failure=true,
-                                   reserve_failure=true))
+                   failures=Failures(switch_failure_prob=1,
+                                    communication_failure_prob=1,
+                                    reserve_failure_prob=1))
 
 res, _, _ = relrad_calc(cost_functions, network, conf)
 ENS = res["base"].ENS

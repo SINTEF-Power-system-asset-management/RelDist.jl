@@ -48,8 +48,8 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
         # This case is not run in the section function. I therefore,
         # don't add it to the  case list.
         res["comm_fail"] = RelStruct(length(L), nrow(network.mpc.branch),
-                                    config.communication_failure_prob)
-        base_prob -= config.communication_failure_prob
+                                    config.failures.communication_failure_prob)
+        base_prob -= config.failures.communication_failure_prob
     end
 
     push_adj(Q, network.radial, network.radial[network.ref_bus, :name])
@@ -64,12 +64,12 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
                 res[name] = RelStruct(length(L), nrow(network.mpc.branch),
                                      config.failures.reserve_failure_prob)
                 push!(cases, name)
-                base_prob -= config.reserve_failure_prob
+                base_prob -= config.failures.reserve_failure_prob
             end
         end
     end
 
-    res["base"] = RelStruct(length(L), nrow(network.mpc.branch)),
+    res["base"] = RelStruct(length(L), nrow(network.mpc.branch))
 
     
     while !isempty(Q)
@@ -128,7 +128,7 @@ function section!(res::Dict{String, RelStruct},
     permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
 
     if permanent_failure_frequency >= 0
-        reconfigured_network, isolating_switch, isolated_edges, backup_switches = traverse_and_get_sectioning_time(network, e, failures.switch_failures)
+        reconfigured_network, isolating_switch, isolated_edges, backup_switches = traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob>0)
         for (i, case) in enumerate(cases)
             R_set = []
             # For the cases with switch failures we remove the extra edges
@@ -143,7 +143,7 @@ function section!(res::Dict{String, RelStruct},
                 # If we are considering reserve failures and the name of the reserve
                 # is the same as the case, we will skip to add the reachable loads
                 # to the reachable matrix.
-                if !(failures.reserve_failure && "reserve_"*create_slack_name(f) == case)
+                if !(failures.reserve_failure_prob > 0.0 && "reserve_"*create_slack_name(f) == case)
                     R = Set(calc_R(network, reconfigured_network, f))
                     push!(R_set, R)
                 end
@@ -172,7 +172,7 @@ function section!(res::Dict{String, RelStruct},
                              l_pos, edge_pos)
                 # In case we are considering communication failures we have the same 
                 # isolated network as in the base case. 
-                if failures.communication_failure && case == "base"
+                if failures.communication_failure_prob > 0 && case == "base"
                     # In case we the outage time is not equal to the component repair time 
                     # set it to the manual switching time of the isolating switch.
                     if  t != repair_time 
