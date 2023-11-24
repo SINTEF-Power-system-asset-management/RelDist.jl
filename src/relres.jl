@@ -18,7 +18,8 @@ mutable struct RelStruct
     ENS::Matrix{<:Real}
     IC::Matrix{<:Real}
     CENS::Matrix{<:Real}
-    switch::Vector{Switch}
+    switch_u::Vector{Switch}
+    switch_d::Vector{Switch}
     prob::Real
 end
 
@@ -37,6 +38,7 @@ function RelStruct(n_loads::Integer, n_branch::Integer, prob::Real)
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
+              [Switch() for switch in 1:n_branch],
               [Switch() for switch in 1:n_branch],
               prob)
 end
@@ -76,10 +78,13 @@ mutable struct ResFrames
     CENS::DataFrame
     load_agg::DataFrame
     branch_agg::DataFrame
+    sys_agg::DataFrame
+
 end
 
 function ResFrames()
-	ResFrames(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
+	ResFrames(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(),
+              DataFrame())
 end
 
 function ResFrames(res::Dict{String, RelStruct}, edge_pos::DataFrame,
@@ -91,7 +96,7 @@ function ResFrames(res::Dict{String, RelStruct}, edge_pos::DataFrame,
     branch_agg = DataFrame(ID=edge_pos.name)
     load_agg = DataFrame(ID=load_labels)
 
-    for field in [:U, :ENS, :IC, :CENS]
+    for field in [:U, :ENS, :CENS]
         frame = DataFrame(zeros(length(L), size(edge_pos, 1)),
                           edge_pos.name, makeunique=true)
         for key in keys(res)
@@ -105,6 +110,10 @@ function ResFrames(res::Dict{String, RelStruct}, edge_pos::DataFrame,
     end
     setfield!(res_new, :load_agg, load_agg)
     setfield!(res_new, :branch_agg, branch_agg)
+    setfield!(res_new,
+              :sys_agg,
+              DataFrame(sum.(eachcol(load_agg[:, 2:end]))',
+                        [:U, :ENS, :CENS]))
     return res_new
 end
 

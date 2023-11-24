@@ -19,11 +19,19 @@ function get_loads(case::Case)
             return [Load(load) for load in eachrow(case.load)]
         else
             @warn "load dataframe found, but no load found, attemping to use bus dataframe"
-            @warn "Assuming all loads to be residential"
-            return [Load(load.ID,
-                         load.bus,
-                         case.bus[case.bus.ID .== load.bus, :Pd][1],
-                         "residential") for load in eachrow(case.load)]
+            if "type" ∈ names(case.load)
+                return [Load(load.ID,
+                             load.bus,
+                             case.bus[case.bus.ID .== load.bus, :Pd][1],
+                             load.type) for load in eachrow(case.load)]
+                else
+                @warn "Customer type not found."
+                @warn "Assuming all loads to be residential"
+                return [Load(load.ID,
+                             load.bus,
+                             case.bus[case.bus.ID .== load.bus, :Pd][1],
+                             "residential") for load in eachrow(case.load)]
+            end
         end
     else
         @warn "no load dataframe found, using buses with Pd > 0 as loads."

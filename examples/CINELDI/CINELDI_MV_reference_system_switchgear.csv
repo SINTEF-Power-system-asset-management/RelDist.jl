@@ -1,4 +1,4 @@
-﻿f_bus;t_bus;circuit_breaker;closed
+﻿f_bus;t_bus;breaker;closed
 1;2;True;True
 1;2;False;True
 2;1;False;True

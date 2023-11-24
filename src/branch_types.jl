@@ -73,7 +73,7 @@ end
     Returns the capacity of a feeder.
 """
 function get_feeder_cap(network::RadialPowerGraph, feeder::String)::Real
-    network.mpc.gen[network.mpc.gen.bus.==network.ref_bus, :Pmax][1]
+    network.mpc.gen[network.mpc.gen.bus.==feeder, :Pmax][1]
 end
 
 function are_edges_equal(e_input, e_test)::Bool

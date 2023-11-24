@@ -128,16 +128,17 @@ function section!(res::Dict{String, RelStruct},
     permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
 
     if permanent_failure_frequency >= 0
-        reconfigured_network, isolating_switch, isolated_edges, backup_switches = traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob>0)
+        reconfigured_network, isolating_switches, isolated_edges, backup_switches = traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob>0)
         for (i, case) in enumerate(cases)
             R_set = []
             # For the cases with switch failures we remove the extra edges
             if case ∈ ["upstream", "downstream"]
-                remember_switch = isolating_switch
                 isolating_switch = backup_switches[i-1]
                 for e in isolated_edges[i-1]
                     rem_edge!(reconfigured_network, e)
                 end
+            else
+                isolating_switch = isolating_switches[1] < isolating_switches[2] ? isolating_switches[2] : isolating_switches[1]
             end
             for f in F
                 # If we are considering reserve failures and the name of the reserve
@@ -152,10 +153,10 @@ function section!(res::Dict{String, RelStruct},
                 for e in isolated_edges[i-1]
                     add_edge!(reconfigured_network, e)
                 end
-                isolating_switch = remember_switch
             end
 
-            res[case].switch[edge_pos] = isolating_switch
+            res[case].switch_u[edge_pos] = isolating_switches[1]
+            res[case].switch_d[edge_pos] = isolating_switches[2]
 
             X = union(R_set...)
 
@@ -204,7 +205,7 @@ function get_switch(mpc::Case, e::Branch)
     end
     # If any of the swithces are not remote. I assume that the slowest switch
     # available for siwtching is a manual switch. If all swithces are remote
-    # I assume that teh slowst switch is a remote switch
+    # I assume that the slowst switch is a remote switch
     drop_switch = switches.t_remote.==Inf
     if any(drop_switch)
         # There is at least one switch that is not remote
@@ -276,67 +277,32 @@ end
 """
     Traverse the in a direction until all isolating switches are found.
 """
-function find_isolating_switches(network::RadialPowerGraph, g::MetaDiGraph,
-        reconfigured_network::MetaGraph, visit::Vector{Int}, seen::Vector{Int},
-        switch_found::Bool, switch_failures::Bool=false)
+function find_isolating_switches!(network::RadialPowerGraph, g::MetaDiGraph,
+        reconfigured_network::MetaGraph, visit::Vector{Int}, seen::Vector{Int})
     # Initialise variable to keep track of sectioning time
-    isolating_switch = Switch("0", "0", 0, 0)
-    backup_switch = Switch("0", "0", 0, 0)
-    isolated_edges = []
+    isolating_switches = Vector{Switch}()
    
-    # If we already have found a switch we should already mark it as failed.
-    if switch_found
-        # Variable to keep track of whether or not to change the configured
-        # network or not.
-        switch_failed = true
-    else
-        switch_failed = false
-    end
     while !isempty(visit)
         next = pop!(visit)
         if !(next in seen)
             push!(seen, next)
-            for n in all_neighbors(g, next)
+            for n in setdiff(all_neighbors(g, next), seen)
                 e = Edge(next, n) in edges(g) ? Edge(next, n) : Edge(n, next)
                 
-                #  In case a switch has already failed we add the edge to a list
-                #  of failed edges. If no edges have failed previously we modfiy
-                #  the reconfigured_network
-                if switch_failed && n .!== seen[1]
-                    push!(isolated_edges, e)
+                rem_edge!(reconfigured_network, e)
+  
+                if get_prop(g, e, :switch) == -1 # it is not a switch, I keep exploring the graph
+                    append!(visit, n)
                 else
-                    rem_edge!(reconfigured_network, e)
+                    # it is a switch, I stop exploring the graph in this direction
+                    push!(seen, n) 
+                    # We are at the depth of the first isolating switch(es)
+                    push!(isolating_switches(get_switch(network, e))
                 end
-                if !(n in seen) & (n != network.ref_bus)
-                    if get_prop(g, e, :switch) == -1 # it is not a switch, I keep exploring the graph
-                        append!(visit, n)
-                    else
-                        # We have found a switch
-                        switch_found = true
-                        if !switch_failures || switch_failed
-                            # it is a switch, I stop exploring the graph (visit does not increase)
-                            push!(seen, n) 
-                        end
-                        
-                        if switch_failed 
-                            # We are past the depth of the first isolating switch(es)
-                            temp = get_switch(network, e)
-                            backup_switch = temp < backup_switch ? backup_switch : temp
-                        else
-                            # We are at the depth of the first isolating switch(es)
-                            temp = get_switch(network, e)
-                            isolating_switch = temp < isolating_switch ? isolating_switch : temp
-                        end
-                    end
-                end
-            end
-            if switch_found
-                # We found a switch at this depth. We don't have to go deeper.
-                switch_failed = true
             end
         end
     end
-    return isolating_switch, isolated_edges, backup_switch
+    return isolating_switches
 end
 
 """
@@ -350,58 +316,40 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     # isolated_edges = []
 	g = network.G
 	reconfigured_network = MetaGraph(copy(network.G)) # This graph must be undirected
+    
+    # Remove the edge from the reconfigured network
+    rem_edge!(reconfigured_network, Edge(s, n))
+
     s = get_node_number(network.G, string(e.src))
-
-    # Create an empty isolating switch
-    isolating_switch = Switch() 
-
     n = get_node_number(network.G, e.dst)
     switch_buses = get_prop(g, Edge(s, n), :switch_buses)
     # If we consider switch failures we always have to search up and
     # downstream.
-    if switch_failures
-        visit_u = Vector{Int}([s])# Vertices to check upstream
-        visit_d =  Vector{Int}([n])# Vertices to check downstream
-    else
-        visit_u =  Vector{Int}([]) # Vertices to check upstream
-        visit_d =  Vector{Int}([]) # Vertices to check downstream
-    end
     
-    switch_src = true # There is a switch at the source
-    switch_dst = true # There is a switch at the destination
     if length(switch_buses) >= 1
         # There is at least one switch on the branch
-        if e.src ∉ switch_buses
-            # There is no switch at the source, we have to search upstream
-            visit_u = Vector{Int}([s])
-            switch_src = false
+        if e.src ∈ switch_buses
+            # There is a switch at the source, we don't have to search upstream
+            switch_u = [get_switch(network, e)]
+        else
+            # Search upstream for a switch
+            switch_u = find_isolating_switches!(network, g, reconfigured_network, 
+                                                [s], [n])
         end
-        if e.dst ∉ switch_buses
-            # There is no switch at the destination, we have to search downstream
-            visit_d = Vector{Int}([n])
-            switch_dst = false
+        if e.dst ∈ switch_buses
+            # There is a switch at the destination, we don't have to search downstream
+            switch_d = [get_switch(network, e)]
+        else
+            # Search upstream for a switch
+            switch_d = find_isolating_switches!(network, g, reconfigured_network, 
+                                                [n], [s])
         end
-            
-        isolating_switch = get_switch(network, e) 
-    else
-        visit_u =  Vector{Int}([s])
-        visit_d =  Vector{Int}([n])
-        switch_src = false
-        switch_dst = false
-        t_sec = 0
     end
-    rem_edge!(reconfigured_network, Edge(s, n))
-    # Search upstream
-    temp, isolated_upstream, backup_upstream = find_isolating_switches(
-                                                                       network, g, reconfigured_network, copy(visit_u), copy(visit_d),
-                                        switch_src, switch_failures)
-    isolating_switch = temp < isolating_switch ? isolating_switch : temp
-    
-    # Search downstream
-    temp, isolated_downstream, backup_downstream = find_isolating_switches(
-                                        network, g, reconfigured_network, visit_d, copy(visit_u),
-                                        switch_dst, switch_failures)
-    return reconfigured_network, temp < isolating_switch ? isolating_switch : temp, [isolated_upstream, isolated_downstream], [backup_upstream, backup_downstream]
+    if switch_failures
+        Write code here that runts find_isolating_switches for each of the
+        isloating swithces to find the backup switches
+
+    return reconfigured_network, [switch_u, switch_d], [isolated_upstream, isolated_downstream], [backup_upstream, backup_downstream]
 end
 
 
