@@ -18,8 +18,6 @@ mutable struct RelStruct
     ENS::Matrix{<:Real}
     IC::Matrix{<:Real}
     CENS::Matrix{<:Real}
-    switch_u::Vector{Switch}
-    switch_d::Vector{Switch}
     prob::Real
 end
 
@@ -38,8 +36,6 @@ function RelStruct(n_loads::Integer, n_branch::Integer, prob::Real)
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
               zeros(n_loads, n_branch),
-              [Switch() for switch in 1:n_branch],
-              [Switch() for switch in 1:n_branch],
               prob)
 end
 

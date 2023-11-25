@@ -128,18 +128,22 @@ function section!(res::Dict{String, RelStruct},
     permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
 
     if permanent_failure_frequency >= 0
-        reconfigured_network, isolating_switches, isolated_edges, backup_switches = traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob>0)
-        for (i, case) in enumerate(cases)
+        rn, isolating = traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob>0)
+        for case in cases
             R_set = []
             # For the cases with switch failures we remove the extra edges
             if case ∈ ["upstream", "downstream"]
-                isolating_switch = backup_switches[i-1]
-                for e in isolated_edges[i-1]
-                    rem_edge!(reconfigured_network, e)
-                end
+                switches = isolating[case]
+                reconfigured_network = rn[case]
             else
-                isolating_switch = isolating_switches[1] < isolating_switches[2] ? isolating_switches[2] : isolating_switches[1]
+                switches = isolating["base"]
+                reconfigured_network = rn["base"]
             end
+            isolating_switch = Switch()
+            for switch in switches
+                isolating_switch = isolating_switch < switch ? switch : isolating_switch
+            end
+
             for f in F
                 # If we are considering reserve failures and the name of the reserve
                 # is the same as the case, we will skip to add the reachable loads
@@ -149,14 +153,6 @@ function section!(res::Dict{String, RelStruct},
                     push!(R_set, R)
                 end
             end
-            if case ∈ ["upstream", "downstream"]
-                for e in isolated_edges[i-1]
-                    add_edge!(reconfigured_network, e)
-                end
-            end
-
-            res[case].switch_u[edge_pos] = isolating_switches[1]
-            res[case].switch_d[edge_pos] = isolating_switches[2]
 
             X = union(R_set...)
 
@@ -297,12 +293,12 @@ function find_isolating_switches!(network::RadialPowerGraph, g::MetaDiGraph,
                     # it is a switch, I stop exploring the graph in this direction
                     push!(seen, n) 
                     # We are at the depth of the first isolating switch(es)
-                    push!(isolating_switches(get_switch(network, e))
+                    push!(isolating_switches, get_switch(network, e))
                 end
             end
         end
     end
-    return isolating_switches
+    return isolating_switches, seen
 end
 
 """
@@ -315,41 +311,84 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     switch_failures::Bool=false)
     # isolated_edges = []
 	g = network.G
-	reconfigured_network = MetaGraph(copy(network.G)) # This graph must be undirected
+    rn = Dict("base" => MetaGraph(copy(network.G))) # This graph must be undirected
     
-    # Remove the edge from the reconfigured network
-    rem_edge!(reconfigured_network, Edge(s, n))
-
     s = get_node_number(network.G, string(e.src))
     n = get_node_number(network.G, e.dst)
+    # Remove the edge from the reconfigured network
+    rem_edge!(rn["base"], Edge(s, n))
     switch_buses = get_prop(g, Edge(s, n), :switch_buses)
-    # If we consider switch failures we always have to search up and
-    # downstream.
-    
+   
+    seen = Vector{Int}()
+
     if length(switch_buses) >= 1
         # There is at least one switch on the branch
         if e.src ∈ switch_buses
             # There is a switch at the source, we don't have to search upstream
             switch_u = [get_switch(network, e)]
+            append!(seen, s)
         else
             # Search upstream for a switch
-            switch_u = find_isolating_switches!(network, g, reconfigured_network, 
-                                                [s], [n])
+            switch_u, temp = find_isolating_switches!(network, g, rn["base"], 
+                                                      [s], [n])
+            append!(seen, temp)
         end
         if e.dst ∈ switch_buses
             # There is a switch at the destination, we don't have to search downstream
             switch_d = [get_switch(network, e)]
+            append!(seen, n)
         else
             # Search upstream for a switch
-            switch_d = find_isolating_switches!(network, g, reconfigured_network, 
+            switch_d, temp = find_isolating_switches!(network, g, rn["base"], 
                                                 [n], [s])
+            append!(seen, temp)
         end
     end
-    if switch_failures
-        Write code here that runts find_isolating_switches for each of the
-        isloating swithces to find the backup switches
+    isolating = Dict("base" => vcat(switch_u, switch_d))
 
-    return reconfigured_network, [switch_u, switch_d], [isolated_upstream, isolated_downstream], [backup_upstream, backup_downstream]
+    rn["upstream"] = copy(rn["base"])
+    rn["downstream"] = copy(rn["base"])
+    if switch_failures
+        if switch_u==switch_d
+            # Find backup switch upstream
+            isolating["upstream"], _ = find_isolating_switches!(network, g, rn["upstream"], 
+                                                [s], [n])
+            
+            isolating["downstream"], _ = find_isolating_switches!(network, g, rn["downstream"], 
+                                                [n], [s])
+        else
+            # Find backup_switches upstream
+            isolating["upstream"], rn["upstream"] = find_backup_switches(network,
+                                                            rn["upstream"],
+                                                            copy(seen),
+                                                            switch_u)
+            # Find backup_switches upstream
+            isolating["downstream"], rn["downstream"] = find_backup_switches(network,
+                                                              rn["downstream"],
+                                                                seen,
+                                                                switch_d)
+        end
+    end
+    return rn, isolating
+end
+
+function find_backup_switches(network::RadialPowerGraph, 
+        reconfigured_network::MetaGraph, seen::Vector{Int}, switches::Vector{Switch})
+        reconfigured_b = copy(reconfigured_network)
+        backup = Vector{Switch}()
+        for switch in switches
+            # Make sure that we don't traverse where we already have
+            # traversed.
+            visit = Vector{Int}()
+            for v in [:src, :dst]
+                append!(visit, all_neighbors(network.G, get_node_number(network.G, getfield(switch, v))))
+            end
+            temp, _ = find_isolating_switches!(network, network.G,
+                                            reconfigured_b, 
+                                            visit, seen)
+            backup = vcat(backup, temp)
+        end
+    return backup, reconfigured_b
 end
 
 
