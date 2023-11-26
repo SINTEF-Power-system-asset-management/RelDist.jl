@@ -274,9 +274,9 @@ end
     Traverse the in a direction until all isolating switches are found.
 """
 function find_isolating_switches!(network::RadialPowerGraph, g::MetaDiGraph,
-        reconfigured_network::MetaGraph, visit::Vector{Int}, seen::Vector{Int})
+        reconfigured_network::MetaGraph, isolating_switches,
+        visit::Vector{Int}, seen::Vector{Int})
     # Initialise variable to keep track of sectioning time
-    isolating_switches = Vector{Switch}()
    
     while !isempty(visit)
         next = pop!(visit)
@@ -298,7 +298,7 @@ function find_isolating_switches!(network::RadialPowerGraph, g::MetaDiGraph,
             end
         end
     end
-    return isolating_switches, seen
+    return seen
 end
 
 """
@@ -318,31 +318,32 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     # Remove the edge from the reconfigured network
     rem_edge!(rn["base"], Edge(s, n))
     switch_buses = get_prop(g, Edge(s, n), :switch_buses)
+    switch_u = Vector{Switch}()
+    switch_d = Vector{Switch}()
    
     seen = Vector{Int}()
 
-    if length(switch_buses) >= 1
-        # There is at least one switch on the branch
-        if e.src ∈ switch_buses
-            # There is a switch at the source, we don't have to search upstream
-            switch_u = [get_switch(network, e)]
-            append!(seen, s)
-        else
-            # Search upstream for a switch
-            switch_u, temp = find_isolating_switches!(network, g, rn["base"], 
-                                                      [s], [n])
-            append!(seen, temp)
-        end
-        if e.dst ∈ switch_buses
-            # There is a switch at the destination, we don't have to search downstream
-            switch_d = [get_switch(network, e)]
-            append!(seen, n)
-        else
-            # Search upstream for a switch
-            switch_d, temp = find_isolating_switches!(network, g, rn["base"], 
-                                                [n], [s])
-            append!(seen, temp)
-        end
+    # There is at least one switch on the branch
+    if e.src ∈ switch_buses
+        # There is a switch at the source, we don't have to search upstream
+        push!(switch_u, get_switch(network, e))
+
+        append!(seen, s)
+    else
+        # Search upstream for a switch
+        temp = find_isolating_switches!(network, g, rn["base"],
+                                                switch_u, [s], [n])
+        append!(seen, temp)
+    end
+    if e.dst ∈ switch_buses
+        # There is a switch at the destination, we don't have to search downstream
+        push!(switch_d, get_switch(network, e))
+        append!(seen, n)
+    else
+        # Search upstream for a switch
+        temp = find_isolating_switches!(network, g, rn["base"], 
+                                        switch_d, [n], [s])
+        append!(seen, temp)
     end
     isolating = Dict("base" => vcat(switch_u, switch_d))
 
@@ -351,11 +352,13 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     if switch_failures
         if switch_u==switch_d
             # Find backup switch upstream
-            isolating["upstream"], _ = find_isolating_switches!(network, g, rn["upstream"], 
-                                                [s], [n])
+            isolating["upstream"] = Vector{Switch}()
+            find_isolating_switches!(network, g, rn["upstream"], 
+                                    isolating["upstream"], [s], [n])
             
-            isolating["downstream"], _ = find_isolating_switches!(network, g, rn["downstream"], 
-                                                [n], [s])
+            isolating["downstream"] = Vector{Switch}()
+            find_isolating_switches!(network, g, rn["downstream"], 
+                                     isolating["downstream"], [n], [s])
         else
             # Find backup_switches upstream
             isolating["upstream"], rn["upstream"] = find_backup_switches(network,
@@ -383,10 +386,9 @@ function find_backup_switches(network::RadialPowerGraph,
             for v in [:src, :dst]
                 append!(visit, all_neighbors(network.G, get_node_number(network.G, getfield(switch, v))))
             end
-            temp, _ = find_isolating_switches!(network, network.G,
-                                            reconfigured_b, 
-                                            visit, seen)
-            backup = vcat(backup, temp)
+             find_isolating_switches!(network, network.G,
+                                      reconfigured_b, backup,
+                                      visit, seen)
         end
     return backup, reconfigured_b
 end
