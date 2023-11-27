@@ -1,7 +1,7 @@
 using SintPowerGraphs
 using Test
 
-network_filename = joinpath(@__DIR__, "../examples/fasad_cineldi/excel_test.toml")
+network_filename = joinpath(@__DIR__, "../examples/fasad/excel_test.toml")
 cost_filename = joinpath(@__DIR__, "../databases/cost_functions_dummy.json")
 
 cost_functions = read_cost_functions(cost_filename)

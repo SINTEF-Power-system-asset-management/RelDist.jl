@@ -1,7 +1,7 @@
 using SintPowerGraphs
 using JLD2
 
-network_filename = joinpath(@__DIR__, "../examples/excel_ex_cineldi_format/excel_test.toml")
+network_filename = joinpath(@__DIR__, "../examples/reliability_course/excel_test.toml")
 cost_filename = joinpath(@__DIR__, "../databases/cost_functions.json")
 
 cost_functions = read_cost_functions(cost_filename)
