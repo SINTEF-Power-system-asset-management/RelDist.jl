@@ -1,16 +1,19 @@
 module RelDist
 
 include("config.jl")
-export Traverse
+export Traverse, Failures, RelDistConf
 
 include("load.jl")
 export get_loads
+
+include("branch_types.jl")
+export Switch, get_minimum_switching_time, Branch, get_slack, slack_is_ref_bus, get_feeder_cap, are_edges_equal, edge2branch, create_slack_name
 
 include("relres.jl")
 export RelStruct, set_res!, ResFrames
 
 include("relindices.jl")
-export get_corr_factor, calculate_kile, set_rel_res!
+export get_corr_factor, calculate_kile, set_rel_res!, f_lin, f_piece
 
 include("relrad_io.jl")
 export read_interruption, read_cost_functions, read_correction_factors_from_csv, read_loadprofile

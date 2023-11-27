@@ -1,4 +1,4 @@
-ID;bus;customer_type;c_NOK_per_kWh_1h;c_NOK_per_kWh_4h
+ID;bus;type;c_NOK_per_kWh_1h;c_NOK_per_kWh_4h
 L1;2;residential;60.31614859888116;52.74454696625565
 L2;6;residential;52.74283777035494;46.121928348118885
 L3;8;residential;60.20986404293001;52.65160451413666

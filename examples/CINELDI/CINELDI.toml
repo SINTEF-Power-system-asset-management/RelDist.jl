@@ -5,20 +5,8 @@
 format = 'skagerak' # Format of the input data. Either 'fasad' or 'skagerak'.
 
 name = 'CINELDI'
-transmission_grid = 'i' # Name of transmission grid node
-
-# The car is assumed to move along the grid lines at a constant speed [km/h]:
-effective_car_speed = 30
-
-# When the car is already at a known switch, the time it takes between giving
-# the order to move car and when it actually starts moving [min]:
-driving_startup_time = 3
-
-# Minimum time until the car arrives at the first manual switch [min]:
-turnout_time = 30
-
-# Minimum time until sectioning starts [min]:
-response_time = 5
+transmission_grid = '1' # Name of transmission grid node
+reserves = ['36', '62', '88']
 
 # Fault indicator maximum fault order. Must be a non-negative integer or 'all':
 indicator_max_fault_order = 0
@@ -34,4 +22,8 @@ indicator_max_fault_order = 0
 	switch= 'CINELDI_MV_reference_system_switchgear.csv'
 	bus = 'CINELDI_MV_reference_grid_base_bus.csv'
 	load = 'CINELDI_MV_reference_system_load_point.csv'
+	gen = 'gen.csv' # Not part of the data set, but added by Sigurd Jakobsen
 	#fault_indicators = []
+
+[failures]
+	switch_failures = true

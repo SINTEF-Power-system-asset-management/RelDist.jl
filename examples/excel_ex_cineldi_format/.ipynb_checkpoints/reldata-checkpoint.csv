@@ -1,9 +1,0 @@
-ID;f_bus;t_bus;repairTime;temporaryFaultFrequency;permanentFaultFrequency;sectioningTime;temporaryFaultTime;capacity
-line_1_rel;trans_grid;bus_1;4.0;0.01;0.2;0.5;0.002;10
-line_2_rel;bus_1;bus_2;4.0;0.01;0.1;0.5;0.002;10
-line_3_rel;bus_2;bus_3;4.0;0.01;0.3;0.5;0.002;10
-line_4_rel;bus_3;bus_4;4.0;0.01;0.3;0.5;0.002;10
-line_a_rel;bus_1;bus_a;2.0;0.01;0.2;0.5;0.002;10
-line_b_rel;bus_2;bus_b;2.0;0.01;0.6;0.5;0.002;10
-line_c_rel;bus_3;bus_c;2.0;0.01;0.4;0.5;0.002;10
-line_d_rel;bus_4;bus_d;2.0;0.01;0.2;0.5;0.002;10

@@ -37,7 +37,7 @@ mutable struct Piece
 end
 
 """Evaluate a linear cost function."""
-function f(x::Piece, t::Real)::Float64
+function f_lin(x::Piece, t::Real)::Float64
     return x.constant + x.slope*(t-x.shift)
 end
 
@@ -47,10 +47,10 @@ mutable struct PieceWiseCost
 end
 
 """Evaluate a piecewise linear cost function."""
-function f(x::PieceWiseCost, t::Real)::Float64
+function f_piece(x::PieceWiseCost, t::Real)::Float64
     for piece in x.pieces
         if t in piece.bound
-            return f(piece, t)
+            return f_lin(piece, t)
         end
     end
 end
@@ -75,10 +75,9 @@ end
 """Calculates the KILE"""
 function calculate_kile(p_ref::Real,
                         t::Real,
-                        λ::Real,
                         cost_function::PieceWiseCost,
                         corr::Real)
-    return λ*corr*p_ref*f(cost_function, t)
+    return corr*p_ref*f_piece(cost_function, t)
 end
 function calculate_kile(interruption::Interruption,
                         cost_functions::Dict{String, PieceWiseCost},
@@ -87,7 +86,7 @@ function calculate_kile(interruption::Interruption,
                            interruption.customer.consumer_type)
     duration = (interruption.end_time - interruption.start_time).value/3600000
     cost_function = cost_functions[interruption.customer.consumer_type]
-    return corr*f(cost_function, duration)*interruption.customer.p_ref
+    return corr*f_piece(cost_function, duration)*interruption.customer.p_ref
 end
 
 """
@@ -110,7 +109,7 @@ function set_rel_res!(res::RelStruct, λ::Real, t::Real, P::Real,
         l_pos::Integer, edge_pos::Integer)
     U, ENS = calculate_rel_indices(λ, t, P)
 
-    IC = calculate_kile(P, t, λ, cost_function, 1)
+    IC = calculate_kile(P, t, cost_function, 1)
     # IC*λ gices CENS/year
-    set_res!(res, t, U, ENS, IC, IC*λ, l_pos, edge_pos)
+    set_res!(res, λ, t, P, U, ENS, IC, IC*λ, l_pos, edge_pos)
 end

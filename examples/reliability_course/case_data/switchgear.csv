@@ -1,0 +1,9 @@
+f_bus;t_bus;breaker;closed;t_manual;t_remote
+trans_grid;bus_1;true;true;0.5;
+bus_1;bus_2;false;true;0.5;
+bus_2;bus_3;false;true;0.5;
+bus_3;bus_4;false;true;0.5;
+bus_1;bus_a;false;true;0.5;
+bus_2;bus_b;false;true;0.5;
+bus_3;bus_c;false;true;0.5;
+bus_4;bus_d;false;true;0.5;

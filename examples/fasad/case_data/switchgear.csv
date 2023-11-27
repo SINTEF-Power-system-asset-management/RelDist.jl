@@ -1,0 +1,10 @@
+ID;f_bus;t_bus;breaker;closed;remote;t_manual;t_remote
+E1;T1;L1;true;true;true;0.08333;0.01667
+K1a;T1;L1;false;true;false;0.08333;
+K1b;L1;T1;false;true;false;0.08333;
+K2a;L1;L2;false;true;true;0.08333;0.01667
+K3a;L1;L3;false;true;false;0.08333;
+K3b;L3;L1;false;true;true;0.08333;0.01667
+K4a;L3;L4;false;true;false;0.08333;
+K5a;L2;T2;false;false;true;0.08333;0.01667
+K6a;L3;T2;false;false;false;0.08333;
