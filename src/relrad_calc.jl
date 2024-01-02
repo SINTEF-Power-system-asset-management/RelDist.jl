@@ -18,12 +18,13 @@ using Logging
         - res: Costs for permanent interruption, defined for each load and each failed branch
         - resₜ: Costs for temporary interruption, defined for each load and each failed branch
 """
-function relrad_calc(cost_functions::Dict{String, PieceWiseCost}, 
+function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
+                    corr_factors::Dict{String, <:Real},
                     network::RadialPowerGraph,
                     config::RelDistConf=RelDistConf(),
                     filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
     Q = []  # Empty arrayj
-	L = get_loads(network.mpc)
+	L = get_loads(network.mpc, corr_factors)
     edge_pos_df = store_edge_pos(network)
     res = Dict("temp" => RelStruct(length(L), nrow(network.mpc.branch)))
     # Set missing automatic switching timtes to zero
@@ -95,6 +96,29 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
     end
     return res, L, edge_pos_df
 end
+
+function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
+                    network::RadialPowerGraph,
+                    config::RelDistConf=RelDistConf(),
+                    filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
+    relrad_calc(cost_functions, 
+                Dict(key=>1.0 for key in keys(cost_functions)),
+                network,
+                config,
+                filtered_branches)
+end
+
+
+# function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
+                    # network::RadialPowerGraph,
+                    # time::String,
+                    # config::RelDistConf=RelDistConf(),
+                    # filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
+    # corr_fac = read_correction_factors_from_csv("../database/correction_factors_month.csv",
+                                                # "../databases/correction_factors_day.csv",
+                                                # "../databases/correction_factors_hour.csv",
+
+
 
 
 """

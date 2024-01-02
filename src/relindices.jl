@@ -55,22 +55,6 @@ function f_piece(x::PieceWiseCost, t::Real)::Float64
     end
 end
 
-"""Struct for correction factors."""
-mutable struct CorrFactor
-    month::DataFrame
-    day::DataFrame
-    hour::DataFrame
-end
-
-"""Get correcition factor for cost function"""
-function get_corr_factor(corr_factor::CorrFactor,
-                         date::ZonedDateTime, c_group::String)::Float64
-    m = corr_factor.month[month(date), Symbol(c_group)]
-    d = corr_factor.day[dayofweek(date), Symbol(c_group)]
-    h = first(filter(row-> hour(date) <= row.hour,
-                    corr_factor.hour))[Symbol(c_group)]
-    return m*d*h
-end
 
 """Calculates the KILE"""
 function calculate_kile(p_ref::Real,
@@ -79,6 +63,7 @@ function calculate_kile(p_ref::Real,
                         corr::Real)
     return corr*p_ref*f_piece(cost_function, t)
 end
+
 function calculate_kile(interruption::Interruption,
                         cost_functions::Dict{String, PieceWiseCost},
                         corr_factors::CorrFactor)
