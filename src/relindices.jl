@@ -1,4 +1,3 @@
-using TimeZones
 using DataFrames
 
 """Store information about a customer."""
@@ -11,8 +10,8 @@ end
 
 """Store information about an interruption"""
 mutable struct Interruption
-    start_time::ZonedDateTime
-    end_time::ZonedDateTime
+    start_time::DateTime
+    end_time::DateTime
     customer::Customer
     notified_interruption::Bool
 end
@@ -89,7 +88,7 @@ function calculate_rel_indices(λ::Real, t::Real, P::Real)
     return U, ENS
 end
 
-function set_rel_res!(res::RelStruct, λ::Real, t::Real, P::Real,
+function set_rel_res!(res::RelStruct, λ::Real, t::Real, P::Real, corr::Real,
         cost_function::PieceWiseCost,
         l_pos::Integer, edge_pos::Integer)
     U, ENS = calculate_rel_indices(λ, t, P)

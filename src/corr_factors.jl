@@ -1,4 +1,4 @@
-using TimeZones
+using Dates
 
 """Struct for correction factors."""
 mutable struct CorrFactor
@@ -10,7 +10,7 @@ end
 
 """Get correcition factor for cost function"""
 function get_corr_factor(corr_factor::CorrFactor,
-                         date::ZonedDateTime, c_group::String)::Float64
+                         date::DateTime, c_group::String)::Float64
     m = corr_factor.month[month(date), Symbol(c_group)]
     d = corr_factor.day[dayofweek(date), Symbol(c_group)]
     h = first(filter(row-> hour(date) <= row.hour,

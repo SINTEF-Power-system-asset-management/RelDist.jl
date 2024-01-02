@@ -24,8 +24,8 @@ export read_interruption, read_cost_functions, read_correction_factors_from_csv,
 include("constants.jl")
 export MONTH_FACTORS, DAY_FACTORS, HOUR_FACTORS, COST_FUN, LOAD_PROFILES, TEMPERATURE_TABLE, TEMPERATURE_AVERAGE, REFERENCETIME_TABLE
 
-include("pref_calc.jl")
-export calculate_pref
+# include("pref_calc.jl")
+# export calculate_pref
 
 include("relrad_calc.jl")
 export relrad_calc
