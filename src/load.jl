@@ -33,7 +33,8 @@ function get_loads(case::Case, corr::Dict{String, <:Real})
                 return [Load(load.ID,
                              load.bus,
                              case.bus[case.bus.ID .== load.bus, :Pd][1],
-                             "residential") for load in eachrow(case.load)]
+                             "residential",
+                             corr["residential"]) for load in eachrow(case.load)]
             end
         end
     else
@@ -41,7 +42,9 @@ function get_loads(case::Case, corr::Dict{String, <:Real})
         @warn "Assuming all loads to be residential"
         return [Load(string("D", bus.ID),
                      bus.ID,
-                     bus.Pd) for bus in eachrow(case.bus) if bus.Pd>0]
+                     bus.Pd,
+                     "residential",
+                     corr["residential"]) for bus in eachrow(case.bus) if bus.Pd>0]
     end
 end
 

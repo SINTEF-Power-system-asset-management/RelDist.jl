@@ -93,7 +93,7 @@ function set_rel_res!(res::RelStruct, λ::Real, t::Real, P::Real, corr::Real,
         l_pos::Integer, edge_pos::Integer)
     U, ENS = calculate_rel_indices(λ, t, P)
 
-    IC = calculate_kile(P, t, cost_function, 1)
+    IC = calculate_kile(P, t, cost_function, corr)
     # IC*λ gices CENS/year
     set_res!(res, λ, t, P, U, ENS, IC, IC*λ, l_pos, edge_pos)
 end

@@ -1,7 +1,19 @@
 using Dates
+using TimeZones
 import JSON
 using CSV
 using DataFrames
+
+"""Parse the Zulu timeformat."""
+function parse_zulu(zulu::String)::ZonedDateTime
+    time_info = split(zulu, "Z")
+    if size(time_info, 1) == 1
+        @warn "Time zone not specified, I will assume Zulu time"
+        return ZonedDateTime(DateTime(time_info), tz"Z")
+    else
+        return ZonedDateTime(DateTime(time_info[1]), tz"Z")
+    end
+end
 
 function read_cost_functions(fname::String)::Dict{String, PieceWiseCost}
     io = open(fname)

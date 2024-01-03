@@ -107,7 +107,7 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
                 network,
                 config,
                 filtered_branches)
-ends
+end
 
 
 function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
