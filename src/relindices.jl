@@ -1,4 +1,3 @@
-using TimeZones
 using DataFrames
 
 """Store information about a customer."""
@@ -11,8 +10,8 @@ end
 
 """Store information about an interruption"""
 mutable struct Interruption
-    start_time::ZonedDateTime
-    end_time::ZonedDateTime
+    start_time::DateTime
+    end_time::DateTime
     customer::Customer
     notified_interruption::Bool
 end
@@ -55,22 +54,6 @@ function f_piece(x::PieceWiseCost, t::Real)::Float64
     end
 end
 
-"""Struct for correction factors."""
-mutable struct CorrFactor
-    month::DataFrame
-    day::DataFrame
-    hour::DataFrame
-end
-
-"""Get correcition factor for cost function"""
-function get_corr_factor(corr_factor::CorrFactor,
-                         date::ZonedDateTime, c_group::String)::Float64
-    m = corr_factor.month[month(date), Symbol(c_group)]
-    d = corr_factor.day[dayofweek(date), Symbol(c_group)]
-    h = first(filter(row-> hour(date) <= row.hour,
-                    corr_factor.hour))[Symbol(c_group)]
-    return m*d*h
-end
 
 """Calculates the KILE"""
 function calculate_kile(p_ref::Real,
@@ -79,6 +62,7 @@ function calculate_kile(p_ref::Real,
                         corr::Real)
     return corr*p_ref*f_piece(cost_function, t)
 end
+
 function calculate_kile(interruption::Interruption,
                         cost_functions::Dict{String, PieceWiseCost},
                         corr_factors::CorrFactor)
@@ -104,12 +88,12 @@ function calculate_rel_indices(λ::Real, t::Real, P::Real)
     return U, ENS
 end
 
-function set_rel_res!(res::RelStruct, λ::Real, t::Real, P::Real,
+function set_rel_res!(res::RelStruct, λ::Real, t::Real, P::Real, corr::Real,
         cost_function::PieceWiseCost,
         l_pos::Integer, edge_pos::Integer)
     U, ENS = calculate_rel_indices(λ, t, P)
 
-    IC = calculate_kile(P, t, cost_function, 1)
+    IC = calculate_kile(P, t, cost_function, corr)
     # IC*λ gices CENS/year
     set_res!(res, λ, t, P, U, ENS, IC, IC*λ, l_pos, edge_pos)
 end

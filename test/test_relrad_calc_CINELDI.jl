@@ -24,3 +24,23 @@ end
 
 epsilon = 0.9
 @test isapprox(sum(IC_sum), sum(IC_sum_target), atol=epsilon)
+
+# Let us check if the code runs correctly when setting a specific time .
+# Today is 2023-01-3, which is a Wednesday and it is 9ish.
+# Let us read in the correction factors
+
+date = DateTime(2023, 1, 3, 9)
+
+corr_fac = read_correction_factors_from_csv(MONTH_FACTORS,
+                                            DAY_FACTORS,
+                                            HOUR_FACTORS)
+agg_corr = get_corr_factor(corr_fac, date, "agriculture")
+res_corr = get_corr_factor(corr_fac, date, "residential")
+
+res, _, _ = relrad_calc(cost_functions, network, "2023-01-03T09")
+
+IC_sum = sum(res["base"].CENS; dims=2)
+
+IC_sum_target[1:2] = IC_sum_target[1:2]*res_corr
+IC_sum_target[3:4] = IC_sum_target[3:4]*agg_corr
+@test isapprox(sum(IC_sum), sum(IC_sum_target), atol=epsilon)

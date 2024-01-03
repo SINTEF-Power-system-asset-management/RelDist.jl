@@ -4,27 +4,6 @@ import JSON
 using CSV
 using DataFrames
 
-"""Read interruption from file."""
-function read_interruption(fname::String)::Interruption
-    io = open(fname)
-    interruption = read_interruption(io)
-    close(io)
-    return interruption
-end
-
-""" Read interruption from file stream."""
-function read_interruption(io::IOStream)::Interruption
-    json = JSON.parse(io)
-    annual_consumption = json["annual_consumption"]
-    start_time = parse_zulu(json["start_time"])
-    end_time = parse_zulu(json["end_time"])
-    c_type = json["consumer_type"]
-    lp_type = json["loadprofile_type"]
-    customer = Customer(c_type, lp_type, annual_consumption, json["p_ref"])
-    return Interruption(start_time, end_time, customer,
-                        json["notified_interruption"])
-end
-
 """Parse the Zulu timeformat."""
 function parse_zulu(zulu::String)::ZonedDateTime
     time_info = split(zulu, "Z")

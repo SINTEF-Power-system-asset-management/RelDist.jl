@@ -1,13 +1,6 @@
 using TimeZones
 using Query
 
-@testset "Test reading of interruption data." begin
-	interruption = read_interruption(joinpath(@__DIR__, "../databases/interruption.json"))
-    @test interruption.start_time == ZonedDateTime(DateTime(2015, 10, 2, 0, 0), tz"Z")
-    @test interruption.customer.consumer_type == "residential"
-    @test interruption.customer.p_ref == 0.8
-    @test interruption.notified_interruption == false
-end
 
 @testset "Test reading of cost data." begin
     cost_functions = read_cost_functions(COST_FUN)

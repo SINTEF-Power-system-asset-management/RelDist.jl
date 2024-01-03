@@ -18,12 +18,13 @@ using Logging
         - res: Costs for permanent interruption, defined for each load and each failed branch
         - resₜ: Costs for temporary interruption, defined for each load and each failed branch
 """
-function relrad_calc(cost_functions::Dict{String, PieceWiseCost}, 
+function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
+                    corr_factors::Dict{String, <:Real},
                     network::RadialPowerGraph,
                     config::RelDistConf=RelDistConf(),
                     filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
     Q = []  # Empty arrayj
-	L = get_loads(network.mpc)
+	L = get_loads(network.mpc, corr_factors)
     edge_pos_df = store_edge_pos(network)
     res = Dict("temp" => RelStruct(length(L), nrow(network.mpc.branch)))
     # Set missing automatic switching timtes to zero
@@ -88,12 +89,52 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
                          rel_data.temporaryFaultFrequency[1],
                          rel_data.temporaryFaultTime[1],
                          l.P,
+                         l.corr,
                          cost_functions[l.type],
                          l_pos, edge_pos)
         end
         push_adj(Q, network.radial, e)
     end
     return res, L, edge_pos_df
+end
+
+function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
+                    network::RadialPowerGraph,
+                    config::RelDistConf=RelDistConf(),
+                    filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
+    relrad_calc(cost_functions, 
+                Dict(key=>1.0 for key in keys(cost_functions)),
+                network,
+                config,
+                filtered_branches)
+end
+
+
+function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
+                    network::RadialPowerGraph,
+                    time::String,
+                    config::RelDistConf=RelDistConf(),
+                    filtered_branches=DataFrame(element=[], f_bus=[],t_bus=[], tag=[]))
+    
+        corr_fac = read_correction_factors_from_csv(MONTH_FACTORS,
+                                                    DAY_FACTORS,
+                                                    HOUR_FACTORS)
+    if time == "year"
+        corr = Dict{String, Real}()
+         for cust_type in keys(cost_functions)
+             corr[cust_type] = sum(get_corr_factor(corr_fac,
+                                                   DateTime(t[1], t[2], t[3]),
+                                                   cust_type) for t in eachrow(create_opal_year()))/2016
+         end
+    else
+        date = DateTime(time)
+        corr = Dict(key=>get_corr_factor(corr_fac, date, key) for key in keys(cost_functions))
+    end
+        relrad_calc(cost_functions, 
+                    corr,
+                    network,
+                    config,
+                    filtered_branches)
 end
 
 
@@ -165,7 +206,7 @@ function section!(res::Dict{String, RelStruct},
                     t = get_minimum_switching_time(isolating_switch)
                 end
                 set_rel_res!(res[case], permanent_failure_frequency, t[1],
-                             l.P, cost_functions[l.type],
+                             l.P, l.corr, cost_functions[l.type],
                              l_pos, edge_pos)
                 # In case we are considering communication failures we have the same 
                 # isolated network as in the base case. 
@@ -176,7 +217,7 @@ function section!(res::Dict{String, RelStruct},
                         t = isolating_switch.t_manual
                     end
                     set_rel_res!(res["comm_fail"], permanent_failure_frequency,
-                                 t[1], l.P, cost_functions[l.type],
+                                 t[1], l.P, l.corr, cost_functions[l.type],
                                  l_pos, edge_pos)
                 end
             end
