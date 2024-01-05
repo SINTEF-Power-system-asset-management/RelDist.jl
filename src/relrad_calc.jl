@@ -3,6 +3,7 @@ using SintPowerGraphs
 using DataFrames
 using MetaGraphs
 using Logging
+using OrderedCollections
 
 
 """
@@ -289,15 +290,51 @@ end
 function traverse(g::MetaGraph, start::Int = 0,
         feeder_cap::Real=Inf, dfs::Bool = true)::Vector{Int}
     seen = Vector{Int}()
+    nfc = OrderedDict{Int, Real}() 
+    nfc_shedded = Vector{Int}()
     visit = Vector{Int}([start])
-    load = 0
+    tot_load = 0
 
     @assert start in vertices(g) "can't access $start in $(props(g, 1))"
     while !isempty(visit)
         next = pop!(visit)
-        load += get_prop(g, next, :load)
-        if load > feeder_cap
-            return seen
+        load = get_prop(g, next, :load)
+        tot_load += load
+        if get_prop(g, next, :nfc)
+            # This is a non firm connection that can be shed later
+            nfc[next] = load 
+        end
+        if tot_load > feeder_cap
+            # We have seen more load than the feeder capacity
+            #
+            # Check if we can shed nfc to help the load
+            shed_min = tot_load-feeder_cap 
+            if shed_min < sum(values(nfc))
+                # We can shed nfc to help the load
+                # Order the list of nfcs
+                sort!(nfc; byvalue=true, rev=true)
+                shed_nfc = 0
+                for (key, value) in nfc
+                    # Increase the amount shedded
+                    shed_nfc += value
+
+                    # Reduce the total load
+                    tot_load -= value
+                    
+                    # Mark the load as shedded
+                    push!(nfc_shedded, key)
+                    
+                    # Remove the nfc from the list of available loads to shed
+                    delete!(nfc, key)
+                    if shed_min < shed_nfc
+                        break
+                    end
+                end
+            else
+                # Shedding nfc does not help, return what we have seen!
+                # Aiaiaiai my eyes! What have they seen?
+                return setdiff(seen, nfc_shedded)
+            end
         end
         if !(next in seen)
             for n in neighbors(g, next)
@@ -308,7 +345,7 @@ function traverse(g::MetaGraph, start::Int = 0,
             push!(seen, next)
         end
     end
-    return seen
+    return setdiff(seen, nfc_shedded)
 end
 
 """
