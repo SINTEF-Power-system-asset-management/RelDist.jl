@@ -13,6 +13,7 @@ conf = RelDistConf(traverse=Traverse(consider_cap=false),
                                     reserve_failure_prob=1))
 
 res, _, _ = relrad_calc(cost_functions, network, conf)
+IC_base = res["base"].CENS
 ENS = res["base"].ENS
 ENSt = res["temp"].ENS
 ENS_sum = sum(ENS+ENSt;dims=2)
@@ -41,5 +42,11 @@ ENS_sum = sum(ENS+ENSt;dims=2)
 
 ENS_sum_target = [0.18; 2.54; 0.11; 0.86]
 epsilon = sum(ENS_sum_target)*1/100 # [kWh]. I take 1% of expected total interrupted energy as maximum error in calculation
-@test (abs(sum(ENS_sum - ENS_sum_target))<epsilon)
+@test isapprox(sum(ENS_sum), sum(ENS_sum_target), atol=epsilon)
 
+# Check if it works when we add a NFC
+network.mpc.load[1, :nfc] = true
+network = RadialPowerGraph(network.mpc)
+res, _, _ = relrad_calc(cost_functions, network)
+@test isapprox(sum(IC_base[2, :]), sum(res["base"].CENS[2, :]))
+@test res["base"].CENS[1] == 0
