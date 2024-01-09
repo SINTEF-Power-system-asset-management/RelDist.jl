@@ -13,7 +13,7 @@ mutable struct Load
 end
 
 function Load(load::DataFrameRow, corr::Dict{String, <:Real})
-    Load(load.ID, load.bus, load.P, load.type, corr[load.type], false)
+    Load(load.ID, load.bus, load.P, load.type, corr[load.type], load.nfc)
 end
 
 function get_loads(case::Case, corr::Dict{String, <:Real})

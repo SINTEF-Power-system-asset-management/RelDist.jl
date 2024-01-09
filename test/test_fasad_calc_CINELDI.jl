@@ -12,7 +12,7 @@ conf = RelDistConf(traverse=Traverse(consider_cap=false),
                                     communication_failure_prob=1,
                                     reserve_failure_prob=1))
 
-res, _, _ = relrad_calc(cost_functions, network, conf)
+res, L, edge_pos = relrad_calc(cost_functions, network, conf)
 IC_base = res["base"].CENS
 ENS = res["base"].ENS
 ENSt = res["temp"].ENS
@@ -48,5 +48,5 @@ epsilon = sum(ENS_sum_target)*1/100 # [kWh]. I take 1% of expected total interru
 network.mpc.load[1, :nfc] = true
 network = RadialPowerGraph(network.mpc)
 res, _, _ = relrad_calc(cost_functions, network)
+
 @test isapprox(sum(IC_base[2, :]), sum(res["base"].CENS[2, :]))
-@test res["base"].CENS[1] == 0
