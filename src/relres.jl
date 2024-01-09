@@ -89,6 +89,7 @@ function ResFrames(res::Dict{String, RelStruct}, edge_pos::DataFrame,
     res_new = ResFrames()
 
     load_labels = [load.ID for load in L]
+    nfc = [load.nfc == true for load in L]
     branch_agg = DataFrame(ID=edge_pos.name)
     load_agg = DataFrame(ID=load_labels)
 
@@ -100,16 +101,29 @@ function ResFrames(res::Dict{String, RelStruct}, edge_pos::DataFrame,
         end
         insertcols!(frame, 1, :L=>load_labels);
         setfield!(res_new, field, frame)
+        
+        if field == :CENS
+            load_agg[!, field] .= 0.0
+            
+            load_agg[!, :CENS_nfc] .= 0.0
 
-        branch_agg[!, field] = sum.(eachcol(frame[:,2:end]))
-        load_agg[!, field] = sum.(eachrow(frame[!,2:end]))
+            branch_agg[!, field] = sum.(eachcol(frame[.!nfc, 2:end]))
+            load_agg[.!nfc, field] = sum.(eachrow(frame[.!nfc, 2:end]))
+            
+            branch_agg[!, :CENS_nfc] = sum.(eachcol(frame[nfc, 2:end]))
+            load_agg[nfc, :CENS_nfc] = sum.(eachrow(frame[nfc, 2:end]))
+
+        else
+            branch_agg[!, field] = sum.(eachcol(frame[:,2:end]))
+            load_agg[!, field] = sum.(eachrow(frame[!,2:end]))
+        end
     end
     setfield!(res_new, :load_agg, load_agg)
     setfield!(res_new, :branch_agg, branch_agg)
     setfield!(res_new,
               :sys_agg,
               DataFrame(sum.(eachcol(load_agg[:, 2:end]))',
-                        [:U, :ENS, :CENS]))
+                        [:U, :ENS, :CENS, :CENS_nfc]))
     return res_new
 end
 
