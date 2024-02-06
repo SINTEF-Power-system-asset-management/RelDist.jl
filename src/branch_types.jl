@@ -46,6 +46,17 @@ function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
     return F
 end
 
+"""
+    Check if a node is a reserve.
+"""
+function is_reserve(f::feeder, bus::String)
+    f.bus == bus
+end
+
+function is_reserve(b::Branch, bus::String)
+    b.dst == bus || b.src == bus
+end
+
 
 """
     Check if a transformer that can be used to supply the network is
