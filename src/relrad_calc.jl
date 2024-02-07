@@ -270,21 +270,21 @@ end
 """
     Traverse the in a direction until all isolating switches are found.
 """
-function find_isolating_switches!(network::RadialPowerGraph, g::MetaDiGraph,
+function find_isolating_switches!(network::RadialPowerGraph,
         reconfigured_network::MetaGraph, isolating_switches,
         visit::Vector{Int}, seen::Vector{Int})
     # Initialise variable to keep track of sectioning time
-   
+  
     while !isempty(visit)
         next = pop!(visit)
         if !(next in seen)
             push!(seen, next)
-            for n in setdiff(all_neighbors(g, next), seen)
-                e = Edge(next, n) in edges(g) ? Edge(next, n) : Edge(n, next)
+            for n in setdiff(all_neighbors(network.G, next), seen)
+                e = Edge(next, n) in edges(network.G) ? Edge(next, n) : Edge(n, next)
                 
                 rem_edge!(reconfigured_network, e)
   
-                if get_prop(g, e, :switch) == -1 # it is not a switch, I keep exploring the graph
+                if get_prop(network.G, e, :switch) == -1 # it is not a switch, I keep exploring the graph
                     append!(visit, n)
                 else
                     # it is a switch, I stop exploring the graph in this direction
@@ -307,14 +307,13 @@ end
 function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     switch_failures::Bool=false)
     # isolated_edges = []
-	g = network.G
-    rn = Dict("base" => MetaGraph(copy(network.G))) # This graph must be undirected
+    rn = Dict("base" => copy(network.G)) # This graph must be undirected
     
     s = get_node_number(network.G, string(e.src))
     n = get_node_number(network.G, e.dst)
     # Remove the edge from the reconfigured network
     rem_edge!(rn["base"], Edge(s, n))
-    switch_buses = get_prop(g, Edge(s, n), :switch_buses)
+    switch_buses = get_prop(network.G, Edge(s, n), :switch_buses)
     switch_u = Vector{Switch}()
     switch_d = Vector{Switch}()
    
@@ -328,8 +327,8 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
         append!(seen, s)
     else
         # Search upstream for a switch
-        temp = find_isolating_switches!(network, g, rn["base"],
-                                                switch_u, [s], [n])
+        temp = find_isolating_switches!(network, rn["base"],
+                                        switch_u, [s], [n])
         append!(seen, temp)
     end
     if e.dst ∈ switch_buses
@@ -338,7 +337,7 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
         append!(seen, n)
     else
         # Search upstream for a switch
-        temp = find_isolating_switches!(network, g, rn["base"], 
+        temp = find_isolating_switches!(network, rn["base"], 
                                         switch_d, [n], [s])
         append!(seen, temp)
     end
@@ -350,11 +349,11 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
         if switch_u==switch_d
             # Find backup switch upstream
             isolating["upstream"] = Vector{Switch}()
-            find_isolating_switches!(network, g, rn["upstream"], 
+            find_isolating_switches!(network, rn["upstream"], 
                                     isolating["upstream"], [s], [n])
             
             isolating["downstream"] = Vector{Switch}()
-            find_isolating_switches!(network, g, rn["downstream"], 
+            find_isolating_switches!(network, rn["downstream"], 
                                      isolating["downstream"], [n], [s])
         else
             # Find backup_switches upstream

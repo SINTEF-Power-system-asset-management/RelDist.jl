@@ -1,41 +1,45 @@
+using OrderedCollections
+
 abstract type Source end
 
-mutable struct Load <: Source
+mutable struct Loadr <: Source
+    idx::Int
     P::Real
     nfc::Bool
 end
 
 """
     Checks if there is a load in the graph at vertex v, and finds
-    its power output and if it is nfc from the case.
+    its power output and if it is nfc from the mpc.
 """
-function get_load(g::MetaGraphs, case::Case, v::Int)
+function get_load(g::MetaGraph, mpc::Case, v::Int)
     # Check if there is load on the vertex
     if get_prop(g, v, :load)
-        return Load(get_load_bus_power(network.case, get_prop(g, v, :name)),
+        return Loadr(v, get_load_bus_power(mpc, get_prop(g, v, :name)),
                     get_prop(g, v, :nfc))
     else
-        return Load(0.0, false)
+        return Loadr(v, 0.0, false)
     end
 end
     
 
 mutable struct Gen <: Source
+    idx::Int
     P::Real
     external::Bool
 end
 
 """
     Checks if there is a generator in the graph at vertex v, and finds
-    its power output and if it is external from the case.
+    its power output and if it is external from the mpc.
 """
-function get_gen(g::MetaGraphs, case::Case, v::Int)
+function get_gen(g::MetaGraph, mpc::Case, v::Int)
     # Check if there is generation on the vertex
     if get_prop(g, v, :gen)
-        return Gen(get_gen_bus_power(network.case, get_prop(g, v, :name)),
+        return Gen(v, get_gen_bus_power(mpc, get_prop(g, v, :name)),
                    get_prop(g, v, :external))
     else
-        return Gen(0.0, false)
+        return Gen(v, 0.0, false)
     end
 end
     
@@ -53,7 +57,7 @@ end
     Merges b into a.
 """
 function merge!(a::Sources, b::Sources)
-    merge!(a.mapping, b.mapping)
+    Base.merge!(a.mapping, b.mapping)
     a.tot += b.tot
 end
 
@@ -83,9 +87,9 @@ end
         to be added.
         v: The vertex of the original graph that we are processing.
 """
-function update_part!(part::Part, gen::Gen, load::Load, v::Int)
-    update_sources!(part.gens, gen, v)
-    update_sources!(part.loads, load, v)
+function update_part!(part::Part, gen::Gen, load::Loadr)
+    update_sources!(part.gens, gen)
+    update_sources!(part.loads, load)
 end
 
 """
@@ -95,7 +99,7 @@ function merge!(a::Part, b::Part)
     # The par gets the capacity of the part with the best capacity.
     a.capacity = a.capacity > b.capacity ? a.capacity : b.capacity
 
-    # Merge the sources in the case.
+    # Merge the sources in the mpc.
     for prop in [:loads, :nfcs, :gens]
         merge!(getfield(a, prop), getfield(b, prop))
     end
@@ -104,8 +108,8 @@ end
 """
     Update the seen sources of a type of sources.
 """
-function update_sources!(sources::Sources, source::Source, v::Int)
-    sources.mapping[v] = source.P
+function update_sources!(sources::Sources, source::Source)
+    sources.mapping[source.idx] = source.P
     sources.tot += source.P
 end
 
@@ -115,8 +119,8 @@ end
     This version is quite simple and merely uses the algebraic sum
     of consumption and production.
 """
-function loading(Part::part)
-    sum(getfield(sources).tot for sources in [:loads, :nfcs, :gens])
+function loading(part::Part)
+    sum(getfield(part, sources).tot for sources in [:loads, :nfcs, :gens])
 end
 
 
@@ -125,7 +129,7 @@ function calc_R(network::RadialPowerGraph,
                 g::MetaGraph,
                 e::Branch)::Array{Any}
     v = get_node_number(network.G, e.dst)
-    vlist = traverse(g, v, e.rateA)
+    vlist = traverse(network, g, v, e.rateA)
     return [get_bus_name(network.G, bus) for bus in vlist]
 end
 
@@ -134,11 +138,11 @@ function calc_R(network::RadialPowerGraph,
                 g::MetaGraph,
                 b::Feeder)::Array{Any}
     v = get_node_number(network.G, b.bus)
-    vlist = traverse(g, v, b.rateA)
+    vlist = traverse(network, g, v, b.rateA)
     return [get_bus_name(network.G, bus) for bus in vlist]
 end
 
-function traverse(g::MetaGraph, start::Int = 0,
+function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
         feeder_cap::Real=Inf)::Vector{Int}
     @assert start in vertices(g) "can't access $start in $(props(g, 1))"
     
@@ -164,8 +168,8 @@ function traverse(g::MetaGraph, start::Int = 0,
             e = Edge(next, n) in edges(g) ? Edge(next, n) : Edge(n, next)
             append!(visit, n)
         
-            gen = get_gen(g, network.case, v)
-            load = get_load(g, network.case, v)
+            gen = get_gen(g, network.mpc, n)
+            load = get_load(g, network.mpc, n)
             # Check if we have reached the capacity of the feeder connected to the part
             overloaded = loading(part) + load.P - gen.P - part.capacity > 0
             # Check if the edge is a switch
@@ -189,7 +193,7 @@ function traverse(g::MetaGraph, start::Int = 0,
                 if is_switch
                     # We found a switch update the previous part with 
                     # what we have found so far.
-                    merge(parts[v_rec], part) # Check if work with intersections
+                    merge!(parts[v_rec], part) # Check if work with intersections
 
                    # Create a new part
                     part = Part()
@@ -202,7 +206,7 @@ function traverse(g::MetaGraph, start::Int = 0,
     end
     reachable = Vector{Int}()
     for reserve in reserves
-        append!(reachable, keys(part.load))
+        append!(reachable, keys(part.loads.mapping))
     end
 
     return reachable
