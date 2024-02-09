@@ -3,7 +3,7 @@ using OrderedCollections
 abstract type Source end
 
 mutable struct Loadr <: Source
-    idx::Int
+    bus::String
     P::Real
     nfc::Bool
 end
@@ -15,16 +15,17 @@ end
 function get_load(g::MetaGraph, mpc::Case, v::Int)
     # Check if there is load on the vertex
     if get_prop(g, v, :load)
-        return Loadr(v, get_load_bus_power(mpc, get_prop(g, v, :name)),
-                    get_prop(g, v, :nfc))
+        return Loadr(get_prop(g, v, :name),
+                     get_load_bus_power(mpc, get_prop(g, v, :name)),
+                     get_prop(g, v, :nfc))
     else
-        return Loadr(v, 0.0, false)
+        return Loadr(get_prop(g, v, :name), 0.0, false)
     end
 end
     
 
 mutable struct Gen <: Source
-    idx::Int
+    bus::String
     P::Real
     external::Bool
 end
@@ -36,16 +37,17 @@ end
 function get_gen(g::MetaGraph, mpc::Case, v::Int)
     # Check if there is generation on the vertex
     if get_prop(g, v, :gen)
-        return Gen(v, get_gen_bus_power(mpc, get_prop(g, v, :name)),
+        return Gen(get_prop(g, v, :name),
+                   get_gen_bus_power(mpc, get_prop(g, v, :name)),
                    get_prop(g, v, :external))
     else
-        return Gen(v, 0.0, false)
+        return Gen(get_prop(g, v, :name), 0.0, false)
     end
 end
     
 
 mutable struct Sources
-    mapping::OrderedDict{Int, Real}
+    mapping::OrderedDict{String, Real}
     tot::Real
 end
 
@@ -109,7 +111,7 @@ end
     Update the seen sources of a type of sources.
 """
 function update_sources!(sources::Sources, source::Source)
-    sources.mapping[source.idx] = source.P
+    sources.mapping[source.bus] = source.P
     sources.tot += source.P
 end
 
@@ -129,8 +131,7 @@ function calc_R(network::RadialPowerGraph,
                 g::MetaGraph,
                 e::Branch)::Array{Any}
     v = get_node_number(network.G, e.dst)
-    vlist = traverse(network, g, v, e.rateA)
-    return [get_bus_name(network.G, bus) for bus in vlist]
+    traverse(network, g, v, e.rateA)
 end
 
 """ Calculate reachable vertices starting from a given edge"""
@@ -138,17 +139,19 @@ function calc_R(network::RadialPowerGraph,
                 g::MetaGraph,
                 b::Feeder)::Array{Any}
     v = get_node_number(network.G, b.bus)
-    vlist = traverse(network, g, v, b.rateA)
-    return [get_bus_name(network.G, bus) for bus in vlist]
+    traverse(network, g, v, b.rateA)
 end
 
 function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
-        feeder_cap::Real=Inf)::Vector{Int}
+        feeder_cap::Real=Inf)
     @assert start in vertices(g) "can't access $start in $(props(g, 1))"
     
     parts = Dict{Int, Part}()
     reserves = Vector{Int}()
     floating = Vector{Int}()
+
+    # Keep track of intersections
+    # intersections = Dict{Int, Vector{Int}}()
 
     seen = Vector{Int}()
     visit = Vector{Int}([start])
@@ -163,7 +166,9 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
     while !isempty(visit)
         next = pop!(visit)
         push!(seen, next)
+        # Add the neighbors of next to the intersections dictionary
         neighbors = setdiff(all_neighbors(g, next), seen)
+        # intersections[next] = neighbors 
         for n in neighbors
             e = Edge(next, n) in edges(g) ? Edge(next, n) : Edge(n, next)
             append!(visit, n)
@@ -187,26 +192,43 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
                     v_rec += 1
                     part = Part()
                     # Mark the node in the reconfiguration graph as floating
-                    append!(floatin, v_rec)
+                    append!(floating, v_rec)
+                else
+                    # We are overloaded, but there is no switch. We have to just add
+                    # what we saw.
+                    update_part!(part, gen, load)
                 end
+
             else 
                 if is_switch
                     # We found a switch update the previous part with 
                     # what we have found so far.
                     merge!(parts[v_rec], part) # Check if work with intersections
+                    if length(all_neighbors(g, n)) > 1
+                        # We will now create a new part
+                        part = Part()
 
-                   # Create a new part
-                    part = Part()
-                    # I guess we can add stuff to it later in the code
+                        # Here we add the generators and loads that we just saw to the new
+                        # part.
+                        update_part!(part, gen, load)
+                    else
+                        # We are at a leaf we should add what we just found
+                        # to the currently active part
+                        update_part!(part, gen, load)
+                        merge!(parts[v_rec], part) # Check if work with intersections
+                    end
+                else
+                    # There is no switch, we have to just update
+                    update_part!(part, gen, load)
                 end
+
             end
             # Here we can add stuff to the currently active part.
-            update_part!(part, gen, load)
         end
     end
-    reachable = Vector{Int}()
+    reachable = Vector{String}()
     for reserve in reserves
-        append!(reachable, keys(part.loads.mapping))
+        append!(reachable, keys(parts[reserve].loads.mapping))
     end
 
     return reachable
