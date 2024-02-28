@@ -7,6 +7,12 @@ cost_filename = joinpath(@__DIR__, "../databases/cost_functions_dummy.json")
 cost_functions = read_cost_functions(cost_filename)
 network =  RadialPowerGraph(network_filename)
 
+# Check a standard case
+
+res, L, edge_pos = relrad_calc(cost_functions, network)
+U = 0.738 # From excel
+@test isapprox(sum(res["base"].U)+sum(res["temp"].U), U, atol=0.01)
+
 conf = RelDistConf(traverse=Traverse(consider_cap=false),
                    failures=Failures(switch_failure_prob=1,
                                     communication_failure_prob=1,
