@@ -98,8 +98,8 @@ end
     Merges one part into another part.
 """
 function merge!(a::Part, b::Part)
-    # The par gets the capacity of the part with the best capacity.
-    a.capacity = a.capacity > b.capacity ? a.capacity : b.capacity
+    # The part gets the capacity of the part with the worst capacity.
+    a.capacity = a.capacity < b.capacity ? a.capacity : b.capacity
 
     # Merge the sources in the mpc.
     for prop in [:loads, :nfcs, :gens]
