@@ -382,8 +382,7 @@ function find_backup_switches(network::RadialPowerGraph,
             for v in [:src, :dst]
                 append!(visit, all_neighbors(network.G, get_node_number(network.G, getfield(switch, v))))
             end
-             find_isolating_switches!(network, network.G,
-                                      reconfigured_b, backup,
+             find_isolating_switches!(network, reconfigured_b, backup,
                                       visit, seen)
         end
     return backup, reconfigured_b
