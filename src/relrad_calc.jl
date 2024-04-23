@@ -187,12 +187,13 @@ function section!(res::Dict{String, RelStruct},
             end
 
             for f in F
+                reachable = Dict{typeof(f), Part}()
                 # If we are considering reserve failures and the name of the reserve
                 # is the same as the case, we will skip to add the reachable loads
                 # to the reachable matrix.
                 if !(failures.reserve_failure_prob > 0.0 && "reserve_"*create_slack_name(f) == case)
-                    R = Set(calc_R(network, reconfigured_network, f))
-                    push!(R_set, R)
+                    reachable[f] = calc_R(network, reconfigured_network, f)
+                    push!(R_set, get_loads(reachable[f]))
                 end
             end
 

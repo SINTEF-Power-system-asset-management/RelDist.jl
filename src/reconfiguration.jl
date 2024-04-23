@@ -55,6 +55,10 @@ function Sources()
     Sources(OrderedDict{Int, Real}(), 0.0)
 end
 
+function get_names(sources::Sources)
+    keys(sources.mapping)
+end
+
 """
     Merges b into a.
 """
@@ -94,6 +98,10 @@ function update_part!(part::Part, gen::Gen, load::Loadr)
     update_sources!(part.loads, load)
 end
 
+function get_loads(part::Part)
+    get_names(part.loads)
+end
+
 """
     Merges one part into another part.
 """
@@ -129,7 +137,7 @@ end
 """ Calculate reachable vertices starting from a given edge"""
 function calc_R(network::RadialPowerGraph,
                 g::MetaGraph,
-                e::Branch)::Array{Any}
+                e::Branch)::Part
     v = get_node_number(network.G, e.dst)
     traverse(network, g, v, e.rateA)
 end
@@ -137,7 +145,7 @@ end
 """ Calculate reachable vertices starting from a given edge"""
 function calc_R(network::RadialPowerGraph,
                 g::MetaGraph,
-                b::Feeder)::Array{Any}
+                b::Feeder)::Part
     v = get_node_number(network.G, b.bus)
     traverse(network, g, v, b.rateA)
 end
@@ -146,91 +154,45 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
         feeder_cap::Real=Inf)
     @assert start in vertices(g) "can't access $start in $(props(g, 1))"
     
-    parts = Dict{Int, Part}()
-    reserves = Vector{Int}()
-    floating = Vector{Int}()
-
-    # Keep track of intersections
-    # intersections = Dict{Int, Vector{Int}}()
+    parents = Dict{Int, Int}()
 
     seen = Vector{Int}()
     visit = Vector{Int}([start])
     
-    v_rec = 1 # The current vertex in the new graph being processed
-    g_rec = SimpleGraph(v_rec) 
-
     part = Part(feeder_cap)
-    parts[1] = part
-    append!(reserves, 1)
 
     while !isempty(visit)
-        next = pop!(visit)
-        push!(seen, next)
-        # Add the neighbors of next to the intersections dictionary
-        neighbors = setdiff(all_neighbors(g, next), seen)
-        # intersections[next] = neighbors 
-        for n in neighbors
-            e = Edge(next, n) in edges(g) ? Edge(next, n) : Edge(n, next)
-            append!(visit, n)
-        
-            gen = get_gen(g, network.mpc, n)
-            load = get_load(g, network.mpc, n)
-            # Check if we have reached the capacity of the feeder connected to the part
-            overloaded = loading(part) + load.P - gen.P - part.capacity > 0
-            # Check if the edge is a switch
-            is_switch = get_prop(g, e, :switch) > -1
+        v_src = pop!(visit)
+        push!(seen, v_src)
+        if !(v_src in seen)
+            push!(seen, v_src)
+            for v_dst in setdiff(all_neighbors(network.G, v_src), seen)
+                e = Edge(v_src, v_dst)
+            
+                gen = get_gen(g, network.mpc, v_dst)
+                load = get_load(g, network.mpc, v_dst)
+                # Check if we have reached the capacity of the feeder connected to the part
+                overloaded = loading(part) + load.P - gen.P - part.capacity > 0
 
-            if overloaded 
-                if is_switch
-                    # We cannot add more load to the current part.
-                    # Add a new vertex to the reconfiguation graph and 
-                    # create a new part.
-                    add_vertex!(g_rec)
-
-                    # This only works if we don't have an intersection
-                    add_edge!(g_rec, v_rec, v_rec+1)
-                    v_rec += 1
-                    part = Part()
-                    # Mark the node in the reconfiguration graph as floating
-                    append!(floating, v_rec)
-                else
-                    # We are overloaded, but there is no switch. We have to just add
-                    # what we saw.
-                    update_part!(part, gen, load)
-                end
-
-            else 
-                if is_switch
-                    # We found a switch update the previous part with 
-                    # what we have found so far.
-                    merge!(parts[v_rec], part) # Check if work with intersections
-                    if length(all_neighbors(g, n)) > 1
-                        # We will now create a new part
-                        part = Part()
-
-                        # Here we add the generators and loads that we just saw to the new
-                        # part.
+                if overloaded
+                    if get_prop(g, e, :switch) == -1
+                        # We have to keep exploring the graph until we find a switch
+                        append!(visit, n)
+                       
+                        # We don't have a switch here, so I just keep it in the graph
                         update_part!(part, gen, load)
-                    else
-                        # We are at a leaf we should add what we just found
-                        # to the currently active part
-                        update_part!(part, gen, load)
-                        merge!(parts[v_rec], part) # Check if work with intersections
                     end
+                    # We are overloaded and the branch is a swithc so we stop exploring
+                    # graph.
                 else
-                    # There is no switch, we have to just update
+                    # If we are not overloaded we update the current part
                     update_part!(part, gen, load)
+                    # Keep on exploring the graph
+                    append!(visit, n)
                 end
-
             end
-            # Here we can add stuff to the currently active part.
         end
     end
-    reachable = Vector{String}()
-    for reserve in reserves
-        append!(reachable, keys(parts[reserve].loads.mapping))
-    end
-
-    return reachable
+    return part
 end
 
