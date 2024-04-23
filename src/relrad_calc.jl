@@ -193,7 +193,7 @@ function section!(res::Dict{String, RelStruct},
                 # to the reachable matrix.
                 if !(failures.reserve_failure_prob > 0.0 && "reserve_"*create_slack_name(f) == case)
                     reachable[f] = calc_R(network, reconfigured_network, f)
-                    push!(R_set, get_loads(reachable[f]))
+                    push!(R_set, Set(get_loads(reachable[f])))
                 end
             end
 

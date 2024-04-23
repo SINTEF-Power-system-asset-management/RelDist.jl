@@ -163,10 +163,9 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
 
     while !isempty(visit)
         v_src = pop!(visit)
-        push!(seen, v_src)
         if !(v_src in seen)
             push!(seen, v_src)
-            for v_dst in setdiff(all_neighbors(network.G, v_src), seen)
+            for v_dst in setdiff(all_neighbors(g, v_src), seen)
                 e = Edge(v_src, v_dst)
             
                 gen = get_gen(g, network.mpc, v_dst)
@@ -177,7 +176,7 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
                 if overloaded
                     if get_prop(g, e, :switch) == -1
                         # We have to keep exploring the graph until we find a switch
-                        append!(visit, n)
+                        append!(visit, v_dst)
                        
                         # We don't have a switch here, so I just keep it in the graph
                         update_part!(part, gen, load)
@@ -188,7 +187,7 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
                     # If we are not overloaded we update the current part
                     update_part!(part, gen, load)
                     # Keep on exploring the graph
-                    append!(visit, n)
+                    append!(visit, v_dst)
                 end
             end
         end
