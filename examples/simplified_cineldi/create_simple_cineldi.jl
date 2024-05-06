@@ -205,7 +205,7 @@ rename!(case_new.reldata, :r_temp => :temporaryFaultTime)
 rename!(case_new.reldata, :lambda_perm => :permanentFaultFrequency)
 rename!(case_new.reldata, :lambda_temp => :temporaryFaultFrequency)
 
-case_new.switch[!, :t_remote] .= 0.5 #1/3600 # I set the remote switching time to 1 second
+case_new.switch[!, :t_remote] .= 1/3600 # I set the remote switching time to 1 second
 case_new.switch[!, :t_manual] .= 0.5 # I set the manual switching time to 30 minutes
 
 rename!(case.reldata, :sectioning_time => :sectioningTime)
