@@ -173,6 +173,7 @@ function section!(res::Dict{String, RelStruct},
         rn, isolating = traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob>0)
         for case in cases
             R_set = []
+            vertices = Vector{Set{Int}}()
             # For the cases with switch failures we remove the extra edges
             if case ∈ ["upstream", "downstream"]
                 switches = isolating[case]
@@ -187,16 +188,26 @@ function section!(res::Dict{String, RelStruct},
             end
 
             for f in F
-                reachable = Dict{typeof(f), Part}()
+                parts = Dict{typeof(f), Part}()
                 # If we are considering reserve failures and the name of the reserve
                 # is the same as the case, we will skip to add the reachable loads
                 # to the reachable matrix.
                 if !(failures.reserve_failure_prob > 0.0 && "reserve_"*create_slack_name(f) == case)
-                    reachable[f] = calc_R(network, reconfigured_network, f)
-                    push!(R_set, Set(in_service_loads(reachable[f])))
+                    part = calc_R(network, reconfigured_network, f)
+                    
+                    if any_shed(part)
+                        # If we have shed any load we should check whether what
+                        # the part can supply overlaps with what another reserve
+                        # can supply
+                        overlapping_reserves!(parts, part)
+                    else
+                        parts[f] = part
+                    end
+                    # Create a set of loads that are in service in the part
+                    loads = Set(in_service_loads(parts[f])) 
+                    push!(R_set, loads)
                 end
             end
-
             X = union(R_set...)
 
             l_pos = 0
@@ -226,6 +237,63 @@ function section!(res::Dict{String, RelStruct},
         end
     else
         return # If the line has no permanent failure frequency we skip it.
+    end
+end
+
+function overlapping_reserves!(parts::Union{Dict{Feeder, Part}, Dict{Branch, Part}},
+        part::Part)
+    for (old_f, old_p) in parts
+        overlapping = intersect(old_p, part)
+        if length(overlapping) > 0
+        # old_p is overlapping with part. First we check if there is 
+        # a complete overlap. Or if one part is a subset of the other.
+        # In these cases we just disregard one of the parts. Although,
+        # in cases with renewables a reconfiguration may be more
+        # optimal.
+            if old_p.vertices == part.vertices
+               # The reserves cover the same vertices. We keep the one
+               # that has the largest 
+               if old_p.capacity < part.capacity
+                   # The new part has a better capacity.
+                   # Kick out the old one
+                    delete!(parts, old_f)
+                    parts[f] = part
+                end
+                # We don't need to do anything in the oposite case
+                                    
+                # Here we check if one part is a subset of the other
+                # I am not sure how realistic this is, but nice to
+                # be certain.
+            elseif subset(old_p, part)
+                # The old part is a subset of part. We kick
+                # out the old part. 
+                delete!(parts, old_f)
+                parts[f] = part
+            elseif subset(part, old_p)
+                # The part is a subset of the old part. We don't
+                # add the new part.
+            else
+                # old_p an part are not subsets of each other. This means
+                # that we need to determine whether it is possible to
+                # split them.
+                for common in overlapping
+                    for n in all_neighbors(g, common)
+                        if (n ∉ part.vertices || n ∉ old_p.vertices)
+                            # This is a line going between the parts
+                            if get_prop(g, Edge(n, common), :switch) == 1
+                                # This is a line going between parts
+                                # with a switch. Opening the switch
+                                # solves the problem.
+                                break
+                                # Just breaking works if only two parts
+                                # overlap. It probably doesn't work
+                                # if multiple parts overlap.
+                            end
+                        end
+                    end
+                end
+            end
+        end
     end
 end
 

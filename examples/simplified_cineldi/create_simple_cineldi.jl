@@ -16,22 +16,22 @@ bus.ID = parse.(Int, bus.ID)
 sort!(bus, :ID)
 bus.ID = string.(bus.ID)
 
-branch_new = DataFrame(case.branch[1:15, :])
-reldata_new = DataFrame(case.reldata[1:15, :])
-switch_new = DataFrame(case.switch[1:15, :])
-bus_new = DataFrame(bus[1:16, :])
+branch_new = DataFrame(branch[1:16, :])
+reldata_new = DataFrame(reldata[1:16, :])
+switch_new = DataFrame(switch[1:14, :])
+bus_new = DataFrame(bus[1:17, :])
 gen_new = DataFrame(case.gen[1:3, :])
-gen_new[2, :bus] = "10"
-gen_new[3, :bus] = "16"
+gen_new[2, :bus] = "11"
+gen_new[3, :bus] = "17"
 
 
 # Make the loads
 # I will scale the later.
-load_new = DataFrame(case.load[1:9, :])
-load_new.ID = [string("L", i) for i in 1:9]
-load_new.bus = ["2", "4", "6", "7", "9", "12", "13", "14", "15"]
+load_new = DataFrame(case.load[1:10, :])
+load_new.ID = [string("L", i) for i in 1:10]
+load_new.bus = ["2", "4", "6", "7", "8", "10", "13", "14", "15", "16"]
 
-loaddata_new = DataFrame(case.loaddata[1:9, :])
+loaddata_new = DataFrame(case.loaddata[1:10, :])
 loaddata_new.bus = load_new.bus
 loaddata_new.ID = load_new.ID
 loaddata_new.P = load_new.P
@@ -57,13 +57,12 @@ rel_line = [:lambda_perm, :lambda_temp, :r_perm, :r_temp]
 # Make line 2
 branch_new[2, π_line] = merge_branches(branch, 2:4)
 reldata_new[2, rel_line] = merge_reldata(reldata, 2:4)
-switch_new[3, :] = switch[4, :]
 
 # Make line 3
 branch_new[3, π_line] = get_branch(case, "4", "6")[1, π_line]
 reldata_new[3, rel_line] = get_branch_data(case, :reldata, "4", "6")[1, rel_line]
-switch_new[4, :f_bus] = "3"
-switch_new[4, :t_bus] = "4"
+switch_new[3, :f_bus] = "3"
+switch_new[3, :t_bus] = "4"
 
 # Make line 4
 branch_new[4, :f_bus] = "3"
@@ -72,8 +71,8 @@ reldata_new[4, :f_bus] = "3"
 reldata_new[4, :t_bus] = "5"
 branch_new[4, π_line] = merge_branches(branch, 4:7)
 reldata_new[4, rel_line] = merge_reldata(reldata, 4:7)
-switch_new[5, :f_bus] = "3"
-switch_new[5, :t_bus] = "5"
+switch_new[4, :f_bus] = "3"
+switch_new[4, :t_bus] = "5"
 
 # Make line 5
 branch_new[5, :f_bus] = "5"
@@ -82,8 +81,8 @@ reldata_new[5, :f_bus] = "5"
 reldata_new[5, :t_bus] = "6"
 branch_new[5, π_line] = get_branch(case, "12", "16")[1, π_line]
 reldata_new[5, rel_line] = get_branch_data(case, :reldata, "12", "16")[1, rel_line]
-switch_new[6, :f_bus] = "5"
-switch_new[6, :t_bus] = "6"
+switch_new[5, :f_bus] = "5"
+switch_new[5, :t_bus] = "6"
 
 # Make line 6
 branch_new[6, :f_bus] = "6"
@@ -98,96 +97,104 @@ branch_new[7, :f_bus] = "5"
 branch_new[7, :t_bus] = "8"
 reldata_new[7, :f_bus] = "5"
 reldata_new[7, :t_bus] = "8"
-branch_new[7, π_line] = get_branch(case, "26", "33")[1, π_line]
-reldata_new[7, rel_line] = get_branch_data(case, :reldata, "26", "33")[1, rel_line]
-switch_new[7, :f_bus] = "5"
-switch_new[7, :t_bus] = "8"
+branch_new[7, π_line] = get_branch(case, "12", "26")[1, π_line]
+reldata_new[7, rel_line] = get_branch_data(case, :reldata, "12", "26")[1, rel_line]
+switch_new[6, :f_bus] = "5"
+switch_new[6, :t_bus] = "8"
 
 # Make line 8
 branch_new[8, :f_bus] = "8"
 branch_new[8, :t_bus] = "9"
 reldata_new[8, :f_bus] = "8"
 reldata_new[8, :t_bus] = "9"
-branch_new[8, π_line] = get_branch(case, "33", "34")[1, π_line]
-reldata_new[8, rel_line] = get_branch_data(case, :reldata, "33", "34")[1, rel_line]
-switch_new[8, :f_bus] = "8"
-switch_new[8, :t_bus] = "9"
+branch_new[8, π_line] = get_branch(case, "26", "33")[1, π_line]
+reldata_new[8, rel_line] = get_branch_data(case, :reldata, "26", "33")[1, rel_line]
 
 # Make line 9
 branch_new[9, :f_bus] = "9"
 branch_new[9, :t_bus] = "10"
 reldata_new[9, :f_bus] = "9"
 reldata_new[9, :t_bus] = "10"
-branch_new[9, π_line] = merge_branches(branch, 65:66)
-reldata_new[9, rel_line] = merge_reldata(reldata, 65:66)
-switch_new[9, :f_bus] = "9"
-switch_new[9, :t_bus] = "10"
-switch_new[9, :closed] = false
-switch_new[10, :f_bus] = "9"
-switch_new[10, :t_bus] = "10"
-switch_new[10, :breaker] = true
-switch_new[10, :closed] = false
+branch_new[9, π_line] = get_branch(case, "33", "34")[1, π_line]
+reldata_new[9, rel_line] = get_branch_data(case, :reldata, "33", "34")[1, rel_line]
+switch_new[7, :f_bus] = "9"
+switch_new[7, :t_bus] = "10"
 
 # Make line 10
-branch_new[10, :f_bus] = "8"
+branch_new[10, :f_bus] = "10"
 branch_new[10, :t_bus] = "11"
-reldata_new[10, :f_bus] = "8"
+reldata_new[10, :f_bus] = "10"
 reldata_new[10, :t_bus] = "11"
-branch_new[10, π_line] = merge_branches(branch, 10:13)
-reldata_new[10, rel_line] = merge_reldata(reldata, 10:13)
-switch_new[11, :f_bus] = "8"
-switch_new[11, :t_bus] = "11"
+branch_new[10, π_line] = merge_branches(branch, 65:66)
+reldata_new[10, rel_line] = merge_reldata(reldata, 65:66)
+switch_new[8, :f_bus] = "10"
+switch_new[8, :t_bus] = "11"
+switch_new[8, :closed] = false
+switch_new[9, :f_bus] = "10"
+switch_new[9, :t_bus] = "11"
+switch_new[9, :breaker] = true
+switch_new[9, :closed] = false
 
 # Make line 11
-branch_new[11, :f_bus] = "11"
+branch_new[11, :f_bus] = "9"
 branch_new[11, :t_bus] = "12"
-reldata_new[11, :f_bus] = "11"
+reldata_new[11, :f_bus] = "9"
 reldata_new[11, :t_bus] = "12"
-branch_new[11, π_line] = merge_branches(branch, 70:72)
-reldata_new[11, rel_line] = merge_reldata(reldata, 70:72)
-switch_new[12, :f_bus] = "11"
-switch_new[12, :t_bus] = "12"
+branch_new[11, π_line] = merge_branches(branch, 10:13)
+reldata_new[11, rel_line] = merge_reldata(reldata, 10:13)
+switch_new[10, :f_bus] = "9"
+switch_new[10, :t_bus] = "12"
 
 # Make line 12
-branch_new[12, :f_bus] = "11"
+branch_new[12, :f_bus] = "12"
 branch_new[12, :t_bus] = "13"
-reldata_new[12, :f_bus] = "11"
+reldata_new[12, :f_bus] = "12"
 reldata_new[12, :t_bus] = "13"
-branch_new[12, π_line] = get_branch(case, "42", "44")[1, π_line]
-reldata_new[12, rel_line] = get_branch_data(case, :reldata, "42", "44")[1, rel_line]
-switch_new[13, :f_bus] = "11"
-switch_new[13, :t_bus] = "13"
+branch_new[12, π_line] = merge_branches(branch, 70:72)
+reldata_new[12, rel_line] = merge_reldata(reldata, 70:72)
+switch_new[11, :f_bus] = "12"
+switch_new[11, :t_bus] = "13"
 
 # Make line 13
-branch_new[13, :f_bus] = "13"
+branch_new[13, :f_bus] = "12"
 branch_new[13, :t_bus] = "14"
-reldata_new[13, :f_bus] = "13"
+reldata_new[13, :f_bus] = "12"
 reldata_new[13, :t_bus] = "14"
-branch_new[13, π_line] = merge_branches(branch, 14:15)
-reldata_new[13, rel_line] = merge_reldata(reldata, 14:15)
+branch_new[13, π_line] = get_branch(case, "42", "44")[1, π_line]
+reldata_new[13, rel_line] = get_branch_data(case, :reldata, "42", "44")[1, rel_line]
+switch_new[12, :f_bus] = "12"
+switch_new[12, :t_bus] = "14"
 
 # Make line 14
 branch_new[14, :f_bus] = "14"
 branch_new[14, :t_bus] = "15"
 reldata_new[14, :f_bus] = "14"
 reldata_new[14, :t_bus] = "15"
-branch_new[14, π_line] = get_branch(case, "46", "47")[1, π_line]
-reldata_new[14, rel_line] = get_branch_data(case, :reldata, "46", "47")[1, rel_line]
+branch_new[14, π_line] = merge_branches(branch, 14:15)
+reldata_new[14, rel_line] = merge_reldata(reldata, 14:15)
 
 # Make line 15
 branch_new[15, :f_bus] = "15"
 branch_new[15, :t_bus] = "16"
 reldata_new[15, :f_bus] = "15"
 reldata_new[15, :t_bus] = "16"
-branch_new[15, π_line] = merge_branches(branch, 14:15)
-reldata_new[15, rel_line] = merge_reldata(reldata, 14:15)
-switch_new[14, :f_bus] = "15"
-switch_new[14, :t_bus] = "16"
+branch_new[15, π_line] = get_branch(case, "46", "47")[1, π_line]
+reldata_new[15, rel_line] = get_branch_data(case, :reldata, "46", "47")[1, rel_line]
+
+# Make line 16
+branch_new[16, :f_bus] = "16"
+branch_new[16, :t_bus] = "17"
+reldata_new[16, :f_bus] = "16"
+reldata_new[16, :t_bus] = "17"
+branch_new[16, π_line] = merge_branches(branch, 14:15)
+reldata_new[16, rel_line] = merge_reldata(reldata, 14:15)
+switch_new[13, :f_bus] = "16"
+switch_new[13, :t_bus] = "17"
+switch_new[13, :closed] = false
+switch_new[14, :f_bus] = "16"
+switch_new[14, :t_bus] = "17"
+switch_new[14, :breaker] = true
 switch_new[14, :closed] = false
-switch_new[15, :f_bus] = "15"
-switch_new[15, :t_bus] = "16"
-switch_new[15, :breaker] = true
-switch_new[15, :closed] = false
 
 case_new = Case()
 case_new.bus = bus_new

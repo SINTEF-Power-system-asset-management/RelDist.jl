@@ -65,19 +65,21 @@ mutable struct Part
     
     gens::Sources{Gen}
 
-    vertices::Vector{Int}
+    vertices::Set{Int}
+
+    reconf_switches::Vector{Switch}
 end
 
 function Part()
-    Part(Inf, Sources{Loadr}(), Sources{Gen}(), Vector{Int}())
+    Part(Inf, Sources{Loadr}(), Sources{Gen}(), Vector{Int}(), Vector{Switch}())
 end
 
 function Part(capacity::Real)
-    Part(capacity, Sources{Loadr}(), Sources{Gen}(), Vector{Int}())
+    Part(capacity, Sources{Loadr}(), Sources{Gen}(), Vector{Int}(), Vector{Switch}())
 end
 
 function Part(capacity::Real, v_start::Integer)
-    Part(capacity, Sources{Loadr}(), Sources{Gen}(), [v_start])
+    Part(capacity, Sources{Loadr}(), Sources{Gen}(), Set([v_start]), Vector{Switch}())
 end
 
 """
@@ -93,7 +95,21 @@ end
 function update_part!(part::Part, gen::Gen, load::Loadr, v::Integer)
     update_sources!(part.loads, load)
     update_sources!(part.gens, gen)
-    append!(part.vertices, v)
+    push!(part.vertices, v)
+end
+
+"""
+    Return the vertices in the parts that intersect.
+"""
+function intersect(part_a::Part, part_b::Part)
+    intersect(part_a.vertices, part_b.vertices)
+end
+
+"""
+    Check if a part is a subset of another
+"""
+function subset(part_a::Part, part_b::Part)
+    subset(part_a.vertices, part_b.vertices)
 end
 
 function update_sources!(sources::Sources, source::Source)
@@ -117,6 +133,13 @@ end
 """
 function in_service_loads(part::Part)
     in_service_sources(part.loads)
+end
+
+"""
+    Returns true if any load has been shed.
+"""
+function any_shed(part::Part)
+    return part.loads.P_shed > 0
 end
 
 function in_service_sources(sources::Sources)
@@ -176,7 +199,7 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
 
                 if overload > 0
                     for nfc in part.loads.sources # can probably overload something to make this cleaner
-                        # If we have not already shed the load
+                        # If we have not already hed the load
                         if !nfc.shed
                             shed_load!(part.loads, nfc)
                             if overload - nfc.P < 0
@@ -189,9 +212,20 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
                 
                 # Check if we managed to solve the load by load shedding
                 overload = loading(part) + load.P - gen.P - part.capacity
+                
+                switch_buses = get_prop(network.G, e, :switch_buses)
                 if overload > 0
                     # We did not solve the overload, mark it as shed
                     shed_load!(part.loads, load)
+                    if length(switch_buses) > 0
+                        if length(switch_buses) == 1
+                            push!(part.switches, switch_buses[1])
+                        else
+                            push!(
+                                  part.switches,
+                                  switch_buses[1] < switch_buses[2] ? switch_buses[1] : switch_buses[2])
+                        end
+                    end
                 end
 
                 if overload < 0 || (get_prop(g, e, :switch) == -1)
