@@ -194,14 +194,13 @@ function section!(res::Dict{String, RelStruct},
                 # to the reachable matrix.
                 if !(failures.reserve_failure_prob > 0.0 && "reserve_"*create_slack_name(f) == case)
                     part = calc_R(network, reconfigured_network, f)
+                    parts[f] = part
                     
                     if any_shed(part)
                         # If we have shed any load we should check whether what
                         # the part can supply overlaps with what another reserve
                         # can supply
-                        overlapping_reserves!(parts, part)
-                    else
-                        parts[f] = part
+                        overlapping_reserves!(reconfigured_network, parts, part)
                     end
                     # Create a set of loads that are in service in the part
                     loads = Set(in_service_loads(parts[f])) 
@@ -240,7 +239,7 @@ function section!(res::Dict{String, RelStruct},
     end
 end
 
-function overlapping_reserves!(parts::Union{Dict{Feeder, Part}, Dict{Branch, Part}},
+function overlapping_reserves!(g::MetaGraph, parts::Union{Dict{Feeder, Part}, Dict{Branch, Part}},
         part::Part)
     for (old_f, old_p) in parts
         overlapping = intersect(old_p, part)
@@ -257,20 +256,25 @@ function overlapping_reserves!(parts::Union{Dict{Feeder, Part}, Dict{Branch, Par
                    # The new part has a better capacity.
                    # Kick out the old one
                     delete!(parts, old_f)
-                    parts[f] = part
+                else
+                    # The old part has better capacity, so we kick out the new part.
+                    delete!(parts, part)
+                    # Since we kick out the new part we can continue
+                    break
                 end
-                # We don't need to do anything in the oposite case
-                                    
+
                 # Here we check if one part is a subset of the other
                 # I am not sure how realistic this is, but nice to
                 # be certain.
-            elseif subset(old_p, part)
+            elseif old_p ⊆ part
                 # The old part is a subset of part. We kick
                 # out the old part. 
                 delete!(parts, old_f)
-                parts[f] = part
-            elseif subset(part, old_p)
+            elseif part ⊆ old_p
                 # The part is a subset of the old part. We don't
+                delete!(parts, part)
+                # Since we kick out the new part we can continue
+                break
                 # add the new part.
             else
                 # old_p an part are not subsets of each other. This means
@@ -284,7 +288,6 @@ function overlapping_reserves!(parts::Union{Dict{Feeder, Part}, Dict{Branch, Par
                                 # This is a line going between parts
                                 # with a switch. Opening the switch
                                 # solves the problem.
-                                parts[f] = part
                                 break
                                 # Just breaking works if only two parts
                                 # overlap. It probably doesn't work

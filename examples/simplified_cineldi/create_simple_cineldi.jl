@@ -21,16 +21,20 @@ reldata_new = DataFrame(reldata[1:16, :])
 switch_new = DataFrame(switch[1:14, :])
 bus_new = DataFrame(bus[1:17, :])
 gen_new = DataFrame(case.gen[1:3, :])
+
+# Fix the reserves
 gen_new[2, :bus] = "11"
 gen_new[3, :bus] = "17"
-new_new.external .= true
+gen_new.ID = ["MF", "BF1", "BF2"]
+gen_new.Pmax = [100, 10, 10]
+gen_new.external .= true
 
 
 # Make the loads
-# I will scale the later.
 load_new = DataFrame(case.load[1:10, :])
 load_new.ID = [string("L", i) for i in 1:10]
 load_new.bus = ["2", "4", "6", "7", "8", "10", "13", "14", "15", "16"]
+load_new.P = [1, 2, 3, 2, 1, 1, 3, 2, 2, 2,]
 
 loaddata_new = DataFrame(case.loaddata[1:10, :])
 loaddata_new.bus = load_new.bus

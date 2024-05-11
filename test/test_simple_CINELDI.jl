@@ -13,3 +13,6 @@ network.mpc.switch.t_remote .= 0.5
 # Set up the case in the excel spreadhsheet
 res, L, edge_pos = relrad_calc(cost_functions, network)
 @test isapprox(sum(res["base"].U[:, 2]), 0.333, atol=0.01)
+
+# Case 1 in the power point
+@test isapprox(sum(res["base"].U[:, 15]), 0.418, atol=0.01)

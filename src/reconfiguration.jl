@@ -67,7 +67,7 @@ mutable struct Part
 
     vertices::Set{Int}
 
-    reconf_switches::Vector{Switch}
+    switches::Vector{Switch}
 end
 
 function Part()
@@ -101,15 +101,15 @@ end
 """
     Return the vertices in the parts that intersect.
 """
-function intersect(part_a::Part, part_b::Part)
+function Base.intersect(part_a::Part, part_b::Part)
     intersect(part_a.vertices, part_b.vertices)
 end
 
 """
     Check if a part is a subset of another
 """
-function subset(part_a::Part, part_b::Part)
-    subset(part_a.vertices, part_b.vertices)
+function Base.:⊆(part_a::Part, part_b::Part)
+    ⊆(part_a.vertices, part_b.vertices)
 end
 
 function update_sources!(sources::Sources, source::Source)
@@ -198,32 +198,24 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
                 update_part!(part, gen, load, v_dst)
 
                 if overload > 0
-                    for nfc in part.loads.sources # can probably overload something to make this cleaner
-                        # If we have not already hed the load
-                        if !nfc.shed
+                    for load in part.loads.sources # can probably overload something to make this cleaner
+                        # Shed nfc that has not been sked
+                        if load.nfc && !nfc.shed
                             shed_load!(part.loads, nfc)
-                            if overload - nfc.P < 0
+                            if overload - load.P < 0
                                 # We removed the overload stop shedding
                                 break
                             end
                         end
                     end
-                end
+                    # Check if we managed to solve the overload by shedding ncf
+                    overload = loading(part) + load.P - gen.P - part.capacity
                 
-                # Check if we managed to solve the load by load shedding
-                overload = loading(part) + load.P - gen.P - part.capacity
-                
-                switch_buses = get_prop(network.G, e, :switch_buses)
-                if overload > 0
-                    # We did not solve the overload, mark it as shed
-                    shed_load!(part.loads, load)
-                    if length(switch_buses) > 0
-                        if length(switch_buses) == 1
-                            push!(part.switches, switch_buses[1])
-                        else
-                            push!(
-                                  part.switches,
-                                  switch_buses[1] < switch_buses[2] ? switch_buses[1] : switch_buses[2])
+                    if overload > 0
+                        # We did not solve the overload, mark it as shed
+                        shed_load!(part.loads, load)
+                        if get_prop(network.G, e, :switch) == 1
+                            push!(part.switches, get_switch(network, e))
                         end
                     end
                 end
