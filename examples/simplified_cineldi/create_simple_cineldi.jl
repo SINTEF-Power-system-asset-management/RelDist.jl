@@ -23,6 +23,7 @@ bus_new = DataFrame(bus[1:17, :])
 gen_new = DataFrame(case.gen[1:3, :])
 gen_new[2, :bus] = "11"
 gen_new[3, :bus] = "17"
+new_new.external .= true
 
 
 # Make the loads

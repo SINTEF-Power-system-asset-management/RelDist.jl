@@ -173,6 +173,7 @@ function section!(res::Dict{String, RelStruct},
         rn, isolating = traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob>0)
         for case in cases
             R_set = []
+            parts = Dict{typeof(F[1]), Part}()
             vertices = Vector{Set{Int}}()
             # For the cases with switch failures we remove the extra edges
             if case ∈ ["upstream", "downstream"]
@@ -188,7 +189,6 @@ function section!(res::Dict{String, RelStruct},
             end
 
             for f in F
-                parts = Dict{typeof(f), Part}()
                 # If we are considering reserve failures and the name of the reserve
                 # is the same as the case, we will skip to add the reachable loads
                 # to the reachable matrix.
@@ -284,6 +284,7 @@ function overlapping_reserves!(parts::Union{Dict{Feeder, Part}, Dict{Branch, Par
                                 # This is a line going between parts
                                 # with a switch. Opening the switch
                                 # solves the problem.
+                                parts[f] = part
                                 break
                                 # Just breaking works if only two parts
                                 # overlap. It probably doesn't work
