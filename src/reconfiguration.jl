@@ -71,11 +71,11 @@ mutable struct Part
 end
 
 function Part()
-    Part(Inf, Sources{Loadr}(), Sources{Gen}(), Vector{Int}(), Vector{Switch}())
+    Part(Inf, Sources{Loadr}(), Sources{Gen}(), Set{Int}(), Vector{Switch}())
 end
 
 function Part(capacity::Real)
-    Part(capacity, Sources{Loadr}(), Sources{Gen}(), Vector{Int}(), Vector{Switch}())
+    Part(capacity, Sources{Loadr}(), Sources{Gen}(), Set{Int}(), Vector{Switch}())
 end
 
 function Part(capacity::Real, v_start::Integer)
@@ -110,6 +110,14 @@ end
 """
 function Base.:⊆(part_a::Part, part_b::Part)
     ⊆(part_a.vertices, part_b.vertices)
+end
+
+"""
+    Check if a reserve is in an island.
+"""
+function reserve_in_island(part::Part, island::Vector{Int})
+    # The reserve is the first vertex
+    part.vertices[1] ∈ island
 end
 
 function update_sources!(sources::Sources, source::Source)
@@ -231,3 +239,154 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
     return part
 end
 
+mutable struct Overlapping
+    g::MetaGraph
+    parts::Vector{Part}
+    part::Part
+    old_p::Part
+    old_i::Int
+    overlapping::Set{Int}
+    add_new_part::Bool
+end
+
+function Overlapping(g::MetaGraph, parts::Vector{Part}, part::Part)
+    Overlapping(g, parts, part, Part(), 0, Set{Int}(), true)
+end
+
+function update_overlapping!(o::Overlapping, old_p::Part,
+        old_i::Int, overlapping::Set{Int})
+    o.old_p = old_p
+    o.old_i = old_i
+    o.overlapping = overlapping
+end
+
+function vertices_equal(o::Overlapping)
+    o.old_p.vertices == o.part.vertices
+end
+
+function part_is_subset(o::Overlapping)
+    o.part ⊆ o.old_p
+end
+
+function old_part_is_subset(o::Overlapping)
+    o.old_p ⊆ o.part
+end
+
+function delete_old_part!(o::Overlapping)
+    deleteat!(o.parts, o.old_i)
+end
+
+function new_part_has_better_cap(o::Overlapping)
+    o.old_p.capacity < o.part.capacity
+end
+
+function islands_in_parts(o::Overlapping, i_1::Vector{Array}, i_2::Vector{Array})
+    reserve_in_island(o.part, i_1) && reserve_in_island(o.old_part, i_2)
+end
+
+function parts_split(o::Overlapping, islands::Vector{Vector{Int}})
+    (islands_in_parts(o, islands[1], islands[2]) ||
+     islands_in_parts(o, islands[2], islands[1]))
+ end
+
+function check_overlap_and_fix!(g::MetaGraph,
+        parts::Vector{Part}, part::Part)
+    o = Overlapping(g, parts, part)
+    for (old_i, old_p) in enumerate(parts)
+        overlapping = intersect(old_p, part)
+        if length(overlapping) > 0
+            # old_p is overlapping with part. We have to fix it
+            update_overlapping!(o, old_p, old_i, overlapping)
+            fix_overlap!(o)
+            # Check if part is a subset of a previous part.
+            if !o.add_new_part
+                break
+            end
+        end
+    end
+    push!(parts, part)
+end
+
+function fix_overlap!(o::Overlapping)
+    # First we check if there is a complete overlap.
+    # Or if one part is a subset of the other.
+    # In these cases we just disregard one of the parts. Although,
+    # in cases with renewables a reconfiguration may be more
+    # optimal.
+    if vertices_equal(o)
+        return fix_parts_with_same_vertices!(o) 
+        # Here we check if one part is a subset of the other
+        # I am not sure how realistic this is, but nice to
+        # be certain.
+    elseif old_part_is_subset(o)
+        # The old part is a subset of part. We kick
+        # out the old part. 
+        delete_old_part!(o)
+    elseif part_is_subset(o)
+        # The part is a subset of the old part. We don't add the new part
+        # Since we kick out the new part we can continue, we should return false
+        # so we know to not add the new part.
+        o.add_new_part = false
+    else
+        # old_p an part are not subsets of each other. This means
+        # that we need to determine whether it is possible to
+        # split them.
+        find_reconfiguration_switches!(o)
+    end
+end
+
+function fix_parts_with_same_vertices!(o::Overlapping)
+   # The reserves cover the same vertices. We keep the one
+   # that has the largest capacity.
+   if new_part_has_better_cap(o)
+       # The new part has a better capacity.
+       # Kick out the old one
+       delete_old_part!(o)
+    else
+        o.add_new_part = false
+    end
+end
+
+function find_reconfiguration_switches!(o::Overlapping)
+    common_switches = Vector{Edge}()
+    for common in o.overlapping
+        for n in all_neighbors(o.g, common)
+            if (n ∉ o.part.vertices || n ∉ o.old_p.vertices)
+                # This is a line going between the parts
+                if get_prop(o.g, Edge(n, common), :switch) == 1
+                    # This is a line going between parts
+                    # with a switch. Opening the switch
+                    # solves the problem.
+                    return 
+                    # Just returning works if only two parts
+                    # overlap. It probably doesn't work
+                    # if multiple parts overlap.
+                end
+            else
+                # The line is not going between the part. If it has a
+                # switch we may want to check it out later.
+                if get_prop(o.g, Edge(n, common), :switch) == 1
+                    push!(common_switches, Edge(n, common))
+                end
+            end
+        end
+    end
+    # We have iterated over all the vertices common to the two parts
+    # without splitting the network. We will now try to open switches
+    # on edges between vertices in both parts.
+    for e in common_switches
+        rem_edge!(o.g, e)
+        islands = connected_componets(o.g)
+        # Since we operate radially we don't bother to check if we split
+        # it two.
+        if parts_split(o, island)
+            # We sucessfully split the network.
+            return 
+        end
+        # Removing the edge didn't help. Put it back
+        add_edge!(g, e)
+    end
+    # We didn't manage to split the network using switches between the parts
+    # or in the overlapping area. This means that we have to search for 
+    # switches that can split the network. 
+end

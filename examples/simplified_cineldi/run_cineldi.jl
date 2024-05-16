@@ -14,7 +14,8 @@ network = RadialPowerGraph(case)
 # Just to make it a bit simpler to compare
 network.mpc.switch.t_remote .= 0.5
 
-network.mpc.gen[2, :Pmax] = 13
+network.mpc.gen[2, :Pmax] = 100
+network.mpc.gen[2, :Pmax] = 130
 res, L, edge_pos = relrad_calc(cost_functions, network)
 results = ResFrames(res, edge_pos, L)
 

@@ -10,6 +10,14 @@ struct Branch{T} <:AbstractEdge{T}
     rateA::Real
 end
 
+"""
+    Check if a reserve is in a set of vertices.
+"""
+function reserve_in_vertices(g::MetaGraph, b::Branch, v::Vector{Int})
+    g[b.src, :name] ∈ v || g[b.dst, :name]
+end
+
+
 function Branch(t::Tuple)
     Branch(t[1], t[2], rateA)
 end
@@ -26,6 +34,13 @@ struct Feeder
 end
 
 """
+    Check if a reserve is in a set of vertices.
+"""
+function reserve_in_vertices(g::MetaGraph, f::Feeder, v::Vector{Int})
+    g[f.bus, :name] ∈ v
+end
+
+"""
     Returns the buses that can supply loads.
 """
 function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
@@ -35,12 +50,14 @@ function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
         push!(F, Branch(e.f_bus, e.t_bus, consider_cap ? e.rateA : Inf))
     end
     if isempty(F)
-        F = [Feeder(network.ref_bus,
-                    consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf)]
         for row in eachrow(network.mpc.gen)
             if row.external
                 push!(F, Feeder(row.bus, consider_cap ? row.Pmax : Inf))
             end
+        end
+        if isempty(F)
+            F = [Feeder(network.ref_bus,
+                        consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf)]
         end
     end
     return F
