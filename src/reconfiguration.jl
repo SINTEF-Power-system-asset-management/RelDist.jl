@@ -300,7 +300,7 @@ function check_overlap_and_fix!(g::MetaGraph,
             fix_overlap!(o)
             # Check if part is a subset of a previous part.
             if !o.add_new_part
-                break
+                return
             end
         end
     end
@@ -389,4 +389,17 @@ function find_reconfiguration_switches!(o::Overlapping)
     # We didn't manage to split the network using switches between the parts
     # or in the overlapping area. This means that we have to search for 
     # switches that can split the network. 
+    # find_splitting_switches(o)
 end
+
+# """
+    # This method searches the graph for switches that sucessfully splits the network
+    # in two.
+# """
+# function find_parts_splitting_switches(o)
+    # not_split = true
+    # while not_split
+
+
+# function find_part_splitting_switch
+
