@@ -15,10 +15,13 @@ res, L, edge_pos = relrad_calc(cost_functions, network)
 # Case 1 in the power point
 @test isapprox(sum(res["base"].U[:, 15]), 0.418, atol=0.01)
 
-# Case 2 in the power point
+# Case 2 in the power point. NOT! BF2 can aslo supply
+# load 10. This is therefore not case 2. Check what the
+# correct answer should be for this case.
 @test isapprox(sum(res["base"].U[:, 2]), 0.333, atol=0.01)
 
-# If we increase the power of the load at bus 10, we should
+# If we increase the power of the load at bus 10, we get
+# case 2.
 # get the same result as before.
 network.mpc.load[1, :P] = 2.0
 res, L, edge_pos = relrad_calc(cost_functions, network)
@@ -32,6 +35,7 @@ res, L, edge_pos = relrad_calc(cost_functions, network)
 @test isapprox(sum(res["base"].U[:, 2]), 0.333, atol=0.01)
 
 # Reset the network and try the third case
+# This should also give the same results as before
 network = RadialPowerGraph(network_filename)
 network.mpc.gen[2, :Pmax] = 13
 network.mpc.switch.t_remote .= 0.5
@@ -41,6 +45,15 @@ res, L, edge_pos = relrad_calc(cost_functions, network)
 # Implement the fourth case from the power point
 network.mpc.switch[12, :t_bus] = "NaN"
 network.mpc.switch[10, :t_bus] = "NaN"
+network = RadialPowerGraph(network.mpc)
 
 res, L, edge_pos = relrad_calc(cost_functions, network)
 @test isapprox(sum(res["base"].U[:, 2]), 0.547, atol=0.01)
+
+# Implement the fifth case from the power point
+network.mpc.switch[12, :f_bus] = "15"
+network.mpc.switch[12, :t_bus] = "16"
+network = RadialPowerGraph(network.mpc)
+
+res, L, edge_pos = relrad_calc(cost_functions, network)
+# @test isapprox(sum(res["base"].U[:, 2]), 0.440, atol=0.01)

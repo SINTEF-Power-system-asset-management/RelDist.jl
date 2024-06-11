@@ -198,14 +198,15 @@ function section!(res::Dict{String, RelStruct},
                         # If we have shed any load we should check whether what
                         # the part can supply overlaps with what another reserve
                         # can supply
-                         check_overlap_and_fix!(reconfigured_network, parts, part)
+                         check_overlap_and_fix!(network, reconfigured_network, parts, part)
+                         # After handling the overlap we could consider to check if
                     else
                         # Create a set of loads that are in service in the part
                         push!(parts, part)
                     end
                 end
             end
-            X = Set(vcat([in_service_loads(part) for part in parts]...))
+            X = Set(vcat([collect(in_service_loads(part)) for part in parts]...))
 
             l_pos = 0
             for l in L
@@ -335,7 +336,7 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
 
         append!(seen, s)
     else
-        # Search upstream for a switch
+        # Search downstream for a switch
         temp = find_isolating_switches!(network, rn["base"],
                                         switch_u, [s], [n])
         append!(seen, temp)
