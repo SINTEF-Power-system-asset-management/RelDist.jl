@@ -43,6 +43,8 @@ res, L, edge_pos = relrad_calc(cost_functions, network)
 @test isapprox(sum(res["base"].U[:, 2]), 0.333, atol=0.01)
 
 # Implement the fourth case from the power point
+network = RadialPowerGraph(network_filename)
+network.mpc.switch.t_remote .= 0.5
 network.mpc.switch[12, :t_bus] = "NaN"
 network.mpc.switch[10, :t_bus] = "NaN"
 network = RadialPowerGraph(network.mpc)

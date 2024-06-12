@@ -194,7 +194,7 @@ function section!(res::Dict{String, RelStruct},
                 if !(failures.reserve_failure_prob > 0.0 && "reserve_"*create_slack_name(f) == case)
                     part = calc_R(network, reconfigured_network, f)
                     
-                    if any_shed(part)
+                    if not_all_served(part)
                         # If we have shed any load we should check whether what
                         # the part can supply overlaps with what another reserve
                         # can supply
