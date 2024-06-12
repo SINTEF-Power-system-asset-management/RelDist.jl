@@ -426,7 +426,7 @@ function evaluate_split!(split::Split, part::Part)
         else
             # If the load was shed, but its power is smaller
             # than what can be reconnect, reconnect it.
-            if power < recon_P
+            if power <= recon_P
                 append!(split.reconnect, v)
                 split.P += power
             end
@@ -564,9 +564,9 @@ function find_reconfiguration_switches!(o::Overlapping)
         # or in the overlapping area. This means that we have to search for 
         # switches that can split the network. 
         find_parts_splitting_switches(o)
-    elseif !isempty(islands) 
-        reduce_part_after_reconf!(o, islands)
+    else
         for (part, split) in splits
+            reduce_part_after_reconf!(getfield(o, part), splits[part].vertices)
             reconnect_load!(getfield(o, part), split.reconnect)
         end
         return 
@@ -578,15 +578,8 @@ end
     in at least one part becoming smaller. This code will
     fix this.
 """
-function reduce_part_after_reconf!(o::Overlapping, islands::Vector{Vector{Int}})
-    for part in [o.part; o.old_p]
-        for island in islands
-            if island ⊆ part.vertices
-                #
-                shed_load!(part, setdiff(part.vertices, island))
-            end
-        end
-    end
+function reduce_part_after_reconf!(part::Part, island::Vector{Int})
+    shed_load!(part, setdiff(part.vertices, island))
 end
 
 function islands_after_switching(o::Overlapping, e::Edge)
@@ -606,7 +599,7 @@ end
 function find_parts_splitting_switches(o::Overlapping)
     switches = Dict{Part, Switch}()
     for part in [o.part, o.old_p]
-        seen = Vector{Int}()
+        seen = copy(overlapping)
         visit = Vector{Int}([source(part)])
         while !isempty(visit)
             v_src = pop!(visit)
