@@ -2,7 +2,6 @@ using SintPowerCase
 using DataFrames
 using Logging
 
-
 mutable struct Load
     ID::String
     bus::String

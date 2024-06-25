@@ -1,0 +1,15 @@
+[files]
+reldata = "cineldi_simple_reldata.csv"
+#gendata = "cineldi_simple_gendata.csv"
+branch = "cineldi_simple_branch.csv"
+gen = "cineldi_simple_gen.csv"
+#transformer = "cineldi_simple_transformer.csv"
+#indicator = "cineldi_simple_indicator.csv"
+loaddata = "cineldi_simple_loaddata.csv"
+load = "cineldi_simple_load.csv"
+switch = "cineldi_simple_switch.csv"
+bus = "cineldi_simple_bus.csv"
+
+[configuration]
+baseMVA = 100.0
+ref_bus = 0

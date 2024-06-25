@@ -172,7 +172,8 @@ function section!(res::Dict{String, RelStruct},
     if permanent_failure_frequency >= 0
         rn, isolating = traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob>0)
         for case in cases
-            R_set = []
+            parts = Vector{Part}()
+            vertices = Vector{Set{Int}}()
             # For the cases with switch failures we remove the extra edges
             if case ∈ ["upstream", "downstream"]
                 switches = isolating[case]
@@ -189,14 +190,23 @@ function section!(res::Dict{String, RelStruct},
             for f in F
                 # If we are considering reserve failures and the name of the reserve
                 # is the same as the case, we will skip to add the reachable loads
-                # to the reachable matrix.
+                # to the reachable matrix
                 if !(failures.reserve_failure_prob > 0.0 && "reserve_"*create_slack_name(f) == case)
-                    R = Set(calc_R(network, reconfigured_network, f))
-                    push!(R_set, R)
+                    part = calc_R(network, reconfigured_network, f)
+                    
+                    if not_all_served(part)
+                        # If we have shed any load we should check whether what
+                        # the part can supply overlaps with what another reserve
+                        # can supply
+                         check_overlap_and_fix!(network, reconfigured_network, parts, part)
+                         # After handling the overlap we could consider to check if
+                    else
+                        # Create a set of loads that are in service in the part
+                        push!(parts, part)
+                    end
                 end
             end
-
-            X = union(R_set...)
+            X = Set(vcat([collect(in_service_loads(part)) for part in parts]...))
 
             l_pos = 0
             for l in L
@@ -267,105 +277,24 @@ end
 function myplot(network, names)
     graphplot(network, names = names, nodeshape=:circle, nodesize=0.1, curves=false, fontsize=7)
 end
-
-""" Calculate reachable vertices starting from a given edge"""
-function calc_R(network::RadialPowerGraph,
-                g::MetaGraph,
-                e::Branch)::Array{Any}
-    v = get_node_number(network.G, e.dst)
-    vlist = traverse(g, v, e.rateA)
-    return [get_bus_name(network.G, bus) for bus in vlist]
-end
-
-""" Calculate reachable vertices starting from a given edge"""
-function calc_R(network::RadialPowerGraph,
-                g::MetaGraph,
-                b::Feeder)::Array{Any}
-    v = get_node_number(network.G, b.bus)
-    vlist = traverse(g, v, b.rateA)
-    return [get_bus_name(network.G, bus) for bus in vlist]
-end
-
-
-function traverse(g::MetaGraph, start::Int = 0,
-        feeder_cap::Real=Inf, dfs::Bool = true)::Vector{Int}
-    seen = Vector{Int}()
-    nfc = OrderedDict{Int, Real}() 
-    nfc_shedded = Vector{Int}()
-    visit = Vector{Int}([start])
-    tot_load = 0
-
-    @assert start in vertices(g) "can't access $start in $(props(g, 1))"
-    while !isempty(visit)
-        next = pop!(visit)
-        load = get_prop(g, next, :load)
-        tot_load += load
-        if get_prop(g, next, :nfc)
-            # This is a non firm connection that can be shed later
-            nfc[next] = load 
-        end
-        if tot_load > feeder_cap
-            # We have seen more load than the feeder capacity
-            #
-            # Check if we can shed nfc to help the load
-            shed_min = tot_load-feeder_cap 
-            if shed_min < sum(values(nfc))
-                # We can shed nfc to help the load
-                # Order the list of nfcs
-                sort!(nfc; byvalue=true, rev=true)
-                shed_nfc = 0
-                for (key, value) in nfc
-                    # Increase the amount shedded
-                    shed_nfc += value
-
-                    # Reduce the total load
-                    tot_load -= value
-                    
-                    # Mark the load as shedded
-                    push!(nfc_shedded, key)
-                    
-                    # Remove the nfc from the list of available loads to shed
-                    delete!(nfc, key)
-                    if shed_min < shed_nfc
-                        break
-                    end
-                end
-            else
-                # Shedding nfc does not help, return what we have seen!
-                # Aiaiaiai my eyes! What have they seen?
-                return setdiff(seen, nfc_shedded)
-            end
-        end
-        if !(next in seen)
-            for n in neighbors(g, next)
-                if !(n in seen)
-                    if dfs append!(visit, n) else insert!(visit, 1, n) end
-                end
-            end
-            push!(seen, next)
-        end
-    end
-    return setdiff(seen, nfc_shedded)
-end
-
 """
     Traverse the in a direction until all isolating switches are found.
 """
-function find_isolating_switches!(network::RadialPowerGraph, g::MetaDiGraph,
+function find_isolating_switches!(network::RadialPowerGraph,
         reconfigured_network::MetaGraph, isolating_switches,
         visit::Vector{Int}, seen::Vector{Int})
     # Initialise variable to keep track of sectioning time
-   
+  
     while !isempty(visit)
         next = pop!(visit)
         if !(next in seen)
             push!(seen, next)
-            for n in setdiff(all_neighbors(g, next), seen)
-                e = Edge(next, n) in edges(g) ? Edge(next, n) : Edge(n, next)
+            for n in setdiff(all_neighbors(network.G, next), seen)
+                e = Edge(next, n) in edges(network.G) ? Edge(next, n) : Edge(n, next)
                 
                 rem_edge!(reconfigured_network, e)
   
-                if get_prop(g, e, :switch) == -1 # it is not a switch, I keep exploring the graph
+                if get_prop(network.G, e, :switch) == -1 # it is not a switch, I keep exploring the graph
                     append!(visit, n)
                 else
                     # it is a switch, I stop exploring the graph in this direction
@@ -388,14 +317,13 @@ end
 function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
     switch_failures::Bool=false)
     # isolated_edges = []
-	g = network.G
-    rn = Dict("base" => MetaGraph(copy(network.G))) # This graph must be undirected
+    rn = Dict("base" => copy(network.G)) # This graph must be undirected
     
     s = get_node_number(network.G, string(e.src))
     n = get_node_number(network.G, e.dst)
     # Remove the edge from the reconfigured network
     rem_edge!(rn["base"], Edge(s, n))
-    switch_buses = get_prop(g, Edge(s, n), :switch_buses)
+    switch_buses = get_prop(network.G, Edge(s, n), :switch_buses)
     switch_u = Vector{Switch}()
     switch_d = Vector{Switch}()
    
@@ -408,9 +336,9 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
 
         append!(seen, s)
     else
-        # Search upstream for a switch
-        temp = find_isolating_switches!(network, g, rn["base"],
-                                                switch_u, [s], [n])
+        # Search downstream for a switch
+        temp = find_isolating_switches!(network, rn["base"],
+                                        switch_u, [s], [n])
         append!(seen, temp)
     end
     if e.dst ∈ switch_buses
@@ -419,7 +347,7 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
         append!(seen, n)
     else
         # Search upstream for a switch
-        temp = find_isolating_switches!(network, g, rn["base"], 
+        temp = find_isolating_switches!(network, rn["base"], 
                                         switch_d, [n], [s])
         append!(seen, temp)
     end
@@ -431,11 +359,11 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
         if switch_u==switch_d
             # Find backup switch upstream
             isolating["upstream"] = Vector{Switch}()
-            find_isolating_switches!(network, g, rn["upstream"], 
+            find_isolating_switches!(network, rn["upstream"], 
                                     isolating["upstream"], [s], [n])
             
             isolating["downstream"] = Vector{Switch}()
-            find_isolating_switches!(network, g, rn["downstream"], 
+            find_isolating_switches!(network, rn["downstream"], 
                                      isolating["downstream"], [n], [s])
         else
             # Find backup_switches upstream
@@ -464,8 +392,7 @@ function find_backup_switches(network::RadialPowerGraph,
             for v in [:src, :dst]
                 append!(visit, all_neighbors(network.G, get_node_number(network.G, getfield(switch, v))))
             end
-             find_isolating_switches!(network, network.G,
-                                      reconfigured_b, backup,
+             find_isolating_switches!(network, reconfigured_b, backup,
                                       visit, seen)
         end
     return backup, reconfigured_b

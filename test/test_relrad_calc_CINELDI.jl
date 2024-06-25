@@ -1,4 +1,5 @@
 using SintPowerGraphs
+using TimeZones
 using JLD2
 
 network_filename = joinpath(@__DIR__, "../examples/reliability_course/excel_test.toml")

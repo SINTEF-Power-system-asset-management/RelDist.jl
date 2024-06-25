@@ -26,9 +26,11 @@ export MONTH_FACTORS, DAY_FACTORS, HOUR_FACTORS, COST_FUN, LOAD_PROFILES, TEMPER
 
 # include("pref_calc.jl")
 # export calculate_pref
+#
+include("reconfiguration.jl")
+export calc_R, traverse
 
 include("relrad_calc.jl")
 export relrad_calc
-
 
 end # module
