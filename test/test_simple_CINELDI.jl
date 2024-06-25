@@ -74,4 +74,5 @@ network.mpc.load[1, :nfc] = true
 network = RadialPowerGraph(network.mpc)
 res, L, edge_pos = relrad_calc(cost_functions, network)
 U -= 5*λ
+U += 0.5*λ
 @test isapprox(sum(res["base"].U[:, 2]), U, atol=0.01)
