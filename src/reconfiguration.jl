@@ -296,10 +296,10 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
                 overload = loading(part) - part.capacity
                 
                 if overload > 0
-                    for load_i in values(part.loads) # can probably overload something to make this cleaner
+                    for temp_load  in values(part.loads) # can probably overload something to make this cleaner
                         # Shed nfc that has not been sked
-                        if load_i.nfc && !loads_i.shed
-                            shed_load!(part.loads, v_dst)
+                        if temp_load.nfc && !temp_load.shed
+                            shed_load!(part, temp_load)
                             if loading(part) - part.capacity < 0
                                 # We removed the overload stop shedding
                                 break
@@ -320,6 +320,10 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
                             shed_load!(part, v_dst)
                             append!(visit, v_dst)
                         end
+                    else
+                        # There was no overload update the part and continue
+                        # the search.
+                        append!(visit, v_dst)
                     end
                 else
                     # There was no overload update the part and continue
@@ -413,7 +417,8 @@ function evaluate_split!(split::Split, part::Part)
     if isempty(v_diff)
         return
     end
-    recon_P = sum(part.loads[v].P for v in v_diff)
+    # This is probably not correct. Because none of this may solve the overload.
+    recon_P = sum(part.loads[v].P for v in v_diff if !part.loads[v].shed; init=0.0)
     
     # Iterate the vertices in the Part after the Split. Note that the split
     # May contain vertices that are not in the Part. We currently do, not
@@ -579,7 +584,9 @@ end
     fix this.
 """
 function reduce_part_after_reconf!(part::Part, island::Vector{Int})
-    shed_load!(part, setdiff(part.vertices, island))
+    for v in setdiff(part.vertices, island)
+        remove_vertex!(part, v)
+    end
 end
 
 function islands_after_switching(o::Overlapping, e::Edge)

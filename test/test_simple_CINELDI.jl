@@ -57,5 +57,21 @@ network.mpc.switch[12, :f_bus] = "15"
 network.mpc.switch[12, :t_bus] = "16"
 network = RadialPowerGraph(network.mpc)
 
+# Implement case 9a from power point presentation
+network = RadialPowerGraph(network_filename)
+network.mpc.switch.t_remote .= 0.5
+network.mpc.load[1, :P] = 5.0
+network.mpc.load[10, :P] = 5.0
+
 res, L, edge_pos = relrad_calc(cost_functions, network)
-# @test isapprox(sum(res["base"].U[:, 2]), 0.440, atol=0.01)
+λ = network.mpc.reldata[2, :permanentFaultFrequency]
+isol = 6:9
+U = λ*(sum(5*length(isol))+0.5*sum(length(setdiff(1:10, isol))))
+@test isapprox(sum(res["base"].U[:, 2]), U, atol=0.01)
+
+# Implement case 9b from power point presentation
+network.mpc.load[1, :nfc] = true
+network = RadialPowerGraph(network.mpc)
+res, L, edge_pos = relrad_calc(cost_functions, network)
+U -= 5*λ
+@test isapprox(sum(res["base"].U[:, 2]), U, atol=0.01)
