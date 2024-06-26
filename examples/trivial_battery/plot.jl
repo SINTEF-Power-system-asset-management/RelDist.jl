@@ -1,4 +1,4 @@
-using CairoMakie
+using GLMakie
 using GraphMakie
 using SintPowerGraphs
 using RelDist
