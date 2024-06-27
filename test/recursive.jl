@@ -6,39 +6,46 @@ using GraphMakie: graphplot
 using GLMakie: Makie.wong_colors;
 import Base: hash, ==
 
-@enum BusKind t_supply t_load
 
+@enum BusKind t_supply t_load t_nfc_load
+
+"""Minimal data structure for storing a bus in a network.
+If bus is a supply power is the power it can supply.
+If it is a load or a nfc_load it is the power it needs."""
 struct Bus
     kind::BusKind
     power::Float64
-    label::String
 end
 
-function Bus(kind::BusKind, power::Float64)
-    Bus(kind, power, "")
-end
+const KeyType = String
+const VertexType = Bus
+const EdgeType = Nothing
+const Network = MetaGraph{Int,SimpleGraph{Int},KeyType,VertexType,EdgeType}
 
-const Network = MetaGraph{Int64,SimpleGraph{Int64},Int64,Bus,Nothing}
+# graf[label] = vertex
+# graf[labe, label] = edge
 
 function empty_network()
     MetaGraph(
         Graph();
-        label_type=Int,
+        label_type=KeyType,
         vertex_data_type=Bus,
         edge_data_type=Nothing,
     )
 end
 
+"""Representation of the subgraph of the network that is supplied by a given bus."""
 mutable struct Part
     # TODO: Det er kanskje raskere om vi har et separat sett med leaf-nodes, 
     # så vi slepp å iterere over heile subtreet kvar iterasjon
     # EDIT: Det er vanskelig å vite når ein node stoppar å være ein leaf node, 
     # ikkje vits å implementere med mindre det blir eit problem
     rest_power::Float64
-    subtree::Set{Int}
+    subtree::Set{KeyType}
+    # dropped_loads::Set{Int}
 end
 
-function Part(network::Network, supply::Int)
+function Part(network::Network, supply::KeyType)
     bus = network[supply]
     if bus.kind != t_supply
         error("Parts should only be instantiated at power supplies")
@@ -55,8 +62,41 @@ function ==(a::Part, b::Part)
     (a.rest_power == b.rest_power) && (a.subtree == b.subtree)
 end
 
+function visit!(network::Network, part::Part, visitation::KeyType)
+    bus::Bus = network[visitation]
+    part.rest_power -= bus.power
+    push!(part.subtree, visitation)
+end
 
-function get_vertex_color(network::Network, vertex::Int)
+function unvisit!(network::Network, part::Part, visitation::KeyType)
+    bus::Bus = network[visitation]
+    part.rest_power += bus.power
+    pop!(part.subtree, visitation)
+end
+
+function visit!(network::Network, parts::Set{Part}, part::Part, visitation::KeyType)
+    # Warning: by modifying something in a set we open up the possibility for a lot of errors.
+    # for example this following line will throw even though part is in parts
+    # because part has been modified.
+    # if !(part in parts)
+    #     error("Part to visit must be in set of parts")
+    # end
+    # pop!(parts, part)
+    visit!(network, part, visitation)
+    # push!(parts, part)
+end
+
+function unvisit!(network::Network, parts::Set{Part}, part::Part, visitisation::KeyType)
+    # if !(part in parts)
+    #     error("Part to unvisit must be in set of parts")
+    # end
+    # pop!(parts, part)
+    unvisit!(network, part, visitisation)
+    # push!(parts, part)
+end
+
+
+function get_vertex_color(network::Network, vertex::KeyType)
     kind = network[vertex].kind
     if kind == t_supply
         :green
@@ -67,7 +107,7 @@ function get_vertex_color(network::Network, vertex::Int)
     end
 end
 
-function get_vertex_color(network::Network, vertex::Int, parts::Set{Part})
+function get_vertex_color(network::Network, vertex::KeyType, parts::Set{Part})
     kind = network[vertex].kind
     if kind == t_supply
         :green
@@ -85,22 +125,17 @@ end
 
 function plot_that_graph(network::Network, parts::Set{Part})
     vertex_colors = [get_vertex_color(network, vertex, parts) for vertex in labels(network)]
-    vertex_labels = [network[vertex].label for vertex in labels(network)]
-    graphplot(network, node_color=vertex_colors, ilabels=vertex_labels)
+    graphplot(network, node_color=vertex_colors, ilabels=labels(network))
 end
 
-"""
-Recursively finds the optimal way to partition the network into parts. Returns power not supplied and the array of parts
-"""
-function search(network::Network, parts::Set{Part})::Set{Part}
-    cache = Set{UInt}()
-    paths_checked = 0
+function energy_not_served(network::Network, parts::Set{Part})::Float64
+    sum([part.rest_power for part in parts])
+end
 
-    function recurse(parts::Set{Part})::Set{Part}
-        choices = []
-
-        # For each of the growing subtrees
-        for (part_idx, part) in enumerate(parts)
+function nodes_to_visit(network::Network, parts::Set{Part})
+    """Creates an iterator over all neighbours of all parts"""
+    Channel(ctype=Tuple{Part,KeyType}) do c
+        for part in parts
             # For each of the node in the subtree
             for node_idx in part.subtree
                 # For each of the neighbours of that node
@@ -110,60 +145,72 @@ function search(network::Network, parts::Set{Part})::Set{Part}
                         # Anyways we don't want it
                         continue
                     end
-                    neighbour = network[neighbour_idx]
-                    if neighbour.kind == t_supply
-                        error("All supplies should be in set of already visited")
-                    end
-                    if neighbour.power > part.rest_power
-                        continue # Overload
-                    end
-
-                    local modified_parts = deepcopy(parts)
-                    local modified_part = pop!(modified_parts, part)
-                    modified_part.rest_power -= neighbour.power
-                    push!(modified_part.subtree, neighbour_idx)
-                    push!(modified_parts, modified_part)
-
-                    hashy = hash(modified_parts)
-                    if hashy in cache
-                        continue
-                    end
-                    res = recurse(modified_parts)
-                    push!(cache, hashy)
-                    paths_checked += 1
-                    push!(choices, res)
+                    push!(c, (part, neighbour_idx))
                 end
             end
         end
-
-        if length(choices) == 0
-            parts
-        else
-            argmin(choice -> sum([part.rest_power for part in choice]), choices)
-        end
     end
-    res = recurse(parts)
-    println("Checked ", paths_checked)
-    res
+end
+
+"""
+Recursively finds the optimal way to partition the network into parts. Returns power not supplied and the array of parts
+"""
+function search(
+    network::Network,
+    parts::Set{Part},
+    cost_function::typeof(energy_not_served)=energy_not_served
+)::Set{Part}
+    # Use the hashes in the cache because its easier to debug
+    cache::Dict{UInt,Set{Part}} = Dict()
+
+    function recurse(parts::Set{Part})::Set{Part}
+        hashy = hash(parts)
+        if hashy in keys(cache)
+            return cache[hashy]
+        end
+        choices = []
+
+        for (part, neighbour_idx) in nodes_to_visit(network, parts)
+            neighbour = network[neighbour_idx]
+            if neighbour.power > part.rest_power
+                continue # Overload
+            end
+
+            visit!(network, parts, part, neighbour_idx)
+            res = recurse(parts)
+            push!(choices, res)
+            unvisit!(network, parts, part, neighbour_idx)
+        end
+
+        res = if length(choices) == 0
+            deepcopy(parts)
+        else
+            argmin(choice -> cost_function(network, choice), choices)
+        end
+        cache[hashy] = res
+        res
+    end # function recurse
+
+    recurse(parts)
 end
 
 function main()
     network = empty_network()
 
-    network[6] = Bus(t_supply, 2.0, "bf_6")
-    network[5] = Bus(t_supply, 2.0, "bf_5")
+    network["bf_6"] = Bus(t_supply, 2.0)
+    network["bf_5"] = Bus(t_supply, 2.0)
 
-    network[4] = Bus(t_load, 1.0, "load_4")
-    network[3] = Bus(t_load, 1.0, "load_3")
-    network[2] = Bus(t_load, 1.0, "load_2")
-    network[1] = Bus(t_load, 1.0, "load_1")
+    network["load_4"] = Bus(t_load, 1.0)
+    network["load_3"] = Bus(t_load, 1.0)
+    network["load_2"] = Bus(t_load, 1.0)
+    network["load_1"] = Bus(t_load, 1.0)
 
-    network[1, 2] = nothing
-    network[2, 3] = nothing
-    network[3, 4] = nothing
+    network["load_1", "load_2"] = nothing
+    network["load_2", "load_3"] = nothing
+    network["load_3", "load_4"] = nothing
 
-    network[5, 2] = nothing
-    network[6, 3] = nothing
+    network["bf_5", "load_2"] = nothing
+    network["bf_6", "load_3"] = nothing
 
     # Create a subtree for each supply, (call this a Part)
     # The subtree needs to know how much more power it can supply
@@ -178,7 +225,8 @@ function main()
 
     # plot_that_graph(network, parts)
     optimal_split = search(network, parts)
-    plot_that_graph(network, optimal_split)
+    display(optimal_split)
+    display(plot_that_graph(network, optimal_split))
 end
 
 main()
