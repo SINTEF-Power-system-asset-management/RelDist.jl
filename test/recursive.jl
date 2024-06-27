@@ -4,6 +4,7 @@ using Graphs: Graph, SimpleGraph
 using MetaGraphsNext: MetaGraph, labels, neighbor_labels, haskey
 using GraphMakie: graphplot
 using GLMakie: Makie.wong_colors;
+import Base: hash, ==
 
 @enum BusKind t_supply t_load
 
@@ -28,6 +29,33 @@ function empty_network()
     )
 end
 
+mutable struct Part
+    # TODO: Det er kanskje raskere om vi har et separat sett med leaf-nodes, 
+    # så vi slepp å iterere over heile subtreet kvar iterasjon
+    # EDIT: Det er vanskelig å vite når ein node stoppar å være ein leaf node, 
+    # ikkje vits å implementere med mindre det blir eit problem
+    rest_power::Float64
+    subtree::Set{Int}
+end
+
+function Part(network::Network, supply::Int)
+    bus = network[supply]
+    if bus.kind != t_supply
+        error("Parts should only be instantiated at power supplies")
+    end
+    subtree = Set([supply])
+    Part(bus.power, subtree)
+end
+
+function hash(party::Part)
+    hash((party.rest_power, party.subtree))
+end
+
+function ==(a::Part, b::Part)
+    (a.rest_power == b.rest_power) && (a.subtree == b.subtree)
+end
+
+
 function get_vertex_color(network::Network, vertex::Int)
     kind = network[vertex].kind
     if kind == t_supply
@@ -39,13 +67,13 @@ function get_vertex_color(network::Network, vertex::Int)
     end
 end
 
-function get_vertex_color(network::Network, vertex::Int, parts::Vector{Part})
+function get_vertex_color(network::Network, vertex::Int, parts::Set{Part})
     kind = network[vertex].kind
     if kind == t_supply
         :green
     elseif kind == t_load
         for (part_idx, part) in enumerate(parts)
-            if haskey(part.subtree, vertex)
+            if vertex in part.subtree
                 return wong_colors()[part_idx]
             end
         end
@@ -55,62 +83,52 @@ function get_vertex_color(network::Network, vertex::Int, parts::Vector{Part})
     end
 end
 
-mutable struct Part
-    rest_power::Float64
-    subtree::Network
-end
-
-function Part(network::Network, supply::Int)
-    bus = network[supply]
-    if bus.kind != t_supply
-        error("Parts should only be instantiated at power supplies")
-    end
-    subtree = empty_network()
-    subtree[supply] = bus
-    Part(bus.power, subtree)
+function plot_that_graph(network::Network, parts::Set{Part})
+    vertex_colors = [get_vertex_color(network, vertex, parts) for vertex in labels(network)]
+    vertex_labels = [network[vertex].label for vertex in labels(network)]
+    graphplot(network, node_color=vertex_colors, ilabels=vertex_labels)
 end
 
 """
 Recursively finds the optimal way to partition the network into parts. Returns power not supplied and the array of parts
 """
-function search(network::Network, parts::Vector{Part}, consumed::Set{Int})::Vector{Part}
-    # TODO: figure out hashing so that we can cache visited states
+function search(network::Network, parts::Set{Part})::Set{Part}
     cache = Set{UInt}()
     paths_checked = 0
 
-    function recurse(parts::Vector{Part}, consumed::Set{Int})::Vector{Part}
+    function recurse(parts::Set{Part})::Set{Part}
         choices = []
 
         # For each of the growing subtrees
-        for part_idx in 1:length(parts)
-            part = parts[part_idx]
+        for (part_idx, part) in enumerate(parts)
             # For each of the node in the subtree
-            for node_idx in labels(part.subtree)
+            for node_idx in part.subtree
                 # For each of the neighbours of that node
                 for neighbour_idx in neighbor_labels(network, node_idx)
-                    if neighbour_idx in consumed
+                    if any([neighbour_idx in part.subtree for part in parts])
+                        # Either walking back in subtree or colliding with another subtree
+                        # Anyways we don't want it
                         continue
                     end
                     neighbour = network[neighbour_idx]
                     if neighbour.kind == t_supply
-                        error("All supplies should be in consumed set")
+                        error("All supplies should be in set of already visited")
                     end
                     if neighbour.power > part.rest_power
                         continue # Overload
                     end
 
                     local modified_parts = deepcopy(parts)
-                    # println(hash(tuple(modified_parts)) in Set(hash(tuple(parts))))
-                    modified_parts[part_idx].rest_power -= neighbour.power
-                    modified_parts[part_idx].subtree[neighbour_idx] = deepcopy(neighbour)
-                    modified_parts[part_idx].subtree[node_idx, neighbour_idx] = nothing
-                    local modified_consumed = deepcopy(consumed)
-                    push!(modified_consumed, neighbour_idx)
+                    local modified_part = pop!(modified_parts, part)
+                    modified_part.rest_power -= neighbour.power
+                    push!(modified_part.subtree, neighbour_idx)
+                    push!(modified_parts, modified_part)
+
                     hashy = hash(modified_parts)
                     if hashy in cache
                         continue
                     end
-                    res = recurse(modified_parts, modified_consumed)
+                    res = recurse(modified_parts)
                     push!(cache, hashy)
                     paths_checked += 1
                     push!(choices, res)
@@ -124,7 +142,7 @@ function search(network::Network, parts::Vector{Part}, consumed::Set{Int})::Vect
             argmin(choice -> sum([part.rest_power for part in choice]), choices)
         end
     end
-    res = recurse(parts, consumed)
+    res = recurse(parts)
     println("Checked ", paths_checked)
     res
 end
@@ -147,14 +165,6 @@ function main()
     network[5, 2] = nothing
     network[6, 3] = nothing
 
-    network_2 = deepcopy(network)
-    println(hash(tuple(network_2)) in Set(hash(tuple(network))))
-
-
-    # vertex_colors = [get_vertex_color(network, vertex) for vertex in labels(network)]
-    # vertex_labels = [network[vertex].label for vertex in labels(network)]
-    # graphplot(network, node_color=vertex_colors, ilabels=vertex_labels)
-
     # Create a subtree for each supply, (call this a Part)
     # The subtree needs to know how much more power it can supply
     # For each leaf node in the subtree, 
@@ -163,15 +173,12 @@ function main()
     # If there are no neighbours, return current state
     # Evaluate by the total unused power. I suppose this needs to change to support more complex costs
     supplies = [vertex for vertex in labels(network) if network[vertex].kind == t_supply]
-    parts = [Part(network, supply) for supply in supplies]
-    visited_nodes = Set(supplies)
+    parts = Set([Part(network, supply) for supply in supplies])
     # println(supplies)
 
-    optimal_split = search(network, parts, visited_nodes)
-
-    vertex_colors = [get_vertex_color(network, vertex, optimal_split) for vertex in labels(network)]
-    vertex_labels = [network[vertex].label for vertex in labels(network)]
-    graphplot(network, node_color=vertex_colors, ilabels=vertex_labels)
+    # plot_that_graph(network, parts)
+    optimal_split = search(network, parts)
+    plot_that_graph(network, optimal_split)
 end
 
 main()
