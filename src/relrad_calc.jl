@@ -246,8 +246,13 @@ function get_switch(network::RadialPowerGraph, e::Branch)
     get_switch(network.mpc, e)
 end
 
+function get_switches(switch::DataFrame, src::String, dst::String)
+    switch[switch.f_bus.==src .&& switch.t_bus.==dst, :]
+end
+
 function get_switch(mpc::Case, e::Branch)
-    switches = mpc.switch[mpc.switch.f_bus.==e.src .&& mpc.switch.t_bus.==e.dst, :]
+    switches = vcat(get_switches(mpc.switch, e.src, e.dst),
+                    get_switches(mpc.switch, e.dst, e.src))
     if isempty(switches)
         return Switch(e.src, e.dst, -Inf, -Inf)
     end

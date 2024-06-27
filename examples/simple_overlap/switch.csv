@@ -1,0 +1,9 @@
+ID;f_bus;t_bus;breaker;closed;remote;t_manual;t_remote
+0;mf_0;failer;true;true;false;0.08333;0.01667
+1000;failer;mf_0;true;true;false;0.08333;0.01667
+6;failer;load_1;false;true;false;0.08333;0.01667
+1;load_1;load_2;false;true;false;0.08333;0.01667
+2;load_2;load_3;false;true;false;0.08333;0.01667
+3;load_2;bf_5;false;false;false;0.08333;0.01667
+4;load_3;load_4;false;true;false;0.08333;0.01667
+5;load_3;bf_6;false;false;false;0.08333;0.01667

@@ -1,0 +1,4 @@
+ID;bus;P;Qg;Qmax;Qmin;Vg;mBase;status;Pmax;Pmin;external
+0;mf;100;0;1000.0;-1000.0;1.1;100.0;1;2.0;0.0;true
+1;bf;1;0;1000.0;-1000.0;1.1;100.0;1;1.0;0.0;true
+2;battery;2;0;1000.0;-1000.0;1.1;100.0;1;2.0;0.0;false

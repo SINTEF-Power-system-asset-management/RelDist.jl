@@ -1,0 +1,6 @@
+ID;f_bus;t_bus;repairTime;permanentFaultFrequency;temporaryFaultFrequency;sectioningTime;temporaryFaultTime
+1;mf;failer;4;0.1;0.1;0.017;0.01667
+2;failer;load_1;4;0.1;0.1;0.017;0.01667
+3;bf;load_1;4;0.1;0.1;0.017;0.01667
+4;load_1;load_2;4;0.1;0.1;0.017;0.01667
+5;battery;load_2;4;0.1;0.1;0.017;0.01667

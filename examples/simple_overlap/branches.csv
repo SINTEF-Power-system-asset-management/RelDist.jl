@@ -1,0 +1,8 @@
+ID;f_bus;t_bus;r;x;b;rateA;rateB;rateC;ratio;angle
+line_0_f;mf_0;failer;0;0;0;0;0;0;0;0
+line_f_1;failer;load_1;0;0;0;0;0;0;0;0
+line_1_2;load_1;load_2;0;0;0;0;0;0;0;0
+line_2_3;load_2;load_3;0;0;0;0;0;0;0;0
+line_2_5;load_2;bf_5;0;0;0;0;0;0;0;0
+line_3_4;load_3;load_4;0;0;0;0;0;0;0;0
+line_3_6;load_3;bf_6;0;0;0;0;0;0;0;0
