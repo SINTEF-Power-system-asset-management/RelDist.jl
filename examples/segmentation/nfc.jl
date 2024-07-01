@@ -1,6 +1,6 @@
 include("setup.jl")
 
-function main()
+function plot_nfc()
     network = empty_network()
 
     network["bf"] = Bus(t_supply, 2.0)
@@ -9,8 +9,8 @@ function main()
     network["load"] = Bus(t_load, 2.0)
 
 
-    network["bf", "nfc"] = nothing
-    network["nfc", "load"] = nothing
+    network["bf", "nfc"] = NewBranch()
+    network["nfc", "load"] = NewBranch()
 
     supplies = [vertex for vertex in labels(network) if network[vertex].kind == t_supply]
     parts = Set([NetworkPart(network, supply) for supply in supplies])
@@ -18,3 +18,5 @@ function main()
     display(optimal_split)
     display(plot_that_graph(network, optimal_split))
 end
+
+plot_nfc()

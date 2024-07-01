@@ -28,4 +28,5 @@ end
 @testset "Testing optimal network splitting" begin
     include("segmentation/simple_overlap.jl")
     include("segmentation/nfc.jl")
+    include("segmentation/kile.jl")
 end

@@ -1,4 +1,5 @@
 using RelDist: segment_network, empty_network, Bus, Network, NetworkPart, KeyType, t_load, t_nfc_load, t_supply
+using RelDist: NewBranch
 using MetaGraphsNext: labels, neighbor_labels
 using Test
 
@@ -13,12 +14,12 @@ function test_simple_overlap()
     network["load_2"] = Bus(t_load, 1.0)
     network["load_1"] = Bus(t_load, 1.0)
 
-    network["load_1", "load_2"] = nothing
-    network["load_2", "load_3"] = nothing
-    network["load_3", "load_4"] = nothing
+    network["load_1", "load_2"] = NewBranch()
+    network["load_2", "load_3"] = NewBranch()
+    network["load_3", "load_4"] = NewBranch()
 
-    network["bf_5", "load_2"] = nothing
-    network["bf_6", "load_3"] = nothing
+    network["bf_5", "load_2"] = NewBranch()
+    network["bf_6", "load_3"] = NewBranch()
 
     optimal_split = segment_network(network)
     for part in optimal_split
