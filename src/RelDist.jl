@@ -30,6 +30,9 @@ export MONTH_FACTORS, DAY_FACTORS, HOUR_FACTORS, COST_FUN, LOAD_PROFILES, TEMPER
 include("reconfiguration.jl")
 export calc_R, traverse
 
+include("network_segmenter.jl")
+export empty_network, Network, Bus, BusKind, NetworkPart, segment_network
+
 include("relrad_calc.jl")
 export relrad_calc
 
