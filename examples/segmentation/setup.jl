@@ -1,49 +1,41 @@
 # Warning: when using algorithms from Graphs they use indices and not labels
 # This is inconsistent with the metagraphs
 using RelDist: segment_network, empty_network, Bus, Network, NetworkPart, KeyType
-using RelDist: t_load, t_nfc_load, t_supply, BusSupply, BusLoad, NewBranch, is_supply
+using RelDist: t_load, t_nfc_load, t_supply, NewBranch, is_supply, is_nfc
 using RelDist: kile_loss
 using MetaGraphsNext: labels, neighbor_labels
 using Graphs: Graph, SimpleGraph
 using GraphMakie: graphplot
 using GLMakie: Makie.wong_colors
 
-get_vertex_color(bus::BusSupply) = :green
-function get_vertex_color(bus::BusLoad)
-    if bus.is_nfc
-        return (get_vertex_color(BusLoad(is_nfc=false, bus...)), 0.8)
+function get_vertex_color(bus::Bus)
+    if is_supply(bus)
+        return :green
     end
 
-    :blue
-end
+    opacity = is_nfc(bus) ? 0.8 : 1.0
 
-function get_vertex_color(bus::Bus)
-    error("Unsupported bus type")
+    (:blue, opacity)
 end
-
 
 function get_vertex_color(network::Network, vertex::KeyType)
     bus = network[vertex]
     get_vertex_color(bus)
 end
 
-# I'm sorry
-get_vertex_color(bus::BusSupply, vertex::KeyType, parts::Set{NetworkPart}) = get_vertex_color(bus)
-function get_vertex_color(bus::BusLoad, vertex::KeyType, parts::Set{NetworkPart})
-    if bus.is_nfc
-        return (get_vertex_color(BusLoad(is_nfc=false, bus...)), 0.8)
+function get_vertex_color(bus::Bus, vertex::KeyType, parts::Set{NetworkPart})
+    if is_supply(bus)
+        return get_vertex_color(bus)
     end
+
+    opacity = is_nfc(bus) ? 0.8 : 1.0
 
     for (part_idx, part) in enumerate(parts)
         if vertex in part.subtree
-            return wong_colors()[part_idx]
+            return (wong_colors()[part_idx+1], opacity)
         end
     end
-    get_vertex_color(bus)
-end
-
-function get_vertex_color(bus::Bus, parts::Set{NetworkPart})
-    error("Unsupported bus type")
+    (:blue, opacity)
 end
 
 function get_vertex_color(network::Network, vertex::KeyType, parts::Set{NetworkPart})

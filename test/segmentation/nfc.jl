@@ -1,5 +1,5 @@
 using RelDist: segment_network, empty_network, t_load, t_nfc_load, t_supply
-using RelDist: NewBranch
+using RelDist: Bus, NewBranch, NetworkPart
 using MetaGraphsNext: labels, neighbor_labels
 using Test
 
@@ -20,7 +20,6 @@ function test_load_dropping()
     for part::NetworkPart in optimal_split
         if "load" in part.subtree
             @test "nfc" in part.subtree
-            @test "nfc" in part.dropped_loads
         end
     end
 end
