@@ -1,9 +1,9 @@
-# Simple overlap case
+# Simple battery case
 
 ```txt
-  1 --- 2 --- 3 --- 4
-        |     |
-        5     6
+  mf --- fail --- load --- load --- battery
+                    |
+                    bf
 ```
 
-5 and 6 are backup power sources that each can supply two loads. The solution should be that 5 supplies 1 and 2, and 6 supplies 3 and 4
+bf can supply one load, battery 2. This means we should be able to supply the entire network, but only if bf can find the battery.
