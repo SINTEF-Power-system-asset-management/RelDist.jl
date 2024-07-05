@@ -103,11 +103,12 @@ end
 
 struct NewBranch
     repair_time::Float64 # h
+    permanent_fault_frequency::Float64
     switches::Vector{NewSwitch}
 end
 
 NewBranch() =
-    NewBranch(0.512, [NewSwitch()])
+    NewBranch(0.512, 0.123, [NewSwitch()])
 
 function is_switch(branch::NewBranch)
     length(branch.switches) > 0
@@ -536,7 +537,7 @@ function add_branches!(graphy::Network, case::Case)
             push!(switches, switchy)
         end
 
-        branchy = NewBranch(branch[:repairTime], switches)
+        branchy = NewBranch(branch[:repairTime], branch[:permanentFaultFrequency], switches)
         graphy[branch[:f_bus], branch[:t_bus]] = branchy
     end
 end
@@ -604,39 +605,24 @@ function isolate_and_get_time!(network::Network, edge::Tuple{KeyType,KeyType})
     edges_to_rm = Set([edge])
     nodes_to_rm::Set{KeyType} = Set()
     min_switching_time = -Inf
-    # println("XAXAXA $edge $node_a ", get_cutoff_switch(network, edge, node_b))
-    # display(network[edge...])
-    if (switch_to_cut = get_cutoff_switch(network, edge, node_a)) !== nothing
-        # Special case where we must cut this switch
-        min_switching_time = max(time_to_cut(switch_to_cut), min_switching_time)
-    else
-        # recurse to find minimum edge set
-        local (edges, nodes) = find_isolating_switches(network, [node_a], Set([node_b]))
-        union!(edges_to_rm, edges)
-        union!(nodes_to_rm, nodes)
-        push!(nodes_to_rm, node_a)
-    end
-    if (switch_to_cut = get_cutoff_switch(network, edge, node_b)) !== nothing
-        # Special case where we must cut other switch
-        min_switching_time = max(time_to_cut(switch_to_cut), min_switching_time)
-    else
-        # recurse to find minimum edge set
-        local (edges, nodes) = find_isolating_switches(network, [node_b], Set([node_a]))
-        union!(edges_to_rm, edges)
-        union!(nodes_to_rm, nodes)
-        push!(nodes_to_rm, node_b)
+
+    for (first, last) in [node_a => node_b, node_b => node_a]
+        if (switch_to_cut = get_cutoff_switch(network, edge, first)) !== nothing
+            # Special case where we must cut this switch
+            min_switching_time = max(time_to_cut(switch_to_cut), min_switching_time)
+        else
+            # recurse to find minimum edge set
+            local (edges, nodes) = find_isolating_switches(network, [first], Set([last]))
+            union!(edges_to_rm, edges)
+            union!(nodes_to_rm, nodes)
+            push!(nodes_to_rm, first)
+        end
     end
 
+    # The only branches we need to cut are the ones that exit the bunch of affected nodes
     branches_to_cut = [edge for edge in edges_to_rm if !(edge[1] in nodes_to_rm) || !(edge[2] in nodes_to_rm)]
     switching_times = [get_min_cutting_time(network[branch...]) for branch in branches_to_cut]
     switching_time = maximum(switching_times; init=min_switching_time)
-    if switching_time == -40.0
-        println(branches_to_cut, find_isolating_switches(network, [node_b], Set([node_a])), find_isolating_switches(network, [node_a], Set([node_b])))
-        for branch in branches_to_cut
-            println(branch, " - ", network[branch...], " ")
-        end
-        println()
-    end
 
     [delete!(network, edge...) for edge in edges_to_rm]
     [delete!(network, node) for node in nodes_to_rm]
@@ -658,8 +644,7 @@ function relrad_calc_2(network::Network)
         let network = deepcopy(network)
             repair_time = network[edge...].repair_time
             [outage_times[edge_idx, colname] = repair_time for colname in colnames] # Worst case for this fault
-            (node_a, node_b) = edge
-            (isolation_time, cuts_to_make_irl) = isolate_and_get_time!(network, edge)
+            (isolation_time, _cuts_to_make_irl) = isolate_and_get_time!(network, edge)
             push!(networks, network)
 
             for subnet in connected_components(network, isolation_time, repair_time)
@@ -678,5 +663,58 @@ function relrad_calc_2(network::Network)
     end
 
     outage_times
+end
+
+"""Get power data on the same format as the times df."""
+function power_matrix(network::Network, times::DataFrame)
+    power_df = copy(times)
+    for row in eachrow(power_df), col in names(power_df)
+        if col == "cut_edge"
+            continue
+        end
+        bus::Bus = network[col]
+        power = get_load_power(bus)
+        row[col] = power
+    end
+    power_df
+end
+
+"""Get fault_rate data on the same format as the times df."""
+function fault_rate_matrix(network::Network, times::DataFrame)
+    fault_rate_df = copy(times)
+    for row in eachrow(fault_rate_df), col in names(fault_rate_df)
+        if col == "cut_edge"
+            continue
+        end
+        edge = row[:cut_edge]
+        branch::NewBranch = network[edge...]
+        fault_rate = branch.permanent_fault_frequency
+        row[col] = fault_rate
+    end
+    fault_rate_df
+end
+
+struct NewResult
+    t::DataFrame
+    power::DataFrame
+    lambda::DataFrame
+    U::DataFrame
+    ENS::DataFrame
+end
+
+function transform_relrad_data(network::Network, times::DataFrame)
+    power = power_matrix(network, times)
+    fault_rate = fault_rate_matrix(network, times)
+
+    p = select(power, Not(:cut_edge))
+    lambda = select(fault_rate, Not(:cut_edge))
+    outage_time = select(times, Not(:cut_edge))
+
+    interruption_duration = lambda .* outage_time
+    energy_not_supplied = interruption_duration .* p
+    interruption_duration[!, :cut_edge] = times[:, :cut_edge]
+    energy_not_supplied[!, :cut_edge] = times[:, :cut_edge]
+
+    NewResult(times, power, fault_rate, interruption_duration, energy_not_supplied)
 end
 
