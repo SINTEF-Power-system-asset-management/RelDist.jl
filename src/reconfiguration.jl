@@ -226,7 +226,7 @@ end
     Returns the names of the loads that are in service.
 """
 function in_service_loads(part::Part)
-    [load.bus for load in values(part.loads) if !load.shed]
+    Dict(load.bus => Inf for load in values(part.loads) if !load.shed)
 end
 
 """
