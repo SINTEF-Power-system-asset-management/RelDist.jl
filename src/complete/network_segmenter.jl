@@ -192,7 +192,7 @@ function NetworkPart(network::Network, supply::KeyType)
     NetworkPart(get_supply_power(bus), subtree, leaf_nodes)
 end
 
-Base.hash(party::NetworkPart) = hash((party.rest_power, party.subtree))
+Base.hash(party::NetworkPart) = hash(party.subtree)
 Base.:(==)(a::NetworkPart, b::NetworkPart) = hash(a) == hash(b)
 Base.keys(party::NetworkPart) = Base.keys(party.subtree)
 
@@ -270,15 +270,15 @@ function nodes_to_visit(network::Network, parts::Set{NetworkPart})
     buffer::Vector{Tuple{NetworkPart,KeyType}} = []
     for part in parts
         # For each of the node in the subtree
-        for node_idx in part.leaf_nodes
+        for node_label in part.leaf_nodes
             # For each of the neighbours of that node
-            for neighbour_idx in neighbor_labels(network, node_idx)
-                if any([neighbour_idx in part.subtree for part in parts])
+            for neighbour_label in neighbor_labels(network, node_label)
+                if any(neighbour_label in part.subtree for part in parts)
                     # Either walking back in subtree or colliding with another subtree
                     # Anyways we don't want it
                     continue
                 end
-                push!(buffer, (part, neighbour_idx))
+                push!(buffer, (part, neighbour_label))
             end
         end
     end
@@ -405,21 +405,27 @@ function segment_network(
     # I'm annoyed i have to use Any when i know that the three Any types will always be the same
     cache::Dict{UInt,Tuple{Any,Set{NetworkPart}}} = Dict()
     visit_count = 0
+    cache_hits = 0
     start = time()
 
     function recurse(parts::Set{NetworkPart})::Tuple{Any,Set{NetworkPart}}
         hashy = hash(parts)
         if hashy in keys(cache)
+            cache_hits += 1
             return cache[hashy]
         end
 
         # TODO: Remove when fast
-        # visit_count += 1
-        # if visit_count % 100000 === 0
-        #     println(visit_count, " ", time() - start, " s")
-        # elseif visit_count > 2e6
-        #     return (1.0, Set())
-        # end
+        visit_count += 1
+        if visit_count % 100000 === 0
+            println("cache size: ", length(cache))
+            println("cache hit count: ", cache_hits)
+            println("new states: ", visit_count)
+            println("time spent: ", time() - start, " s")
+            println()
+        elseif visit_count + cache_hits > 2e7
+            return (0.0, Set())
+        end
 
         # We do know that if we don't drop any loads, the deeper search
         # is always better, but this is hard to implement in a readable manner
@@ -461,6 +467,49 @@ function segment_network(network::Network, cost_function::Function=energy_not_se
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = Set([NetworkPart(network, supply) for supply in supplies])
     segment_network(network, parts, cost_function)
+end
+
+"""DFS over all buses from the start bus, gobbling up all nodes we can. 
+TODO: If we encounter overload on a branch with no switch we return nothing to backtrack."""
+function traverse_classic(network::Network, part::NetworkPart)
+    visit = [part.subtree...]
+
+    while !isempty(visit)
+        v_src = pop!(visit)
+
+        for v_dst in setdiff(neighbor_labels(network, v_src), part.subtree)
+            if get_load_power(network[v_dst]) > part.rest_power
+                # TODO: Handle the case where the branch doesn't have any switches
+                continue
+            end
+            visit!(network, part, v_dst)
+            push!(visit, v_dst)
+        end
+    end
+    part
+end
+
+function segment_network_classic(network::Network, parts::Set{NetworkPart}, cost_function::Function=energy_not_served)
+    all_supplied = Vector{NetworkPart}()
+    for part in parts
+        println("$part")
+        supplied_by_this = traverse_classic(network, part)
+        push!(all_supplied, supplied_by_this)
+    end
+    # This is how to get X from the prev algorithm
+    # I handle it differently in my later code though, so we don't need it.
+    """supplied_vertices = Set() 
+    for part in parts
+        union!(supplied_vertices, part.subtree)
+    end"""
+
+    Set(all_supplied)
+end
+
+function segment_network_classic(network::Network, cost_function::Function=energy_not_served)
+    supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
+    parts = [NetworkPart(network, supply) for supply in supplies]
+    segment_network_classic(network, parts, cost_function)
 end
 
 """Create a super simple network to use in doctests
@@ -533,11 +582,28 @@ function add_branches!(graphy::Network, case::Case)
             if sort([branch[:f_bus], branch[:t_bus]]) != sort([switch[:f_bus], switch[:t_bus]])
                 continue
             end
-            switchy = NewSwitch(switch[:f_bus], switch[:closed], switch[:t_remote])
+            t_remote = if :t_remote in propertynames(switch)
+                switch[:t_remote]
+            else
+                branch[:sectioning_time] # Cineldi compat
+            end
+            switchy = NewSwitch(switch[:f_bus], switch[:closed], t_remote)
             push!(switches, switchy)
         end
 
-        branchy = NewBranch(branch[:repairTime], branch[:permanentFaultFrequency], switches)
+        repair_time = if :repair_time in propertynames(branch)
+            branch[:repair_time]
+        else
+            branch[:r_perm] # Cineldi compat
+        end
+
+        permanent_fault_frequency = if :permanentFaultFrequency in propertynames(branch)
+            branch[:permanentFaultFrequency]
+        else
+            branch[:lambda_perm] # Cineldi compat
+        end
+
+        branchy = NewBranch(repair_time, permanent_fault_frequency, switches)
         graphy[branch[:f_bus], branch[:t_bus]] = branchy
     end
 end

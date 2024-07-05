@@ -1,12 +1,23 @@
 include("setup.jl")
+using RelDist: delete!, edge_labels
 
 network = Network(joinpath(@__DIR__, "../CINELDI/CINELDI.toml"))
 
+for vertex in ["1", "36", "62"] # remove all sources but 88
+    for edge in edge_labels(network)
+        if edge[1] == vertex || edge[2] == vertex
+            delete!(network, edge...)
+        end
+    end
+    delete!(network, vertex)
+end
+
 supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
 parts = Set([NetworkPart(network, supply) for supply in supplies])
-display(plot_that_graph(network, parts))
+# display(plot_that_graph(network, parts))
 println("HERE")
-optimal_split = segment_network(network, parts)
+optimal_split = segment_network_classic(network, parts)
+# optimal_split = segment_network(network, parts)
 println("THERE")
 println(optimal_split)
 plot_that_graph(network, optimal_split)

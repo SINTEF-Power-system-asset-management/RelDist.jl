@@ -1,6 +1,6 @@
 # Warning: when using algorithms from Graphs they use indices and not labels
 # This is inconsistent with the metagraphs
-using RelDist: segment_network, empty_network, Bus, Network, NetworkPart, KeyType
+using RelDist: segment_network, segment_network_classic, empty_network, Bus, Network, NetworkPart, KeyType
 using RelDist: t_load, t_nfc_load, t_supply, NewBranch, is_supply, is_nfc
 using RelDist: kile_loss
 using MetaGraphsNext: labels, neighbor_labels
