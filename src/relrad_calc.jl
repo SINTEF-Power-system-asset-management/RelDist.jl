@@ -76,6 +76,7 @@ function relrad_calc(cost_functions::Dict{String, PieceWiseCost},
     
     while !isempty(Q)
         e = pop!(Q)
+
         @info "Processing line $e"
         edge_pos = get_edge_pos(e,edge_pos_df, filtered_branches)
         rel_data = get_branch_data(network, :reldata, e.src, e.dst)
@@ -206,6 +207,9 @@ function section!(res::Dict{String, RelStruct},
                     end
                 end
             end
+
+            evaluate_unpartitioned_parts!(network, reconfigured_network, parts)
+
             X = Set(vcat([collect(in_service_loads(part)) for part in parts]...))
 
             l_pos = 0
