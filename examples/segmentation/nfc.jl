@@ -12,7 +12,7 @@ function plot_nfc()
     network["bf", "nfc"] = NewBranch()
     network["nfc", "load"] = NewBranch()
 
-    supplies = [vertex for vertex in labels(network) if network[vertex].kind == t_supply]
+    supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = Set([NetworkPart(network, supply) for supply in supplies])
     optimal_split = segment_network(network, parts)
     display(optimal_split)

@@ -1,5 +1,5 @@
 ID;f_bus;t_bus;breaker;closed;remote;t_manual;t_remote
 1;mf;load;true;true;false;0.08333;0.01667
-2;load;bf_1;false;true;false;0.08333;0.01667
+2;load;bf_1;false;false;false;0.08333;0.01667
 3;load;bf_2;false;false;false;0.08333;0.01667
-4;load;bf_3;false;true;false;0.08333;0.01667
+4;load;bf_3;false;false;false;0.08333;0.01667

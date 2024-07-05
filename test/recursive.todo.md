@@ -3,6 +3,8 @@
 - Koble til resten av koden
     - Reimplementere traverse_and_get_sectioning_time()
     - 
+- Outputs: U, t, ENS, CENS, r, lambda
+- Hva skjer hvis reparasjonstida endrer seg? eller U?
 - Finne splitting time for den gitte løsninga
 - Dokumentere
 - Batteri

@@ -7,4 +7,3 @@ parts = Set([NetworkPart(network, supply) for supply in supplies])
 optimal_split = segment_network(network, parts)
 display(optimal_split)
 display(plot_that_graph(network, optimal_split))
-

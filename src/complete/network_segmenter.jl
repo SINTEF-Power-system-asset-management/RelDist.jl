@@ -5,6 +5,7 @@ import MetaGraphsNext: labels, edge_labels, neighbor_labels
 import MetaGraphsNext: haskey, setindex!, getindex, delete!
 using SintPowerCase: Case
 using DataFrames: outerjoin, keys
+using DataStructures: DefaultDict
 
 import Base
 
@@ -75,8 +76,9 @@ function is_supply(bus::Bus)
     length(bus.supplies) !== 0
 end
 
-# Note: I will be making this assumption
-is_load(bus::Bus) = !is_supply(bus)
+function is_load(bus::Bus)
+    length(bus.loads) !== 0
+end
 
 ### /Bus
 ### Branch
@@ -91,42 +93,54 @@ end
 
 NewSwitch() = NewSwitch("you should have a key here if you're not testing code", false, 0.2)
 
+function time_to_cut(switch::NewSwitch)
+    if !switch.is_closed
+        0.0
+    else
+        switch.switching_time
+    end
+end
+
 struct NewBranch
     repair_time::Float64 # h
     switches::Vector{NewSwitch}
 end
 
 NewBranch() =
-    NewBranch(0.5, [NewSwitch()])
+    NewBranch(0.512, [NewSwitch()])
 
 function is_switch(branch::NewBranch)
     length(branch.switches) > 0
 end
 
-get_min_switching_time(branch::NewBranch) = minimum(s -> s.switching_time, branch.switches)
+get_min_cutting_time(branch::NewBranch) = minimum(s -> time_to_cut(s), branch.switches)
 
 const VertexType = Bus
 const EdgeType = NewBranch
-struct Network
+mutable struct Network
     network::MetaGraphsNext.MetaGraph{Int,SimpleGraph{Int},KeyType,VertexType,EdgeType}
     switching_time::Float64
+    repair_time::Float64
 end
 
-# graf[label] = vertex
-# graf[labe, label] = edge
+# network[label] = vertex
+# network[labe, label] = edge
 
-function Network(switching_time::Float64=0.5)
+"""Create a Network. If this is a subgraph after a fault switching time and repair time
+are the times it takes to respectively reorganize and fix the fault on the network.
+If not then they don't mean anything."""
+function Network(switching_time=0.511, repair_time=4.0)
     network = MetaGraphsNext.MetaGraph(
         Graph();
         label_type=KeyType,
         vertex_data_type=VertexType,
         edge_data_type=EdgeType,
     )
-    Network(network, switching_time)
+    Network(network, switching_time, repair_time)
 end
 
-# Forwarding methods to the inner network
 empty_network() = Network()
+# Forwarding methods to the inner network
 labels(network::Network) = labels(network.network)
 edge_labels(network::Network) = edge_labels(network.network)
 neighbor_labels(network::Network, key::KeyType) = neighbor_labels(network.network, key)
@@ -143,11 +157,12 @@ delete!(network::Network, key::KeyType) =
 delete!(network::Network, key_a::KeyType, key_b::KeyType) =
     delete!(network.network, key_a, key_b)
 
-"""Create Network instances for each of the connected_components in the network"""
-function connected_components(network::Network, switching_time::Float64=0.5)::Vector{Network}
+"""Create Network instances for each of the connected_components in the network.
+Pass in the switching and repair times for convenience."""
+function connected_components(network::Network, switching_time=0.592, repair_time=4.0)::Vector{Network}
     comps = []
     for subnet_indices in connected_components(network.network)
-        subnet = Network(switching_time)
+        subnet = Network(switching_time, repair_time)
         subnet_labels = [label_for(network.network, idx) for idx in subnet_indices]
         [subnet[label] = network[label] for label in labels(network) if label in subnet_labels]
         [subnet[edge...] = network[edge...] for edge in edge_labels(network) if edge[1] in subnet_labels && edge[2] in subnet_labels]
@@ -280,6 +295,7 @@ function is_served(parts::Set{NetworkPart}, vertex::KeyType)
     return false
 end
 
+get_outage_time(network::Network, parts::Set{NetworkPart}, vertex::KeyType) = is_served(parts, vertex) ? network.switching_time : network.repair_time
 
 """
 Create a function that takes a set of parts given the captured network and repair time.
@@ -303,10 +319,10 @@ function kile_loss(
     network::Network,
     repair_time::Float64=4.0,
     correction_factor=1.0,
-    cost_functions=Dict("residental" => PieceWiseCost()),
+    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
 )
     # TODO: switching time should be the highest of all the switces needed to isolate this part of the grid
-    switching_time = 0.5
+    switching_time = network.switching_time
     function kile_internal(parts::Set{NetworkPart})::Float64
         cost = 0.0
         for vertex in labels(network)
@@ -342,7 +358,7 @@ function unsupplied_nfc_loss(network::Network)
             if !is_served(parts, bus)
                 # Also get buses outside any subgraph, else it might be 
                 # optimal to drop an nfc load that we might have partially served
-                cost += get_nfc_load_power(bus)
+                cost += get_nfc_load_power(network[bus])
             end
         end
 
@@ -396,12 +412,13 @@ function segment_network(
             return cache[hashy]
         end
 
-        visit_count += 1
-        if visit_count % 100000 === 0
-            println(visit_count, " ", time() - start, " s")
-        elseif visit_count > 2e6
-            return (1.0, Set())
-        end
+        # TODO: Remove when fast
+        # visit_count += 1
+        # if visit_count % 100000 === 0
+        #     println(visit_count, " ", time() - start, " s")
+        # elseif visit_count > 2e6
+        #     return (1.0, Set())
+        # end
 
         # We do know that if we don't drop any loads, the deeper search
         # is always better, but this is hard to implement in a readable manner
@@ -435,7 +452,7 @@ function segment_network(
     end # function recurse
 
     res = recurse(parts)
-    println(visit_count, " ", time() - start, " s")
+    # println(visit_count, " ", time() - start, " s") # TODO: remove when fast
     res[2]
 end
 
@@ -499,39 +516,29 @@ function add_buses!(graphy::Network, case::Case)
 end
 
 function add_branches!(graphy::Network, case::Case)
-    branch_withswitch = outerjoin(case.branch, case.switch, on=[:f_bus, :t_bus], renamecols="_branch" => "_switch")
-    # Sort the branches such that (a->b) and (b->a) are immediately after each other
-    permute!(branch_withswitch, sortperm([sort([row.f_bus, row.t_bus]) for row in eachrow(branch_withswitch)]))
-    if :br_r_branch in names(branch_withswitch) # for compat with cineldi_simple
-        rename!(branch_withswitch, :br_r_branch => :r_branch)
+    reldata = if :ID in propertynames(case.reldata)
+        select(case.reldata, Not(:ID))
+    else
+        case.reldata
     end
-    switches::Vector{} = []
-    prev_id::Union{Tuple{String,String},Nothing} = nothing
-    prev_r::Union{Float64,Nothing} = nothing
+    branch_joined = outerjoin(case.branch, reldata, on=[:f_bus, :t_bus])
+    # Sort the branches such that (a->b) and (b->a) are immediately after each other
+    permute!(branch_joined, sortperm([sort([row.f_bus, row.t_bus]) for row in eachrow(branch_joined)]))
 
-    for branch in eachrow(branch_withswitch)
-        # (a->b) and (b->a) are the same branch
-        cur_id = Tuple(sort([branch[:f_bus], branch[:t_bus]]))
-        if cur_id != prev_id && prev_id !== nothing
-            # Make sure nodes exist
-            # push switch to edges
-            branchy = NewBranch(prev_r, switches)
-            graphy[prev_id[1], prev_id[2]] = branchy
-            switches = []
-        end
-        prev_id = cur_id
-        if branch[:r_branch] !== missing
-            prev_r = branch[:r_branch]
-        end
-
-        if branch[:closed_switch] !== missing
-            switchy = NewSwitch(branch[:f_bus], branch[:closed_switch], branch[:t_remote_switch])
+    for branch in eachrow(branch_joined)
+        switches = []
+        for switch in eachrow(case.switch)
+            # (a->b) and (b->a) are the same branch
+            if sort([branch[:f_bus], branch[:t_bus]]) != sort([switch[:f_bus], switch[:t_bus]])
+                continue
+            end
+            switchy = NewSwitch(switch[:f_bus], switch[:closed], switch[:t_remote])
             push!(switches, switchy)
         end
-    end
 
-    branchy = NewBranch(prev_r, switches)
-    graphy[prev_id[1], prev_id[2]] = branchy
+        branchy = NewBranch(branch[:repairTime], switches)
+        graphy[branch[:f_bus], branch[:t_bus]] = branchy
+    end
 end
 
 Network(case_file::String) = Network(Case(case_file))
@@ -596,10 +603,12 @@ function isolate_and_get_time!(network::Network, edge::Tuple{KeyType,KeyType})
     (node_a, node_b) = edge
     edges_to_rm = Set([edge])
     nodes_to_rm::Set{KeyType} = Set()
-    min_switching_time = 0.0
+    min_switching_time = -Inf
+    # println("XAXAXA $edge $node_a ", get_cutoff_switch(network, edge, node_b))
+    # display(network[edge...])
     if (switch_to_cut = get_cutoff_switch(network, edge, node_a)) !== nothing
         # Special case where we must cut this switch
-        min_switching_time = max(switch_to_cut.switching_time, min_switching_time)
+        min_switching_time = max(time_to_cut(switch_to_cut), min_switching_time)
     else
         # recurse to find minimum edge set
         local (edges, nodes) = find_isolating_switches(network, [node_a], Set([node_b]))
@@ -609,7 +618,7 @@ function isolate_and_get_time!(network::Network, edge::Tuple{KeyType,KeyType})
     end
     if (switch_to_cut = get_cutoff_switch(network, edge, node_b)) !== nothing
         # Special case where we must cut other switch
-        min_switching_time = max(switch_to_cut.switching_time, min_switching_time)
+        min_switching_time = max(time_to_cut(switch_to_cut), min_switching_time)
     else
         # recurse to find minimum edge set
         local (edges, nodes) = find_isolating_switches(network, [node_b], Set([node_a]))
@@ -618,36 +627,56 @@ function isolate_and_get_time!(network::Network, edge::Tuple{KeyType,KeyType})
         push!(nodes_to_rm, node_b)
     end
 
-    branches_to_cut = [edge for edge in edges_to_rm if !(edge[1] in nodes_to_rm) || !(edge[1] in nodes_to_rm)]
-    switching_times = [get_min_switching_time(network[branch...]) for branch in branches_to_cut]
+    branches_to_cut = [edge for edge in edges_to_rm if !(edge[1] in nodes_to_rm) || !(edge[2] in nodes_to_rm)]
+    switching_times = [get_min_cutting_time(network[branch...]) for branch in branches_to_cut]
+    switching_time = maximum(switching_times; init=min_switching_time)
+    if switching_time == -40.0
+        println(branches_to_cut, find_isolating_switches(network, [node_b], Set([node_a])), find_isolating_switches(network, [node_a], Set([node_b])))
+        for branch in branches_to_cut
+            println(branch, " - ", network[branch...], " ")
+        end
+        println()
+    end
 
     [delete!(network, edge...) for edge in edges_to_rm]
     [delete!(network, node) for node in nodes_to_rm]
 
-    (max(min_switching_time, maximum(switching_times)), branches_to_cut)
+    (switching_time, branches_to_cut)
 end
 
 function relrad_calc_2(network::Network)
-    for edge in edge_labels(network)
-        edge = ("mf", "load")
-        @info "handling edge $edge"
+    colnames = [lab for lab in labels(network) if is_load(network[lab])]
+    ncols = length(colnames)
+    nrows = length(edge_labels(network))
+    vals = fill(1337.0, (nrows, ncols))
+    outage_times = DataFrame(vals, colnames)
+    outage_times[!, :cut_edge] = collect(edge_labels(network))
+    networks::Vector{Network} = []
+
+    for (edge_idx, edge) in enumerate(edge_labels(network))
         # Shadow old network to not override by accident
         let network = deepcopy(network)
             repair_time = network[edge...].repair_time
+            [outage_times[edge_idx, colname] = repair_time for colname in colnames] # Worst case for this fault
             (node_a, node_b) = edge
             (isolation_time, cuts_to_make_irl) = isolate_and_get_time!(network, edge)
+            push!(networks, network)
 
-            for subnet in connected_components(network, isolation_time)
-                kile_fn = kile_loss(subnet)
-                nfc_fn = unsupplied_nfc_loss(subnet)
-                # loss_fn(parts::Set{Part}) =
-                optimal_split = segment_network(subnet, parts -> (kile_fn(parts), nfc_fn(parts)))
-                loss = kile_fn(optimal_split)
-                println(loss)
+            for subnet in connected_components(network, isolation_time, repair_time)
+                let network = nothing # Shadow old network again
+                    kile_fn = kile_loss(subnet)
+                    nfc_fn = unsupplied_nfc_loss(subnet)
+                    optimal_split = segment_network(subnet, parts -> (kile_fn(parts), nfc_fn(parts)))
+                    for vertex in labels(subnet)
+                        if is_load(subnet[vertex])
+                            outage_times[edge_idx, vertex] = get_outage_time(subnet, optimal_split, vertex)
+                        end
+                    end
+                end
             end
-
-            return network
         end
     end
+
+    outage_times
 end
 
