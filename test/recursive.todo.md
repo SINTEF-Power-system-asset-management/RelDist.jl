@@ -5,7 +5,7 @@
     - [ ] Reimplementere den gamle sectioning-algoritmen
 - [ ] Outputs: U, t, ENS, CENS, r, lambda (mangler CENS)
     - Hva skjer hvis reparasjonstida endrer seg? eller U?
-- [ ] Slutte å anta at alle kanter har en switch / preprocesse slik at alle kanter får en switch (Preprosessering)
+- [x] Slutte å anta at alle kanter har en switch / preprocesse slik at alle kanter får en switch (Preprosessering)
 - [ ] Dokumentere
 - [ ] Batteri
 - [ ] Optimize  

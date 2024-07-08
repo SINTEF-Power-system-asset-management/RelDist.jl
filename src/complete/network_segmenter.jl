@@ -331,7 +331,7 @@ function kile_loss(
     cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
     correction_factor=1.0,
 )
-    # TODO: switching time should be the highest of all the switces needed to isolate this part of the grid
+    # TODO: switching time should be the highest of all the switches needed to isolate this part of the grid
     switching_time = network.switching_time
     function kile_internal(parts::Set{NetworkPart})::Float64
         cost = 0.0
@@ -859,7 +859,7 @@ function transform_relrad_data(
     cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
     correction_factor=1.0
 )
-    # TODO: Use loads, not buses
+    # To get times, we should use the compressed network. For everything else we can use the original
     power = power_matrix(network, times)
     fault_rate = fault_rate_matrix(network, times)
 
@@ -877,8 +877,13 @@ function transform_relrad_data(
     NewResult(times, power, fault_rate, interruption_duration, energy_not_supplied, cost_of_ens)
 end
 
-function move_edge(old_edge::Tuple{KeyType,KeyType}, new_edge::Tuple{KeyType,KeyType})
-
+function move_edge!(network::Network, old_edge::Tuple{KeyType,KeyType}, new_edge::Tuple{KeyType,KeyType})
+    # Maybe todo: Handle the case where this edge already exists
+    # Add the probabilities together, pick the max repair time
+    # As long as we don't use them we don't really need this, we only need to keep the topology
+    network[new_edge...] = network[old_edge...]
+    # network[old_edge...] = missing
+    delete!(network, old_edge...)
 end
 
 function remove_switchless_branches!(network::Network)
@@ -886,27 +891,33 @@ function remove_switchless_branches!(network::Network)
     while did_change
         did_change = false
         for edge in edge_labels(network)
-            branch::NewBranch = network[edge]
-            if length(branch.switces) !== 0
+            branch::NewBranch = network[edge...]
+            if is_switch(branch) || edge[1] == edge[2]
+                # We keep self-edges (for now)
+                # If we want to remove them, we should do it below
                 continue
             end
             did_change = true
 
-            (node_a::Bus, node_b::Bus) = edge
-            append!(node_a.loads, node_b.loads)
-            append!(node_a.supplies, node_b.supplies)
+            (node_a::KeyType, node_b::KeyType) = edge
+            @info "removing " edge
+            bus_a::Bus = network[node_a]
+            bus_b::Bus = network[node_b]
+            append!(bus_a.loads, bus_b.loads)
+            append!(bus_a.supplies, bus_b.supplies)
             for edge in edge_labels(network)
-                if edge[1] == node_b
+                if edge[1] == node_b && edge[2] == node_b
+                    new_edge = (node_a, node_a)
+                    move_edge!(network, edge, new_edge)
+                elseif edge[1] == node_b
                     new_edge = (node_a, edge[2])
-                    # TODO: Handle the case where this edge already exists
-                    network[node_a, edge[2]] = network[edge...]
-                    delete!(network, edge...)
-                end
-                if edge[2] == node_b
-                    network[edge[1], node_a] = network[edge...]
-                    delete!(network, edge...)
+                    move_edge!(network, edge, new_edge)
+                elseif edge[2] == node_b
+                    new_edge = (edge[1], node_a)
+                    move_edge!(network, edge, new_edge)
                 end
             end
+            delete!(network, node_b)
 
             break
         end
