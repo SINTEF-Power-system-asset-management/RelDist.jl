@@ -13,10 +13,12 @@ import Base
 
 @enum BusKind t_supply t_load t_nfc_load
 struct SupplyUnit
+    id::String
     power::Float64
 end
 
 struct LoadUnit
+    id::String
     power::Float64
     type::String # e.g. residental/industry
     correction_factor::Real
@@ -29,13 +31,13 @@ end
 
 
 """Simple constructor to be compatible with previous versions of tests"""
-function Bus(type::BusKind, power::Float64)
+function Bus(id::String, type::BusKind, power::Float64)
     if type == t_supply
-        Bus([], [SupplyUnit(power)])
+        Bus([], [SupplyUnit(id, power)])
     elseif type == t_load
-        Bus([LoadUnit(power, "residental", 1.0, false)], [])
+        Bus([LoadUnit(id, power, "residental", 1.0, false)], [])
     elseif type == t_nfc_load
-        Bus([LoadUnit(power, "residental", 1.0, true)], [])
+        Bus([LoadUnit(id, power, "residental", 1.0, true)], [])
     end
 end
 
@@ -69,16 +71,11 @@ function get_nfc_load_power(bus::Bus)
     summy
 end
 
-function get_kile(bus::Bus, outage_time::Float64, cost_functions::Dict{String,PieceWiseCost}, correction_factor::Float64=1.0)
-    # Maybe do it for each load and not each bus?
-    summy = 0.0
-    for load in bus.loads
-        if !load.is_nfc
-            continue
-        end
-        summy += calculate_kile(load.power, outage_time, cost_functions[load.type], correction_factor)
+function get_kile(load::LoadUnit, outage_time::Float64, cost_functions::AbstractDict{String,PieceWiseCost}, correction_factor::Float64=1.0)
+    if load.is_nfc
+        return 0.0
     end
-    summy
+    calculate_kile(load.power, outage_time, cost_functions[load.type], correction_factor)
 end
 
 # only for visualization
@@ -341,7 +338,9 @@ function kile_loss(
         for vertex in labels(network)
             bus::Bus = network[vertex]
             time_spent = is_served(parts, vertex) ? switching_time : repair_time
-            cost += get_kile(bus, time_spent, cost_functions, correction_factor)
+            for load in bus.loads
+                cost += get_kile(load, time_spent, cost_functions, correction_factor)
+            end
         end
         cost
     end
@@ -620,11 +619,11 @@ function add_buses!(graphy::Network, case::Case)
         prev_id = bus[:ID]
 
         if bus[:P_load] !== missing
-            loady = LoadUnit(bus[:P_load], bus[:type_load], 1.0, bus[:nfc_load])
+            loady = LoadUnit(bus[:ID_load], bus[:P_load], bus[:type_load], 1.0, bus[:nfc_load])
             push!(loads, loady)
         end
         if bus[:Pmax_gen] !== missing
-            supplyy = SupplyUnit(bus[:Pmax_gen])
+            supplyy = SupplyUnit(bus[:ID_gen], bus[:Pmax_gen])
             push!(gens, supplyy)
         end
     end
@@ -766,7 +765,8 @@ function isolate_and_get_time!(network::Network, edge::Tuple{KeyType,KeyType})
 end
 
 function relrad_calc_2(network::Network)
-    colnames = [lab for lab in labels(network) if is_load(network[lab])]
+    # TODO: Use loads, not buses. WE NEED A COL PER LOAD !!
+    colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
     ncols = length(colnames)
     nrows = length(edge_labels(network))
     vals = fill(1337.0, (nrows, ncols))
@@ -788,8 +788,8 @@ function relrad_calc_2(network::Network)
                     nfc_fn = unsupplied_nfc_loss(subnet)
                     optimal_split = segment_network(subnet, parts -> (kile_fn(parts), nfc_fn(parts)))
                     for vertex in labels(subnet)
-                        if is_load(subnet[vertex])
-                            outage_times[edge_idx, vertex] = get_outage_time(subnet, optimal_split, vertex)
+                        for load::LoadUnit in subnet[vertex].loads
+                            outage_times[edge_idx, load.id] = get_outage_time(subnet, optimal_split, vertex)
                         end
                     end
                 end
@@ -803,13 +803,10 @@ end
 """Get power data on the same format as the times df."""
 function power_matrix(network::Network, times::DataFrame)
     power_df = copy(times)
-    for row in eachrow(power_df), col in propertynames(power_df)
-        if col == "cut_edge"
-            continue
+    for row in eachrow(power_df)
+        for vertex in labels(network), load in network[vertex].loads
+            row[load.id] = load.power
         end
-        bus::Bus = network[col]
-        power = get_load_power(bus)
-        row[col] = power
     end
     power_df
 end
@@ -817,14 +814,13 @@ end
 """Get fault_rate data on the same format as the times df."""
 function fault_rate_matrix(network::Network, times::DataFrame)
     fault_rate_df = copy(times)
-    for row in eachrow(fault_rate_df), col in propertynames(fault_rate_df)
-        if col == "cut_edge"
-            continue
+    for row in eachrow(fault_rate_df)
+        for vertex in labels(network), load in network[vertex].loads
+            edge = row[:cut_edge]
+            branch::NewBranch = network[edge...]
+            fault_rate = branch.permanent_fault_frequency
+            row[load.id] = fault_rate
         end
-        edge = row[:cut_edge]
-        branch::NewBranch = network[edge...]
-        fault_rate = branch.permanent_fault_frequency
-        row[col] = fault_rate
     end
     fault_rate_df
 end
@@ -836,15 +832,14 @@ function cens_matrix(
     correction_factor=1.0
 )
     cens_df = copy(times)
-    for row_idx in 1:nrow(cens_df), col in propertynames(cens_df)
-        if col == "cut_edge"
-            continue
-        end
+    for row_idx in 1:nrow(cens_df)
         row = cens_df[row_idx, :]
-        bus::Bus = network[col]
-        t = times[row_idx, col]
-        kile = get_kile(bus, t, cost_functions, correction_factor)
-        row[col] = kile
+        for vertex in labels(network), load in network[vertex].loads
+            row[load.id] = load.power
+            t = times[row_idx, load.id]
+            kile = get_kile(load, t, cost_functions, correction_factor)
+            row[load.id] = kile
+        end
     end
     cens_df
 end
@@ -864,6 +859,7 @@ function transform_relrad_data(
     cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
     correction_factor=1.0
 )
+    # TODO: Use loads, not buses
     power = power_matrix(network, times)
     fault_rate = fault_rate_matrix(network, times)
 
@@ -881,3 +877,39 @@ function transform_relrad_data(
     NewResult(times, power, fault_rate, interruption_duration, energy_not_supplied, cost_of_ens)
 end
 
+function move_edge(old_edge::Tuple{KeyType,KeyType}, new_edge::Tuple{KeyType,KeyType})
+
+end
+
+function remove_switchless_branches!(network::Network)
+    did_change = true
+    while did_change
+        did_change = false
+        for edge in edge_labels(network)
+            branch::NewBranch = network[edge]
+            if length(branch.switces) !== 0
+                continue
+            end
+            did_change = true
+
+            (node_a::Bus, node_b::Bus) = edge
+            append!(node_a.loads, node_b.loads)
+            append!(node_a.supplies, node_b.supplies)
+            for edge in edge_labels(network)
+                if edge[1] == node_b
+                    new_edge = (node_a, edge[2])
+                    # TODO: Handle the case where this edge already exists
+                    network[node_a, edge[2]] = network[edge...]
+                    delete!(network, edge...)
+                end
+                if edge[2] == node_b
+                    network[edge[1], node_a] = network[edge...]
+                    delete!(network, edge...)
+                end
+            end
+
+            break
+        end
+    end
+
+end
