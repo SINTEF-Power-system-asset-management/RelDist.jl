@@ -5,7 +5,7 @@ import MetaGraphsNext: labels, edge_labels, neighbor_labels
 import MetaGraphsNext: haskey, setindex!, getindex, delete!
 using SintPowerCase: Case
 using DataFrames: outerjoin, keys
-using DataStructures: DefaultDict
+using DataStructures: DefaultDict, Queue
 
 import Base
 
@@ -65,6 +65,18 @@ function get_nfc_load_power(bus::Bus)
             continue
         end
         summy += load.power
+    end
+    summy
+end
+
+function get_kile(bus::Bus, outage_time::Float64, cost_functions::Dict{String,PieceWiseCost}, correction_factor::Float64=1.0)
+    # Maybe do it for each load and not each bus?
+    summy = 0.0
+    for load in bus.loads
+        if !load.is_nfc
+            continue
+        end
+        summy += calculate_kile(load.power, outage_time, cost_functions[load.type], correction_factor)
     end
     summy
 end
@@ -319,8 +331,8 @@ loss_fn(optimal_split)
 function kile_loss(
     network::Network,
     repair_time::Float64=4.0,
-    correction_factor=1.0,
     cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor=1.0,
 )
     # TODO: switching time should be the highest of all the switces needed to isolate this part of the grid
     switching_time = network.switching_time
@@ -329,12 +341,7 @@ function kile_loss(
         for vertex in labels(network)
             bus::Bus = network[vertex]
             time_spent = is_served(parts, vertex) ? switching_time : repair_time
-            for load in bus.loads
-                cost_function = cost_functions[load.type]
-                IC =
-                    calculate_kile(load.power, time_spent, cost_function, correction_factor)
-                cost += IC
-            end
+            cost += get_kile(bus, time_spent, cost_functions, correction_factor)
         end
         cost
     end
@@ -372,6 +379,7 @@ function energy_not_served(parts::Set{NetworkPart})::Float64
     sum([part.rest_power for part in parts])
 end
 
+## Beginning of DFS in state space
 """
 Recursively finds the optimal way to partition the network into parts. Returns the different parts of the network.
 Assume the fault has been found and isolated.
@@ -383,7 +391,7 @@ To optimise for both CENS and supplying NFC loads, i recommend creating a compou
 
 # Example 
 
-```jldoctest
+```jl
 network = create_mock_network()
 kile_fn = kile_loss(network)
 nfc_fn = unsupplied_nfc_loss(network)
@@ -418,18 +426,12 @@ function segment_network(
         # TODO: Remove when fast
         visit_count += 1
         if visit_count % 100000 === 0
-            println("cache size: ", length(cache))
-            println("cache hit count: ", cache_hits)
-            println("new states: ", visit_count)
-            println("time spent: ", time() - start, " s")
-            println()
-        elseif visit_count + cache_hits > 2e7
-            return (0.0, Set())
+            @info "" cache_size = length(cache) cache_hit_count = cache_hits cache_miss_count = visit_count time_spent = time() - start
+
+            # elseif visit_count + cache_hits > 2e7
+            #     return (0.0, Set())
         end
 
-        # We do know that if we don't drop any loads, the deeper search
-        # is always better, but this is hard to implement in a readable manner
-        # so we just check it
         choices::Vector{Tuple{Any,Set{NetworkPart}}} = []
 
         for (part, neighbour_idx) in nodes_to_visit(network, parts)
@@ -469,15 +471,20 @@ function segment_network(network::Network, cost_function::Function=energy_not_se
     segment_network(network, parts, cost_function)
 end
 
+## End of DFS in state space
+## Beginning of classic reimpl
+
 """DFS over all buses from the start bus, gobbling up all nodes we can. 
 TODO: If we encounter overload on a branch with no switch we return nothing to backtrack."""
-function traverse_classic(network::Network, part::NetworkPart)
+function traverse_classic(network::Network, part::NetworkPart, off_limits=Set{KeyType}())
     visit = [part.subtree...]
 
     while !isempty(visit)
         v_src = pop!(visit)
 
-        for v_dst in setdiff(neighbor_labels(network, v_src), part.subtree)
+        to_visit = setdiff(neighbor_labels(network, v_src), part.subtree)
+        setdiff!(to_visit, off_limits)
+        for v_dst in to_visit
             if get_load_power(network[v_dst]) > part.rest_power
                 # TODO: Handle the case where the branch doesn't have any switches
                 continue
@@ -489,28 +496,88 @@ function traverse_classic(network::Network, part::NetworkPart)
     part
 end
 
-function segment_network_classic(network::Network, parts::Set{NetworkPart}, cost_function::Function=energy_not_served)
-    all_supplied = Vector{NetworkPart}()
+function segment_network_classic(network::Network, parts::Set{NetworkPart})
+    all_supplied = Set{NetworkPart}()
     for part in parts
         println("$part")
         supplied_by_this = traverse_classic(network, part)
         push!(all_supplied, supplied_by_this)
     end
-    # This is how to get X from the prev algorithm
-    # I handle it differently in my later code though, so we don't need it.
-    """supplied_vertices = Set() 
-    for part in parts
-        union!(supplied_vertices, part.subtree)
-    end"""
 
-    Set(all_supplied)
+    # Handle overlaps
+
+    all_supplied
 end
 
-function segment_network_classic(network::Network, cost_function::Function=energy_not_served)
+function segment_network_classic(network::Network)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
-    segment_network_classic(network, parts, cost_function)
+    segment_network_classic(network, parts)
 end
+
+"""Get the union of all other """
+function get_off_limits(part::NetworkPart, parts::Set{NetworkPart})
+    off_limits = Set()
+    for other_part in parts
+        if other_part == part
+            continue
+        end
+        union!(off_limits, other_part.subtree)
+    end
+    off_limits
+end
+
+"""Get a good start point for the complete search using the data 
+from the `segment_network_classic` algorithm"""
+function get_start_guess(network::Network, old_parts::Set{NetworkPart})
+    supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
+    parts = [NetworkPart(network, supply) for supply in supplies]
+    all_supplied = Set{NetworkPart}()
+    for (old_part, part) in zip(old_parts, parts)
+        println("$part")
+        off_limits = get_off_limits(old_part, old_parts)
+        supplied_by_this = traverse_classic(network, part, off_limits)
+        push!(all_supplied, supplied_by_this)
+    end
+    all_supplied
+end
+## End of classic reimpl
+
+## Beginning of bubble segment
+"""Segment network by growing bubbles that collide like soap bubbles"""
+function bubble_segment(network::Network, parts::Set{NetworkPart})
+    queues = [Queue{KeyType}(part.subtree) for part in parts]
+    # Step 1: Grow bubble doing one step per part until they can't grow anymore
+    #   They cannot overlap, nor can they take more load than they can handle
+    #   Bubbles should grow in a BFS manner
+    # Step 2: At each border between two parts, part A and B
+    #   If:
+    #       A has unsupplied neighbours
+    #       B has the capacity to handle the load
+    #       Losing the load won't split a
+    #   Or (considered later):
+    #       A has unsupplied nfc loads
+    #       and the other conditions from above
+    #   Then:
+    #       Move the load from A to b
+    #       Go to step 1
+    #   Else:
+    #       Quit
+
+    # How to handle handoff of nodes that might cause an island to be created?
+
+    while true # While we have some gains
+        # TODO: Try this if you have spare time
+    end
+end
+
+function bubble_segment(network::Network)
+    supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
+    parts = [NetworkPart(network, supply) for supply in supplies]
+    bubble_segment(network, parts)
+end
+
+## End of bubble segment
 
 """Create a super simple network to use in doctests
 # Examples
@@ -593,6 +660,8 @@ function add_branches!(graphy::Network, case::Case)
 
         repair_time = if :repair_time in propertynames(branch)
             branch[:repair_time]
+        elseif :repairTime in propertynames(branch)
+            branch[:repairTime] # simplified cineldi
         else
             branch[:r_perm] # Cineldi compat
         end
@@ -734,7 +803,7 @@ end
 """Get power data on the same format as the times df."""
 function power_matrix(network::Network, times::DataFrame)
     power_df = copy(times)
-    for row in eachrow(power_df), col in names(power_df)
+    for row in eachrow(power_df), col in propertynames(power_df)
         if col == "cut_edge"
             continue
         end
@@ -748,7 +817,7 @@ end
 """Get fault_rate data on the same format as the times df."""
 function fault_rate_matrix(network::Network, times::DataFrame)
     fault_rate_df = copy(times)
-    for row in eachrow(fault_rate_df), col in names(fault_rate_df)
+    for row in eachrow(fault_rate_df), col in propertynames(fault_rate_df)
         if col == "cut_edge"
             continue
         end
@@ -760,15 +829,41 @@ function fault_rate_matrix(network::Network, times::DataFrame)
     fault_rate_df
 end
 
+function cens_matrix(
+    network::Network,
+    times::DataFrame,
+    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor=1.0
+)
+    cens_df = copy(times)
+    for row_idx in 1:nrow(cens_df), col in propertynames(cens_df)
+        if col == "cut_edge"
+            continue
+        end
+        row = cens_df[row_idx, :]
+        bus::Bus = network[col]
+        t = times[row_idx, col]
+        kile = get_kile(bus, t, cost_functions, correction_factor)
+        row[col] = kile
+    end
+    cens_df
+end
+
 struct NewResult
     t::DataFrame
     power::DataFrame
     lambda::DataFrame
     U::DataFrame
     ENS::DataFrame
+    CENS::DataFrame
 end
 
-function transform_relrad_data(network::Network, times::DataFrame)
+function transform_relrad_data(
+    network::Network,
+    times::DataFrame,
+    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor=1.0
+)
     power = power_matrix(network, times)
     fault_rate = fault_rate_matrix(network, times)
 
@@ -778,9 +873,11 @@ function transform_relrad_data(network::Network, times::DataFrame)
 
     interruption_duration = lambda .* outage_time
     energy_not_supplied = interruption_duration .* p
+    cost_of_ens = cens_matrix(network, times, cost_functions, correction_factor)
     interruption_duration[!, :cut_edge] = times[:, :cut_edge]
     energy_not_supplied[!, :cut_edge] = times[:, :cut_edge]
+    cost_of_ens[!, :cut_edge] = times[:, :cut_edge]
 
-    NewResult(times, power, fault_rate, interruption_duration, energy_not_supplied)
+    NewResult(times, power, fault_rate, interruption_duration, energy_not_supplied, cost_of_ens)
 end
 
