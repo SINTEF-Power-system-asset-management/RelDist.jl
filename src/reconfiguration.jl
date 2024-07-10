@@ -27,6 +27,8 @@ end
 mutable struct Gen <: Source
     bus::String
     P::Real
+    Pmax::Real
+    E::Real
     external::Bool
     shed::Bool
 end
@@ -38,11 +40,15 @@ end
 function get_gen(g::MetaGraph, mpc::Case, v::Int)
     # Check if there is generation on the vertex
     if get_prop(g, v, :gen)
+        bus_id = get_prop(g, v, :name)
+        row = mpc.gen[mpc.gen.bus.==bus_id, :][1, :] # This will be replaced soon
         return Gen(get_prop(g, v, :name),
-            get_gen_bus_power(mpc, get_prop(g, v, :name)),
+            get_gen_bus_power(mpc, bus_id),
+            row.Pmax, # Will be replaced soon
+            row.E,
             get_prop(g, v, :external), false)
     else
-        return Gen(get_prop(g, v, :name), 0.0, false, false)
+        return Gen(get_prop(g, v, :name), 0.0, 0.0, 0.0, false, false)
     end
 end
 
@@ -222,14 +228,130 @@ function shed_gen!(part::Part, v::Int)
 end
 
 """
+    Return the indices of the loads that can be served given a list of loads
+    and a capacity.
+"""
+function loads_that_can_be_served(loads::Vector{Load}, capacity::Real)
+    i = 1
+    sorted_idx = sortperm([load.P for load in loads])
+    while i <= length(sorted_idx)
+        P = sum(load.P for load in loads[sorted_idx[i:end]]) < capacity
+        if P < capacity
+            return sorted_idx[i:end], sorted_idx[1:i-1], P
+        else
+            i += 1
+        end
+    end
+    return [], sorted_idx, 0
+end
+
+"""
     Returns the names of the loads that are in service.
 """
 function in_service_loads(part::Part)
     # If there is no distributed generation in the part, everything
     # that is not shed can be supplied for the full duration of
     # the fault repair.
-    if part.tot_gen == 0
-        Dict(load.bus => Inf for load in values(part.loads) if !load.shed)
+    if any_shed(part)
+        loads = Dict(v => load for (v, load) in part.loads if !load.shed)
+        if part.tot_load > part.capacity
+            # The partitioning algorithm concluded that some of the loads
+            # should be supplied by DER. I will now determing which loads that should
+            # always be fed by the reserve.
+            served_idx, not_served_idx, served = loads_that_can_be_served(
+                values(loads),
+                part.capacity)
+            always_served = collect(keys(loads))[served_idx]
+        else
+            # The capacity of the feeder is larger than that of the unshed part.
+            always_served = [v for (v, load) in part.loads if !load.shed]
+            served = part.tot_load
+        end
+        serve_times = Dict(loads[served].bus => Inf for served in always_served)
+
+        ratings = [gen.Pmax for gen in values(part.gens) if !gen.external]
+        energies = [gen.E for gen in values(part.gens) if !gen.external]
+
+        if sum(ratings) == 0 || sum(energies) == 0
+            # We don't have any DER that can support the shed loads. Therefore, we
+            # don't need to bother adding buses to the list
+            return serve_times
+        end
+
+        # Slightly hackish, but the code below returns a list of the loads that has
+        # to be served by DER.
+        loads = getindex.(Ref(part.loads), setdiff(part.vertices, always_served))
+
+        # create a list of loads 
+        nfc = [load for load in loads if load.nfc]
+        loads = [load for load in loads if !load.nfc]
+
+        # In case the reserve has some capacity after feeding the loads that always should
+        # be served.
+        capacity = sum(ratings) + part.capacity - served
+        serve_time = 0
+
+        while length(loads) > 0
+            unserved = sum(load.P for load in loads)
+            unserved_nfc = sum(load for load in nfc)
+            # Check if we potentially can serve some NFC
+            if capacity > unserved + unserved_nfc
+                # We can serve all the loads for some time 
+                to_be_served = unserved + unserved_nfc
+            elseif capacity > unserved
+                # Check if we can serve some NFC loads
+                served_nfc_idx, unserved_nfc_idx, P = loads_that_can_be_served(nfc, capacity)
+
+                # These loads could not be served in this round. Set the
+                # appropriate serving time.
+                merge!(serve_times,
+                    Dict(nfc[unserved_idx].bus => serve_time
+                         for unserved_idx in unserved_nfc_idx))
+                # Calculate how much load we should serve in this round.
+                to_be_served = unserved + P
+                # Remove the loads we could not serve from the list
+                deleteat!(nfc, unserved_nfc_idx)
+            else
+                # We could not serve any NFC loads, and we cannot serve all
+                # loads. Delete all NFC loads
+                nfc = []
+                # Calculate how much load we should serve. 
+                served_load_idx, unserved_load_idx, P = loads_that_can_be_served(loads,
+                    capacity)
+                to_be_served = P
+
+                # These loads could not be served in this round. Set the
+                # appropriate serving time.
+                merge!(serve_times,
+                    Dict(loada[unserved_idx].bus => serve_time
+                         for unserved_idx in unserved_load_idx))
+
+                # Remove the loads we could not serve from the list
+                deleteat!(loads, unserved_nfc_idx)
+            end
+
+            # Calculate how much power each DER should deliver based on the rating
+            powers = to_be_served .* ratings
+            # Calcualte how long the DER can suppy the power and find the index of the
+            # DER that will deplete first.
+            times = energies ./ powers
+            min_time_idx = sortperm(times)
+            # In case more than one battery has the same minimum time 
+            # (unlikely in a realistic case)
+            min_time_idx = min_time_idx[times.==times[min_time_idx[1]]]
+
+            serve_time = times[min_time_idx[1]]
+
+            # Deplete the energy storages with the amount of energy they will serve
+            # in this round
+            energies -= powers .* serve_time
+            # Delete the depleted DER from the list
+            deleteat!(energies, min_time_idx)
+            deleteat!(ratings, min_time_idx)
+            capacity = sum(ratings)
+        end
+    else
+        Dict(load.bus => Inf for load in values(part.loads))
     end
 end
 
@@ -378,7 +500,7 @@ function update_overlapping!(o::Overlapping, old_p::Part,
 end
 
 function vertices_equal(o::Overlapping)
-    o.old_p.vertices == o.part.vertices
+    Set(o.old_p.vertices) == Set(o.part.vertices)
 end
 
 function part_is_subset(o::Overlapping)
@@ -570,7 +692,8 @@ function find_reconfiguration_switches!(o::Overlapping)
 
                     if split_solved_overlap(o, splits_temp)
                         for (part, split) in splits_temp
-                            reconnect_load!(getfield(o, part), split.reconnect)
+                            update_part_after_split!(getfield(o, part),
+                                o.g, split, get_switch(o.network, e))
                         end
                         return
                     end
@@ -596,6 +719,16 @@ function find_reconfiguration_switches!(o::Overlapping)
         end
         return
     end
+end
+
+"""
+    When we have found a switch that can split two parts we should update
+    each of the parts. This function updates one of the parts.
+"""
+function update_part_after_split!(part::Part, g::MetaGraph, split::Split, switch::Switch)
+    reduce_part_after_reconf!(part, g, split.vertices)
+    reconnect_load!(part, split.reconnect)
+    push!(part.switches, switch)
 end
 
 """

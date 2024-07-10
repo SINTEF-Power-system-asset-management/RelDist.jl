@@ -186,6 +186,7 @@ function section!(res::Dict{String,RelStruct},
             for switch in switches
                 isolating_switch = isolating_switch < switch ? switch : isolating_switch
             end
+            switching_time = get_minimum_switching_time(isolating_switch)[1]
 
             for f in F
                 # If we are considering reserve failures and the name of the reserve
@@ -212,16 +213,18 @@ function section!(res::Dict{String,RelStruct},
             for l in L
                 l_pos += 1
                 if !(l.bus in keys(X))
-                    t = repair_time
+                    # The bus is in the isolated part
+                    t = repair_time[1]
                 else
-                    t = get_minimum_switching_time(isolating_switch)
+                    # The bus is not in the isolated part
                     # The next expression is a bit weird, but the logic it
                     # that if the load can be supplied longer than the repair time 
                     # the outage time will be given by the sectioning time. Otherwise
-                    # it will be given by how long the load can be supplied.
-                    t = r < X[l.bus] ? t : X[l.bus]
+                    # it will be given by the difference between the repair time and
+                    # how long it can be supplied.
+                    t = repair_time[1] < X[l.bus] ? switching_time : repair_time[1] - X[l.bus]
                 end
-                set_rel_res!(res[case], permanent_failure_frequency, t[1],
+                set_rel_res!(res[case], permanent_failure_frequency, t,
                     l.P, l.corr, cost_functions[l.type],
                     l_pos, edge_pos)
                 # In case we are considering communication failures we have the same 
@@ -233,7 +236,7 @@ function section!(res::Dict{String,RelStruct},
                         t = isolating_switch.t_manual
                     end
                     set_rel_res!(res["comm_fail"], permanent_failure_frequency,
-                        t[1], l.P, l.corr, cost_functions[l.type],
+                        t, l.P, l.corr, cost_functions[l.type],
                         l_pos, edge_pos)
                 end
             end
