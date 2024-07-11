@@ -1,4 +1,5 @@
 using SintPowerGraphs
+using DataFrames
 using Test
 
 network_filename = joinpath(@__DIR__, "../examples/simplified_cineldi/cineldi_simple.toml")
@@ -76,3 +77,21 @@ res, L, edge_pos = relrad_calc(cost_functions, network)
 U -= 5*λ
 U += 0.5*λ
 @test isapprox(sum(res["base"].U[:, 2]), U, atol=0.01)
+
+## Implement and test case 8 from the power point
+network = RadialPowerGraph(network_filename)
+network.mpc.switch.t_remote .= 0.5
+network.mpc.gen[1, :Pmax] = 2
+# Add batteries
+i = 1
+while i <=3
+    append!(network.mpc.gen, DataFrame(network.mpc.gen[3,:]))
+    network.mpc.gen[3+i, :ID] = string("DER", i)
+    global i+=1
+end
+network.mpc.gen[4:6, :Pmax] = [2,3,4]
+network.mpc.gen[4:6, :E] = [2,2,1]
+network.mpc.gen[4:6, :external] .= false
+
+res, L, edge_pos = relrad_calc(cost_functions, network)
+@test isapprox(sum(res["base"].U[:, 9]), 0.299, atol=0.01)

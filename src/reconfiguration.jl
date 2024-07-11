@@ -231,16 +231,19 @@ end
     Return the indices of the loads that can be served given a list of loads
     and a capacity.
 """
-function loads_that_can_be_served(loads::Vector{Load}, capacity::Real)
+function can_be_served(loads::Vector{Real}, capacity::Real)
     i = 1
-    sorted_idx = sortperm([load.P for load in loads])
-    while i <= length(sorted_idx)
-        P = sum(load.P for load in loads[sorted_idx[i:end]]) < capacity
+    sorted_idx = sortperm(loads)
+    # Drop loads that are larger than the capacity.
+    exceed_cap_idx = findfirst(>(capacity), loads[sorted_idx])
+    last_idx = isempty(exceed_cap_idx) ? length(loads) : exceed_cap_idx
+
+    while i <= last_idx
+        P = sum(loads[sorted_idx[i:end]])
         if P < capacity
             return sorted_idx[i:end], sorted_idx[1:i-1], P
-        else
-            i += 1
         end
+        i += 1
     end
     return [], sorted_idx, 0
 end
@@ -258,8 +261,8 @@ function in_service_loads(part::Part)
             # The partitioning algorithm concluded that some of the loads
             # should be supplied by DER. I will now determing which loads that should
             # always be fed by the reserve.
-            served_idx, not_served_idx, served = loads_that_can_be_served(
-                values(loads),
+            served_idx, not_served_idx, served = can_be_served(
+                [load.P for load in values(loads)],
                 part.capacity)
             always_served = collect(keys(loads))[served_idx]
         else
@@ -288,7 +291,8 @@ function in_service_loads(part::Part)
 
         # In case the reserve has some capacity after feeding the loads that always should
         # be served.
-        capacity = sum(ratings) + part.capacity - served
+        part_spare_cap = part.capacity - served
+        capacity = sum(ratings) + part_spare_cap
         serve_time = 0
 
         while length(loads) > 0
@@ -300,7 +304,8 @@ function in_service_loads(part::Part)
                 to_be_served = unserved + unserved_nfc
             elseif capacity > unserved
                 # Check if we can serve some NFC loads
-                served_nfc_idx, unserved_nfc_idx, P = loads_that_can_be_served(nfc, capacity)
+                served_nfc_idx, unserved_nfc_idx, P = can_be_served([l.P for l in nfc],
+                    capacity)
 
                 # These loads could not be served in this round. Set the
                 # appropriate serving time.
@@ -316,14 +321,14 @@ function in_service_loads(part::Part)
                 # loads. Delete all NFC loads
                 nfc = []
                 # Calculate how much load we should serve. 
-                served_load_idx, unserved_load_idx, P = loads_that_can_be_served(loads,
+                served_load_idx, unserved_load_idx, P = can_be_served([l.P for l in loads],
                     capacity)
                 to_be_served = P
 
                 # These loads could not be served in this round. Set the
                 # appropriate serving time.
                 merge!(serve_times,
-                    Dict(loada[unserved_idx].bus => serve_time
+                    Dict(loads[unserved_idx].bus => serve_time
                          for unserved_idx in unserved_load_idx))
 
                 # Remove the loads we could not serve from the list
@@ -331,7 +336,7 @@ function in_service_loads(part::Part)
             end
 
             # Calculate how much power each DER should deliver based on the rating
-            powers = to_be_served .* ratings
+            powers = to_be_served * capacity .* ratings
             # Calcualte how long the DER can suppy the power and find the index of the
             # DER that will deplete first.
             times = energies ./ powers
@@ -339,16 +344,18 @@ function in_service_loads(part::Part)
             # In case more than one battery has the same minimum time 
             # (unlikely in a realistic case)
             min_time_idx = min_time_idx[times.==times[min_time_idx[1]]]
+            min_time = times[min_time_idx[1]]
 
-            serve_time = times[min_time_idx[1]]
+            serve_time += min_time
 
             # Deplete the energy storages with the amount of energy they will serve
             # in this round
-            energies -= powers .* serve_time
+            energies -= powers .* min_time
+
             # Delete the depleted DER from the list
+            capacity -= sum(ratings[min_time_idx])
             deleteat!(energies, min_time_idx)
             deleteat!(ratings, min_time_idx)
-            capacity = sum(ratings)
         end
     else
         Dict(load.bus => Inf for load in values(part.loads))
@@ -667,14 +674,21 @@ function find_reconfiguration_switches!(o::Overlapping)
     best_P = 0
     islands = Vector{Vector{Int}}()
     split_switch = Switch()
+    checked = Vector{Edge}()
     # We could reduce the running time by first considering the overlap of the
     # vertices that both parts can supply.
     for common in o.overlapping
+        # The way the code has been implemented I check a switch multiple times.
+        # I should fix this.
         for n in all_neighbors(o.g, common)
             # Previously I first checked the lines going between the parts first.
             # It seems that this was not a good strategy. Now I will just check
             # the lines connected to vertices that are common.
             e = Edge(n, common)
+            if e ∈ checked
+                break
+            end
+            push!(checked, e)
             if get_prop(o.g, e, :switch) == 1
                 # Check if opening the switch sucessfully split the netwok.
                 islands = islands_after_switching(o, e)
