@@ -135,7 +135,7 @@ end
 function remove_vertex!(part::Part, v::Integer)
     shed_load!(part, v)
     shed_gen!(part, v)
-    pop!(part.vertices)
+    deleteat!(part.vertices, part.vertices.==v)
     pop!(part.gens, v)
     pop!(part.loads, v)
 end
