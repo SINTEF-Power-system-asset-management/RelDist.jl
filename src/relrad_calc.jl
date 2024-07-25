@@ -215,6 +215,11 @@ function section!(res::Dict{String,RelStruct},
                     t = repair_time
                 else
                     t = get_minimum_switching_time(isolating_switch)
+                    # The next expression is a bit weird, but the logic it
+                    # that if the load can be supplied longer than the repair time 
+                    # the outage time will be given by the sectioning time. Otherwise
+                    # it will be given by how long the load can be supplied.
+                    t = r < X[l.bus] ? t : X[l.bus]
                 end
                 set_rel_res!(res[case], permanent_failure_frequency, t[1],
                     l.P, l.corr, cost_functions[l.type],

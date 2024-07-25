@@ -225,7 +225,12 @@ end
     Returns the names of the loads that are in service.
 """
 function in_service_loads(part::Part)
-    Dict(load.bus => Inf for load in values(part.loads) if !load.shed)
+    # If there is no distributed generation in the part, everything
+    # that is not shed can be supplied for the full duration of
+    # the fault repair.
+    if part.tot_gen == 0
+        Dict(load.bus => Inf for load in values(part.loads) if !load.shed)
+    end
 end
 
 """
