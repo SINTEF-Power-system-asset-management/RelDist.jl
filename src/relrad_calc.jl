@@ -206,12 +206,12 @@ function section!(res::Dict{String,RelStruct},
                     end
                 end
             end
-            X = Set(vcat([collect(in_service_loads(part)) for part in parts]...))
+            X = merge([collect(in_service_loads(part)) for part in parts]...)
 
             l_pos = 0
             for l in L
                 l_pos += 1
-                if !(l.bus in X)
+                if !(l.bus in keys(X))
                     t = repair_time
                 else
                     t = get_minimum_switching_time(isolating_switch)
