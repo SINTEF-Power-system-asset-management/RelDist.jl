@@ -1,6 +1,9 @@
 name: Unit tests
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  # push:
+  # pull_request:
 
 # needed to allow julia-actions/cache to delete old caches that it has created
 permissions:
@@ -12,7 +15,7 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        julia-version: ['1.10.4']
+        julia-version: ["1.10.4"]
         julia-arch: [x64, x86]
         os: [ubuntu-latest, windows-latest, macOS-latest]
         exclude:
