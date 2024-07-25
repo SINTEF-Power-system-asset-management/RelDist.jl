@@ -207,7 +207,10 @@ function section!(res::Dict{String,RelStruct},
                     end
                 end
             end
-            X = merge([collect(in_service_loads(part)) for part in parts]...)
+
+            evaluate_unpartitioned_parts!(network, reconfigured_network, parts)
+
+            X = merge([in_service_loads(part) for part in parts]...)
 
             l_pos = 0
             for l in L
@@ -259,7 +262,6 @@ function get_switches(switch::DataFrame, src::String, dst::String)
 end
 
 function get_switch(mpc::Case, e::Branch)
-    # TODO: den er åpen hvis den har to switches som begge er åpne
     switches = vcat(get_switches(mpc.switch, e.src, e.dst),
         get_switches(mpc.switch, e.dst, e.src))
     if isempty(switches)
