@@ -168,6 +168,13 @@ function reserve_in_island(part::Part, island::Vector{Int})
 end
 
 """
+    Check if a vertex is in a part.
+"""
+function Base.:∈(v::Int, part::Part)
+    v ∈ part.vertices
+end
+
+"""
     Reconnect load on vertex v.
 """
 function reconnect_load!(part::Part, v::Int)
@@ -268,18 +275,21 @@ function calc_R(network::RadialPowerGraph,
 end
 
 function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int=0,
-    feeder_cap::Real=Inf)
-    @assert start in vertices(g) "can't access $start in $(props(g, 1))"
-
-    parents = Dict{Int,Int}()
-
-    seen = Vector{Int}()
-    visit = Vector{Int}([start])
-
+    feeder_cap::Real=Inf, seen=Vector{Int}())
     part = Part(feeder_cap,
         get_load(g, network.mpc, start),
         get_gen(g, network.mpc, start),
         start)
+    traverse!(network, g, part, start, seen)
+    return part
+end
+
+function traverse!(network::RadialPowerGraph, g::MetaGraph, part::Part, start::Int=0,
+    seen=Vector{Int}())
+    @assert start in vertices(g) "can't access $start in $(props(g, 1))"
+
+    parents = Dict{Int,Int}()
+    visit = Vector{Int}([start])
 
     while !isempty(visit)
         v_src = pop!(visit)
@@ -336,7 +346,6 @@ function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int=0,
             end
         end
     end
-    return part
 end
 
 mutable struct Overlapping
@@ -530,6 +539,7 @@ function find_reconfiguration_switches!(o::Overlapping)
     solved = false
     best_P = 0
     islands = Vector{Vector{Int}}()
+    split_switch = Switch()
     # We could reduce the running time by first considering the overlap of the
     # vertices that both parts can supply.
     for common in o.overlapping
@@ -562,6 +572,7 @@ function find_reconfiguration_switches!(o::Overlapping)
                     if best_P < power
                         splits = splits_temp
                         best_P = power
+                        split_switch = get_switch(o.network, e)
                     end
                 end
             end
@@ -574,8 +585,9 @@ function find_reconfiguration_switches!(o::Overlapping)
         find_parts_splitting_switches(o)
     else
         for (part, split) in splits
-            reduce_part_after_reconf!(getfield(o, part), splits[part].vertices)
+            reduce_part_after_reconf!(getfield(o, part), o.g, splits[part].vertices)
             reconnect_load!(getfield(o, part), split.reconnect)
+            push!(getfield(o, part).switches, split_switch)
         end
         return
     end
@@ -586,10 +598,21 @@ end
     in at least one part becoming smaller. This code will
     fix this.
 """
-function reduce_part_after_reconf!(part::Part, island::Vector{Int})
+function reduce_part_after_reconf!(part::Part, g::MetaGraph, island::Vector{Int})
     for v in setdiff(part.vertices, island)
         remove_vertex!(part, v)
     end
+    # After removing the vertices we may end up in a situation where one
+    # of the vertices splitting the part from the rest of the network no
+    # longer is in the part.
+    del_swithces = Vector{Int}()
+    for (idx, switch) in enumerate(part.switches)
+        if !any(in.([g[switch.src, :name], g[switch.dst, :name]], Ref(part.vertices)))
+            # The switch is not in the part, we should get rid of it.
+            append!(del_swithces, idx)
+        end
+    end
+    deleteat!(part.switches, del_swithces)
 end
 
 function islands_after_switching(o::Overlapping, e::Edge)
@@ -639,5 +662,33 @@ function find_parts_splitting_switches(o::Overlapping)
         end
         # Remove vertices we didn't see.
         shed_load!(part, part_vertices_not_in_vertices(part, seen))
+        push!(part.switches, switches[part])
+    end
+end
+
+"""
+    Evaluate the parts of the network we haven't investigated so far.
+"""
+function evaluate_unpartitioned_parts!(network::RadialPowerGraph,
+    g::MetaGraph, parts::Vector{Part})
+    seen = vcat([part.vertices for part in parts]...)
+    for part in parts
+        for switch in part.switches
+            switch_v = [g[switch.src, :name], g[switch.dst, :name]]
+            # If the vertices of the switch edge is in more than one part
+            # this is a switch splitting parts and we should not search from it.
+            starts = setdiff(switch_v, part.vertices)
+            if isempty(starts)
+                starts = setdiff(
+                    vcat([all_neighbors(g, v) for v in switch_v]...), part.vertices)
+            end
+            # In case the splitting switch is right before an intersection we have
+            # will have more than one direction to evaluate.
+            for start in starts
+                if sum(any(switch_v' .∈ part.vertices) for part in parts) > 1
+                    traverse!(network, g, part, start, seen)
+                end
+            end
+        end
     end
 end
