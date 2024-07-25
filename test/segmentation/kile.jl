@@ -5,9 +5,9 @@ using Test
 
 function test_kile_in_segmentation()
     network = empty_network()
-    network["bf"] = Bus(t_supply, 2.0)
-    network["load_1"] = Bus(t_load, 1.0)
-    network["load_2"] = Bus(t_load, 2.0)
+    network["bf"] = Bus("bf", t_supply, 2.0)
+    network["load_1"] = Bus("load_1", t_load, 1.0)
+    network["load_2"] = Bus("load_2", t_load, 2.0)
     network["bf", "load_1"] = NewBranch()
     network["load_1", "load_2"] = NewBranch()
 

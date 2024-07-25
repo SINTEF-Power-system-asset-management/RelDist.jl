@@ -26,7 +26,7 @@ function test_simple_overlap()
     # If there are no neighbours, return current state
     # Evaluate by the total unused power. I suppose this needs to change to support more complex costs
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
-    parts = Set([NetworkPart(network, supply) for supply in supplies])
+    parts = [NetworkPart(network, supply) for supply in supplies]
     # println(supplies)
 
     # plot_that_graph(network, parts)

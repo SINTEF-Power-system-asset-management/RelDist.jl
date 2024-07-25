@@ -1,19 +1,14 @@
 include("setup.jl")
-using RelDist: delete!, edge_labels, get_start_guess
+using RelDist: delete!, get_start_guess, KeyType
 
 network = Network(joinpath(@__DIR__, "../CINELDI/CINELDI.toml"))
 
-for vertex in ["1", "36", "62"] # remove all sources but 88
-    for edge in edge_labels(network)
-        if edge[1] == vertex || edge[2] == vertex
-            delete!(network, edge...)
-        end
-    end
+for vertex in ["1", "88"] # ["1", "62", "36", "88"] # remove all sources but 1
     delete!(network, vertex)
 end
 
 supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
-parts = Set([NetworkPart(network, supply) for supply in supplies])
+parts = [NetworkPart(network, supply) for supply in supplies]
 
 display(plot_that_graph(network, parts))
 
@@ -38,9 +33,18 @@ if "a" == "a"
     compressed_network = deepcopy(network)
     remove_switchless_branches!(compressed_network)
 
-    parts = Set([NetworkPart(network, supply) for supply in supplies])
+    parts = [NetworkPart(network, supply) for supply in supplies]
     display(plot_that_graph(compressed_network, parts))
 
-    # compressed_split = segment_network(compressed_network)
-    # display(plot_that_graph(compressed_network, compressed_split))
+    estimated_split = segment_network_classic(compressed_network, parts)
+    without_overlap = get_start_guess(compressed_network, estimated_split)
+    # without_overlap = parts
+    compressed_split = segment_network(compressed_network, without_overlap)
+    display(plot_that_graph(compressed_network, compressed_split))
 end
+
+# let nothing
+#     remove_switchless_branches!(compressed_network)
+# display(plot_that_graph(compressed_network, parts))
+# end
+

@@ -6,10 +6,10 @@ using Test
 function test_load_dropping()
     network = empty_network()
 
-    network["bf"] = Bus(t_supply, 2.0)
+    network["bf"] = Bus("bf", t_supply, 2.0)
 
-    network["nfc"] = Bus(t_nfc_load, 1.0)
-    network["load"] = Bus(t_load, 2.0)
+    network["nfc"] = Bus("nfc", t_nfc_load, 1.0)
+    network["load"] = Bus("load", t_load, 2.0)
 
 
     network["bf", "nfc"] = NewBranch()
