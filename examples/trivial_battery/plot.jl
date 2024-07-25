@@ -46,10 +46,4 @@ nodecolors = [get_node_color(node) for node in vertices(network.G)]
 edge_properties = [props(network.G, edge) for edge in edges(network.G)]
 edgecolors = [get_edge_color(edge) for edge in edges(network.G)]
 
-graphplot(
-    network.G,
-    L,
-    node_color=nodecolors,
-    edge_color=edgecolors,
-    ilabels=names,
-)
+graphplot(network.G, L, node_color = nodecolors, edge_color = edgecolors, ilabels = names)

@@ -19,11 +19,13 @@ using OrderedCollections
         - res: Costs for permanent interruption, defined for each load and each failed branch
         - resₜ: Costs for temporary interruption, defined for each load and each failed branch
 """
-function relrad_calc(cost_functions::Dict{String,PieceWiseCost},
+function relrad_calc(
+    cost_functions::Dict{String,PieceWiseCost},
     corr_factors::Dict{String,<:Real},
     network::RadialPowerGraph,
-    config::RelDistConf=RelDistConf(),
-    filtered_branches=DataFrame(element=[], f_bus=[], t_bus=[], tag=[]))
+    config::RelDistConf = RelDistConf(),
+    filtered_branches = DataFrame(element = [], f_bus = [], t_bus = [], tag = []),
+)
     Q = []  # Empty arrayj
     L = get_loads(network.mpc, corr_factors)
     edge_pos_df = store_edge_pos(network)
@@ -39,8 +41,11 @@ function relrad_calc(cost_functions::Dict{String,PieceWiseCost},
 
     if config.failures.switch_failure_prob > 0
         for case in ["upstream", "downstream"]
-            res[case] = RelStruct(length(L), nrow(network.mpc.branch),
-                config.failures.switch_failure_prob)
+            res[case] = RelStruct(
+                length(L),
+                nrow(network.mpc.branch),
+                config.failures.switch_failure_prob,
+            )
             push!(cases, case)
             base_prob -= config.failures.switch_failure_prob
         end
@@ -49,8 +54,11 @@ function relrad_calc(cost_functions::Dict{String,PieceWiseCost},
     if config.failures.communication_failure_prob > 0
         # This case is not run in the section function. I therefore,
         # don't add it to the  case list.
-        res["comm_fail"] = RelStruct(length(L), nrow(network.mpc.branch),
-            config.failures.communication_failure_prob)
+        res["comm_fail"] = RelStruct(
+            length(L),
+            nrow(network.mpc.branch),
+            config.failures.communication_failure_prob,
+        )
         base_prob -= config.failures.communication_failure_prob
     end
 
@@ -63,8 +71,11 @@ function relrad_calc(cost_functions::Dict{String,PieceWiseCost},
         for f in F
             if !slack_is_ref_bus(network, f)
                 name = "reserve_" * create_slack_name(f)
-                res[name] = RelStruct(length(L), nrow(network.mpc.branch),
-                    config.failures.reserve_failure_prob)
+                res[name] = RelStruct(
+                    length(L),
+                    nrow(network.mpc.branch),
+                    config.failures.reserve_failure_prob,
+                )
                 push!(cases, name)
                 base_prob -= config.failures.reserve_failure_prob
             end
@@ -86,56 +97,63 @@ function relrad_calc(cost_functions::Dict{String,PieceWiseCost},
         for l in L
 
             l_pos += 1
-            set_rel_res!(res["temp"],
+            set_rel_res!(
+                res["temp"],
                 rel_data.temporaryFaultFrequency[1],
                 rel_data.temporaryFaultTime[1],
                 l.P,
                 l.corr,
                 cost_functions[l.type],
-                l_pos, edge_pos)
+                l_pos,
+                edge_pos,
+            )
         end
         push_adj(Q, network.radial, e)
     end
     return res, L, edge_pos_df
 end
 
-function relrad_calc(cost_functions::Dict{String,PieceWiseCost},
+function relrad_calc(
+    cost_functions::Dict{String,PieceWiseCost},
     network::RadialPowerGraph,
-    config::RelDistConf=RelDistConf(),
-    filtered_branches=DataFrame(element=[], f_bus=[], t_bus=[], tag=[]))
-    relrad_calc(cost_functions,
+    config::RelDistConf = RelDistConf(),
+    filtered_branches = DataFrame(element = [], f_bus = [], t_bus = [], tag = []),
+)
+    relrad_calc(
+        cost_functions,
         Dict(key => 1.0 for key in keys(cost_functions)),
         network,
         config,
-        filtered_branches)
+        filtered_branches,
+    )
 end
 
 
-function relrad_calc(cost_functions::Dict{String,PieceWiseCost},
+function relrad_calc(
+    cost_functions::Dict{String,PieceWiseCost},
     network::RadialPowerGraph,
     time::String,
-    config::RelDistConf=RelDistConf(),
-    filtered_branches=DataFrame(element=[], f_bus=[], t_bus=[], tag=[]))
+    config::RelDistConf = RelDistConf(),
+    filtered_branches = DataFrame(element = [], f_bus = [], t_bus = [], tag = []),
+)
 
-    corr_fac = read_correction_factors_from_csv(MONTH_FACTORS,
-        DAY_FACTORS,
-        HOUR_FACTORS)
+    corr_fac = read_correction_factors_from_csv(MONTH_FACTORS, DAY_FACTORS, HOUR_FACTORS)
     if time == "year"
         corr = Dict{String,Real}()
         for cust_type in keys(cost_functions)
-            corr[cust_type] = sum(get_corr_factor(corr_fac,
-                DateTime(t[1], t[2], t[3]),
-                cust_type) for t in eachrow(create_opal_year())) / 2016
+            corr[cust_type] =
+                sum(
+                    get_corr_factor(corr_fac, DateTime(t[1], t[2], t[3]), cust_type) for
+                    t in eachrow(create_opal_year())
+                ) / 2016
         end
     else
         date = DateTime(time)
-        corr = Dict(key => get_corr_factor(corr_fac, date, key) for key in keys(cost_functions))
+        corr = Dict(
+            key => get_corr_factor(corr_fac, date, key) for key in keys(cost_functions)
+        )
     end
-    relrad_calc(cost_functions,
-        corr,
-        network,
-        config,
-        filtered_branches)
+    relrad_calc(cost_functions, corr, network, config, filtered_branches)
 end
 
 
@@ -156,7 +174,8 @@ end
             - e: failed network edge
             - L: Array of loads
 """
-function section!(res::Dict{String,RelStruct},
+function section!(
+    res::Dict{String,RelStruct},
     cost_functions::Dict{String,PieceWiseCost},
     network::RadialPowerGraph,
     edge_pos::Int,
@@ -164,13 +183,16 @@ function section!(res::Dict{String,RelStruct},
     L::Array,
     F::Array,
     cases::Array,
-    failures::Failures)
+    failures::Failures,
+)
 
     repair_time = get_branch_data(network, :reldata, e.src, e.dst).repairTime
-    permanent_failure_frequency = get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
+    permanent_failure_frequency =
+        get_branch_data(network, :reldata, e.src, e.dst).permanentFaultFrequency[1]
 
     if permanent_failure_frequency >= 0
-        rn, isolating = traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob > 0)
+        rn, isolating =
+            traverse_and_get_sectioning_time(network, e, failures.switch_failure_prob > 0)
         for case in cases
             parts = Vector{Part}()
             vertices = Vector{Set{Int}}()
@@ -192,7 +214,10 @@ function section!(res::Dict{String,RelStruct},
                 # If we are considering reserve failures and the name of the reserve
                 # is the same as the case, we will skip to add the reachable loads
                 # to the reachable matrix
-                if !(failures.reserve_failure_prob > 0.0 && "reserve_" * create_slack_name(f) == case)
+                if !(
+                    failures.reserve_failure_prob > 0.0 &&
+                    "reserve_" * create_slack_name(f) == case
+                )
                     part = calc_R(network, reconfigured_network, f)
 
                     if not_all_served(part)
@@ -225,11 +250,20 @@ function section!(res::Dict{String,RelStruct},
                     # the outage time will be given by the sectioning time. Otherwise
                     # it will be given by the difference between the repair time and
                     # how long it can be supplied.
-                    t = repair_time[1] < X[l.bus] ? switching_time : repair_time[1] - X[l.bus]
+                    t =
+                        repair_time[1] < X[l.bus] ? switching_time :
+                        repair_time[1] - X[l.bus]
                 end
-                set_rel_res!(res[case], permanent_failure_frequency, t,
-                    l.P, l.corr, cost_functions[l.type],
-                    l_pos, edge_pos)
+                set_rel_res!(
+                    res[case],
+                    permanent_failure_frequency,
+                    t,
+                    l.P,
+                    l.corr,
+                    cost_functions[l.type],
+                    l_pos,
+                    edge_pos,
+                )
                 # In case we are considering communication failures we have the same 
                 # isolated network as in the base case. 
                 if failures.communication_failure_prob > 0 && case == "base"
@@ -238,9 +272,16 @@ function section!(res::Dict{String,RelStruct},
                     if t != repair_time
                         t = isolating_switch.t_manual
                     end
-                    set_rel_res!(res["comm_fail"], permanent_failure_frequency,
-                        t, l.P, l.corr, cost_functions[l.type],
-                        l_pos, edge_pos)
+                    set_rel_res!(
+                        res["comm_fail"],
+                        permanent_failure_frequency,
+                        t,
+                        l.P,
+                        l.corr,
+                        cost_functions[l.type],
+                        l_pos,
+                        edge_pos,
+                    )
                 end
             end
         end
@@ -262,8 +303,8 @@ function get_switches(switch::DataFrame, src::String, dst::String)
 end
 
 function get_switch(mpc::Case, e::Branch)
-    switches = vcat(get_switches(mpc.switch, e.src, e.dst),
-        get_switches(mpc.switch, e.dst, e.src))
+    switches =
+        vcat(get_switches(mpc.switch, e.src, e.dst), get_switches(mpc.switch, e.dst, e.src))
     if isempty(switches)
         return Switch(e.src, e.dst, -Inf, -Inf)
     end
@@ -289,21 +330,32 @@ end
 
 function get_names(mg)
     names = []
-    for bus in 1:nv(mg)
+    for bus = 1:nv(mg)
         append!(names, [get_prop(mg, bus, :name)])
     end
     return names
 end
 
 function myplot(network, names)
-    graphplot(network, names=names, nodeshape=:circle, nodesize=0.1, curves=false, fontsize=7)
+    graphplot(
+        network,
+        names = names,
+        nodeshape = :circle,
+        nodesize = 0.1,
+        curves = false,
+        fontsize = 7,
+    )
 end
 """
     Traverse the in a direction until all isolating switches are found.
 """
-function find_isolating_switches!(network::RadialPowerGraph,
-    reconfigured_network::MetaGraph, isolating_switches,
-    visit::Vector{Int}, seen::Vector{Int})
+function find_isolating_switches!(
+    network::RadialPowerGraph,
+    reconfigured_network::MetaGraph,
+    isolating_switches,
+    visit::Vector{Int},
+    seen::Vector{Int},
+)
     # Initialise variable to keep track of sectioning time
 
     while !isempty(visit)
@@ -335,8 +387,11 @@ end
     Finds the switch that isolates a fault and the part of the network connected to
     this switch.
 """
-function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
-    switch_failures::Bool=false)
+function traverse_and_get_sectioning_time(
+    network::RadialPowerGraph,
+    e::Branch,
+    switch_failures::Bool = false,
+)
     # isolated_edges = []
     rn = Dict("base" => copy(network.G)) # This graph must be undirected
 
@@ -360,8 +415,7 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
         append!(seen, s)
     else
         # Search downstream for a switch
-        temp = find_isolating_switches!(network, rn["base"],
-            switch_u, [s], [n])
+        temp = find_isolating_switches!(network, rn["base"], switch_u, [s], [n])
         append!(seen, temp)
     end
     if e.dst ∈ switch_buses
@@ -370,8 +424,7 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
         append!(seen, n)
     else
         # Search upstream for a switch
-        temp = find_isolating_switches!(network, rn["base"],
-            switch_d, [n], [s])
+        temp = find_isolating_switches!(network, rn["base"], switch_d, [n], [s])
         append!(seen, temp)
     end
     isolating = Dict("base" => vcat(switch_u, switch_d))
@@ -382,30 +435,40 @@ function traverse_and_get_sectioning_time(network::RadialPowerGraph, e::Branch,
         if switch_u == switch_d
             # Find backup switch upstream
             isolating["upstream"] = Vector{Switch}()
-            find_isolating_switches!(network, rn["upstream"],
-                isolating["upstream"], [s], [n])
+            find_isolating_switches!(
+                network,
+                rn["upstream"],
+                isolating["upstream"],
+                [s],
+                [n],
+            )
 
             isolating["downstream"] = Vector{Switch}()
-            find_isolating_switches!(network, rn["downstream"],
-                isolating["downstream"], [n], [s])
+            find_isolating_switches!(
+                network,
+                rn["downstream"],
+                isolating["downstream"],
+                [n],
+                [s],
+            )
         else
             # Find backup_switches upstream
-            isolating["upstream"], rn["upstream"] = find_backup_switches(network,
-                rn["upstream"],
-                copy(seen),
-                switch_u)
+            isolating["upstream"], rn["upstream"] =
+                find_backup_switches(network, rn["upstream"], copy(seen), switch_u)
             # Find backup_switches upstream
-            isolating["downstream"], rn["downstream"] = find_backup_switches(network,
-                rn["downstream"],
-                seen,
-                switch_d)
+            isolating["downstream"], rn["downstream"] =
+                find_backup_switches(network, rn["downstream"], seen, switch_d)
         end
     end
     return rn, isolating
 end
 
-function find_backup_switches(network::RadialPowerGraph,
-    reconfigured_network::MetaGraph, seen::Vector{Int}, switches::Vector{Switch})
+function find_backup_switches(
+    network::RadialPowerGraph,
+    reconfigured_network::MetaGraph,
+    seen::Vector{Int},
+    switches::Vector{Switch},
+)
     reconfigured_b = copy(reconfigured_network)
     backup = Vector{Switch}()
     for switch in switches
@@ -413,10 +476,12 @@ function find_backup_switches(network::RadialPowerGraph,
         # traversed.
         visit = Vector{Int}()
         for v in [:src, :dst]
-            append!(visit, all_neighbors(network.G, get_node_number(network.G, getfield(switch, v))))
+            append!(
+                visit,
+                all_neighbors(network.G, get_node_number(network.G, getfield(switch, v))),
+            )
         end
-        find_isolating_switches!(network, reconfigured_b, backup,
-            visit, seen)
+        find_isolating_switches!(network, reconfigured_b, backup, visit, seen)
     end
     return backup, reconfigured_b
 end
@@ -445,22 +510,64 @@ end
 
 function store_edge_pos(network::RadialPowerGraph)
     if "name" in names(network.mpc.branch)
-        return insertcols!(select(network.mpc.branch, "f_bus" => "f_bus", "t_bus" => "t_bus", "name" => "name"), 1, :index => 1:size(network.mpc.branch)[1])
+        return insertcols!(
+            select(
+                network.mpc.branch,
+                "f_bus" => "f_bus",
+                "t_bus" => "t_bus",
+                "name" => "name",
+            ),
+            1,
+            :index => 1:size(network.mpc.branch)[1],
+        )
     elseif "ID" in names(network.mpc.branch)
-        return insertcols!(select(network.mpc.branch, "f_bus" => "f_bus", "t_bus" => "t_bus", "ID" => "name"), 1, :index => 1:size(network.mpc.branch)[1])
+        return insertcols!(
+            select(
+                network.mpc.branch,
+                "f_bus" => "f_bus",
+                "t_bus" => "t_bus",
+                "ID" => "name",
+            ),
+            1,
+            :index => 1:size(network.mpc.branch)[1],
+        )
     else
         # Here I am creating artificially a name column equal to the index
-        return insertcols!(insertcols!(select(network.mpc.branch, "f_bus" => "f_bus", "t_bus" => "t_bus"), 1, :name => string.(1:size(network.mpc.branch, 1))), 1, :index => 1:size(network.mpc.branch)[1])
+        return insertcols!(
+            insertcols!(
+                select(network.mpc.branch, "f_bus" => "f_bus", "t_bus" => "t_bus"),
+                1,
+                :name => string.(1:size(network.mpc.branch, 1)),
+            ),
+            1,
+            :index => 1:size(network.mpc.branch)[1],
+        )
     end
 end
 
 function get_edge_pos(e, edge_pos, filtered_branches)
     if typeof(edge_pos.f_bus[1]) == Int
-        rows = vcat(edge_pos[.&(edge_pos.f_bus .== parse(Int64, e.src), edge_pos.t_bus .== parse(Int64, e.dst)), :],
-            edge_pos[.&(edge_pos.f_bus .== parse(Int64, e.dst), edge_pos.t_bus .== parse(Int64, e.src)), :])
+        rows = vcat(
+            edge_pos[
+                .&(
+                    edge_pos.f_bus .== parse(Int64, e.src),
+                    edge_pos.t_bus .== parse(Int64, e.dst),
+                ),
+                :,
+            ],
+            edge_pos[
+                .&(
+                    edge_pos.f_bus .== parse(Int64, e.dst),
+                    edge_pos.t_bus .== parse(Int64, e.src),
+                ),
+                :,
+            ],
+        )
     else
-        rows = vcat(edge_pos[.&(edge_pos.f_bus .== e.src, edge_pos.t_bus .== e.dst), :],
-            edge_pos[.&(edge_pos.f_bus .== e.dst, edge_pos.t_bus .== e.src), :])
+        rows = vcat(
+            edge_pos[.&(edge_pos.f_bus .== e.src, edge_pos.t_bus .== e.dst), :],
+            edge_pos[.&(edge_pos.f_bus .== e.dst, edge_pos.t_bus .== e.src), :],
+        )
     end
     for row in collect(eachrow(rows))
         if !(row.name in filtered_branches[!, :element])

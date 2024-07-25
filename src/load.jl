@@ -11,11 +11,11 @@ mutable struct Load
     nfc::Bool
 end
 
-function Load(load::DataFrameRow, corr::Dict{String, <:Real})
+function Load(load::DataFrameRow, corr::Dict{String,<:Real})
     Load(load.ID, load.bus, load.P, load.type, corr[load.type], load.nfc)
 end
 
-function get_loads(case::Case, corr::Dict{String, <:Real})
+function get_loads(case::Case, corr::Dict{String,<:Real})
     return [Load(load, corr) for load in eachrow(case.load)]
 end
 

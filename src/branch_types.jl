@@ -56,8 +56,12 @@ function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
             end
         end
         if isempty(F)
-            F = [Feeder(network.ref_bus,
-                consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf)]
+            F = [
+                Feeder(
+                    network.ref_bus,
+                    consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf,
+                ),
+            ]
         end
     end
     return F
@@ -132,7 +136,8 @@ end
     Overloading of comparison operator for switches. If both switches have an equal remote swithcing
     time it compares the manual switching time, otherwise it compares the remote switching time.
 """
-(<)(s1::Switch, s2::Switch) = (s1.t_remote == s2.t_remote ? s1.t_manual < s2.t_manual : s1.t_remote < s2.t_remote)
+(<)(s1::Switch, s2::Switch) =
+    (s1.t_remote == s2.t_remote ? s1.t_manual < s2.t_manual : s1.t_remote < s2.t_remote)
 
 function get_minimum_switching_time(s::Switch)
     return s.t_remote < s.t_manual ? s.t_remote : s.t_manual

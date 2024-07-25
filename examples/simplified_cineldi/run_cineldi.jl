@@ -28,13 +28,13 @@ network.mpc.switch.t_remote .= 0.5
 network.mpc.gen[1, :Pmax] = 2
 # Add batteries
 i = 1
-while i <=3
-    append!(network.mpc.gen, DataFrame(network.mpc.gen[3,:]))
+while i <= 3
+    append!(network.mpc.gen, DataFrame(network.mpc.gen[3, :]))
     network.mpc.gen[3+i, :ID] = string("DER", i)
-    global i+=1
+    global i += 1
 end
-network.mpc.gen[4:6, :Pmax] = [2,3,4]
-network.mpc.gen[4:6, :E] = [2,2,1]
+network.mpc.gen[4:6, :Pmax] = [2, 3, 4]
+network.mpc.gen[4:6, :E] = [2, 2, 1]
 network.mpc.gen[4:6, :external] .= false
 network = RadialPowerGraph(network.mpc)
 res, L, edge_pos = relrad_calc(cost_functions, network)

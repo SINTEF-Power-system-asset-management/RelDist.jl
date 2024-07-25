@@ -12,7 +12,13 @@ using RelDist: t_load, t_nfc_load, t_supply, NewBranch, is_supply, is_nfc, is_sw
 using RelDist: kile_loss, remove_switchless_branches!
 using MetaGraphsNext: labels, neighbor_labels, edge_labels
 using Graphs: Graph, SimpleGraph
-using GraphMakie: graphplot, NodeHoverHighlight, NodeDrag, EdgeHoverHighlight, EdgeDrag, NetworkLayout.SFDP
+using GraphMakie:
+    graphplot,
+    NodeHoverHighlight,
+    NodeDrag,
+    EdgeHoverHighlight,
+    EdgeDrag,
+    NetworkLayout.SFDP
 using GLMakie.Makie: wong_colors, deregister_interaction!, register_interaction!
 
 function get_vertex_color(bus::Bus)
@@ -64,16 +70,16 @@ function plot_that_graph(network::Network, parts::Vector{NetworkPart})
     edge_colors = [get_edge_color(network, edge) for edge in edge_labels(network)]
     node_size = [25.0 for vertex in labels(network)]
     edge_width = [3.0 for edge in edge_labels(network)]
-    layout = SFDP(Ptype=Float32, tol=0.01, C=0.2, K=1)
+    layout = SFDP(Ptype = Float32, tol = 0.01, C = 0.2, K = 1)
 
     f, ax, p = graphplot(
         network.network,
-        node_color=vertex_colors,
-        ilabels=labels(network),
-        edge_color=edge_colors,
-        node_size=node_size,
-        edge_width=edge_width,
-        layout=layout
+        node_color = vertex_colors,
+        ilabels = labels(network),
+        edge_color = edge_colors,
+        node_size = node_size,
+        edge_width = edge_width,
+        layout = layout,
     )
 
     deregister_interaction!(ax, :rectanglezoom)

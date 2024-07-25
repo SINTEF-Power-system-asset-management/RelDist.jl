@@ -11,7 +11,8 @@ using SintPowerCase: Case
 using DataFrames: outerjoin, keys
 using DataStructures: DefaultDict, Queue
 
-using ..network_graph: Network, KeyType, is_supply, get_supply_power, get_load_power, get_nfc_load_power
+using ..network_graph:
+    Network, KeyType, is_supply, get_supply_power, get_load_power, get_nfc_load_power
 using ..network_graph: Bus, is_switch, get_kile, NewBranch, NewSwitch
 using ...RelDist: PieceWiseCost
 
@@ -145,9 +146,9 @@ loss_fn(optimal_split)
 """
 function kile_loss(
     network::Network,
-    repair_time::Float64=4.0,
-    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
-    correction_factor=1.0,
+    repair_time::Float64 = 4.0,
+    cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor = 1.0,
 )
     # TODO: switching time should be the highest of all the switches needed to isolate this part of the grid
     switching_time = network.switching_time
@@ -279,7 +280,7 @@ loss_fn(optimal_split)
 function segment_network(
     network::Network,
     parts::Vector{NetworkPart},
-    cost_function::Function=energy_not_served,
+    cost_function::Function = energy_not_served,
 )::Vector{NetworkPart}
     # Use the hashes as keys in the cache because its easier to debug
     # I'm annoyed i have to use Any when i know that the three Any types will always be the same
@@ -347,7 +348,7 @@ function segment_network(
     res[2]
 end
 
-function segment_network(network::Network, cost_function::Function=energy_not_served)
+function segment_network(network::Network, cost_function::Function = energy_not_served)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
     segment_network(network, parts, cost_function)
@@ -358,7 +359,7 @@ end
 
 """DFS over all buses from the start bus, gobbling up all nodes we can. 
 TODO: If we encounter overload on a branch with no switch we return nothing to backtrack."""
-function traverse_classic(network::Network, part::NetworkPart, off_limits=Set{KeyType}())
+function traverse_classic(network::Network, part::NetworkPart, off_limits = Set{KeyType}())
     visit = [part.subtree...]
 
     while !isempty(visit)

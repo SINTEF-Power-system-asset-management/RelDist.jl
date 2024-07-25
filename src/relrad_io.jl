@@ -15,53 +15,64 @@ function parse_zulu(zulu::String)::ZonedDateTime
     end
 end
 
-function read_cost_functions(fname::String)::Dict{String, PieceWiseCost}
+function read_cost_functions(fname::String)::Dict{String,PieceWiseCost}
     io = open(fname)
     piecewise_cost = read_cost_functions(io)
     close(io)
     return piecewise_cost
 end
 
-function read_cost_functions(io::IOStream)::Dict{String, PieceWiseCost}
+function read_cost_functions(io::IOStream)::Dict{String,PieceWiseCost}
     json = JSON.parse(io)
-    piecewise_cost = Dict{String, PieceWiseCost}()
+    piecewise_cost = Dict{String,PieceWiseCost}()
     for (key, value) in json
-        pieces = Array{Piece, 1}(undef, 0)
+        pieces = Array{Piece,1}(undef, 0)
         for (index, range) in enumerate(value["ranges"])
             if range[2] == "inf"
                 range[2] = Inf
             end
             # If a time shit ( t-shift ) is defined use it otherwise set it to 0
             shift = "shift" in keys(value) ? value["shift"][index] : 0
-            push!(pieces, Piece(Bound(range[1], range[2]),
-                                value["constants"][index],
-                                value["slopes"][index],
-                                shift))
+            push!(
+                pieces,
+                Piece(
+                    Bound(range[1], range[2]),
+                    value["constants"][index],
+                    value["slopes"][index],
+                    shift,
+                ),
+            )
         end
         piecewise_cost[key] = PieceWiseCost(pieces)
     end
     return piecewise_cost
 end
 
-function read_correction_factors_from_csv(month::String, day::String, hour::String,
-                                         decimal::Char=',')::CorrFactor
-    return CorrFactor(DataFrame(CSV.File(month, decimal=decimal)),
-                      DataFrame(CSV.File(day, decimal=decimal)),
-                      DataFrame(CSV.File(hour, decimal=decimal)))
+function read_correction_factors_from_csv(
+    month::String,
+    day::String,
+    hour::String,
+    decimal::Char = ',',
+)::CorrFactor
+    return CorrFactor(
+        DataFrame(CSV.File(month, decimal = decimal)),
+        DataFrame(CSV.File(day, decimal = decimal)),
+        DataFrame(CSV.File(hour, decimal = decimal)),
+    )
 end
 
 """Read load profiles from file."""
 function read_loadprofile(fname::String, lp_type::String)::DataFrame
     io = open(fname)
-    lp=read_loadprofile(io, lp_type)
+    lp = read_loadprofile(io, lp_type)
     close(io)
     return lp
 end
 
 """Read load profiles from file stream."""
-function read_loadprofile(io::IOStream, lp_type::String, decimal::Char=',')::DataFrame
-    lp = CSV.read(io, DataFrame, datarow = 3, decimal=decimal)
-    return lp[(lp.Name .== lp_type), :]
+function read_loadprofile(io::IOStream, lp_type::String, decimal::Char = ',')::DataFrame
+    lp = CSV.read(io, DataFrame, datarow = 3, decimal = decimal)
+    return lp[(lp.Name.==lp_type), :]
 end
 
 """ Read reference time point from filename."""
@@ -74,9 +85,9 @@ end
 
 
 
-function parse_temperature(fname::String, decimal::Char=',')::DataFrame
-    csv = CSV.read(fname, DataFrame, decimal=decimal)
-    T= csv[:,[:referenceTime, :value]]
-    T[!,:referenceTime] = Date.(T[!,:referenceTime], "yyyy-mm-dd HH:MM:SSzzzz")
+function parse_temperature(fname::String, decimal::Char = ',')::DataFrame
+    csv = CSV.read(fname, DataFrame, decimal = decimal)
+    T = csv[:, [:referenceTime, :value]]
+    T[!, :referenceTime] = Date.(T[!, :referenceTime], "yyyy-mm-dd HH:MM:SSzzzz")
     return T
 end

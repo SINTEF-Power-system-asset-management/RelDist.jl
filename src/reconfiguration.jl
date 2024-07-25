@@ -16,9 +16,12 @@ end
 function get_load(g::MetaGraph, mpc::Case, v::Int)
     # Check if there is load on the vertex
     if get_prop(g, v, :load)
-        return Loadr(get_prop(g, v, :name),
+        return Loadr(
+            get_prop(g, v, :name),
             get_load_bus_power(mpc, get_prop(g, v, :name)),
-            get_prop(g, v, :nfc), false)
+            get_prop(g, v, :nfc),
+            false,
+        )
     else
         return Loadr(get_prop(g, v, :name), 0.0, false, false)
     end
@@ -42,11 +45,14 @@ function get_gen(g::MetaGraph, mpc::Case, v::Int)
     if get_prop(g, v, :gen)
         bus_id = get_prop(g, v, :name)
         row = mpc.gen[mpc.gen.bus.==bus_id, :][1, :] # This will be replaced soon
-        return Gen(get_prop(g, v, :name),
+        return Gen(
+            get_prop(g, v, :name),
             get_gen_bus_power(mpc, bus_id),
             row.Pmax, # Will be replaced soon
             row.E,
-            get_prop(g, v, :external), false)
+            get_prop(g, v, :external),
+            false,
+        )
     else
         return Gen(get_prop(g, v, :name), 0.0, 0.0, 0.0, false, false)
     end
@@ -73,37 +79,63 @@ mutable struct Part
 end
 
 function Part()
-    Part(0.0, 0.0, 0.0, 0.0, 0.0,
-        Dict{Int,Loadr}(), Dict{Int,Gen}(),
-        Vector{Int}(), Vector{Switch}())
+    Part(
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        Dict{Int,Loadr}(),
+        Dict{Int,Gen}(),
+        Vector{Int}(),
+        Vector{Switch}(),
+    )
 end
 
 function Part(capacity::Real, v_start::Integer)
-    Part(capacity, 0.0, 0.0, 0.0, 0.0,
-        Dict{Int,Loadr}(), Dict{Int,Gen}(),
-        Vector([v_start]), Vector{Switch}())
+    Part(
+        capacity,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        Dict{Int,Loadr}(),
+        Dict{Int,Gen}(),
+        Vector([v_start]),
+        Vector{Switch}(),
+    )
 end
 
 function Part(capacity::Real, load::Loadr, gen::Gen, v_start::Integer)
-    Part(capacity, 0.0, 0.0, 0.0, 0.0,
-        Dict(v_start => load), Dict(v_start => gen),
-        Vector([v_start]), Vector{Switch}())
+    Part(
+        capacity,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        Dict(v_start => load),
+        Dict(v_start => gen),
+        Vector([v_start]),
+        Vector{Switch}(),
+    )
 end
 
 """
     Returns the load in a set of vertices that are in a part.
 """
 function load_in_part_vertices(part::Part, vertices::Vector{Int})
-    sum(part.loads[v].P for v in vertices; init=0.0)
+    sum(part.loads[v].P for v in vertices; init = 0.0)
 end
 
 """
     Returns the total load in two parts.
 """
 function load_in_parts(part_a::Part, part_b::Part)
-    (load_in_part_vertices(part_a, setdiff(part_a.vertices, part_b.vertices)) +
-     load_in_part_vertices(part_b, setdiff(part_b.vertices, part_a.vertices)) +
-     load_in_part_vertices(part_a, intersect(part_a.vertices, part_b.vertices)))
+    (
+        load_in_part_vertices(part_a, setdiff(part_a.vertices, part_b.vertices)) +
+        load_in_part_vertices(part_b, setdiff(part_b.vertices, part_a.vertices)) +
+        load_in_part_vertices(part_a, intersect(part_a.vertices, part_b.vertices))
+    )
 end
 
 """
@@ -135,7 +167,7 @@ end
 function remove_vertex!(part::Part, v::Integer)
     shed_load!(part, v)
     shed_gen!(part, v)
-    deleteat!(part.vertices, part.vertices.==v)
+    deleteat!(part.vertices, part.vertices .== v)
     pop!(part.gens, v)
     pop!(part.loads, v)
 end
@@ -261,9 +293,8 @@ function in_service_loads(part::Part)
             # The partitioning algorithm concluded that some of the loads
             # should be supplied by DER. I will now determing which loads that should
             # always be fed by the reserve.
-            served_idx, not_served_idx, served = can_be_served(
-                [load.P for load in values(loads)],
-                part.capacity)
+            served_idx, not_served_idx, served =
+                can_be_served([load.P for load in values(loads)], part.capacity)
             always_served = collect(keys(loads))[served_idx]
         else
             # The capacity of the feeder is larger than that of the unshed part.
@@ -304,14 +335,18 @@ function in_service_loads(part::Part)
                 to_be_served = unserved + unserved_nfc
             elseif capacity > unserved
                 # Check if we can serve some NFC loads
-                served_nfc_idx, unserved_nfc_idx, P = can_be_served([l.P for l in nfc],
-                    capacity)
+                served_nfc_idx, unserved_nfc_idx, P =
+                    can_be_served([l.P for l in nfc], capacity)
 
                 # These loads could not be served in this round. Set the
                 # appropriate serving time.
-                merge!(serve_times,
-                    Dict(nfc[unserved_idx].bus => serve_time
-                         for unserved_idx in unserved_nfc_idx))
+                merge!(
+                    serve_times,
+                    Dict(
+                        nfc[unserved_idx].bus => serve_time for
+                        unserved_idx in unserved_nfc_idx
+                    ),
+                )
                 # Calculate how much load we should serve in this round.
                 to_be_served = unserved + P
                 # Remove the loads we could not serve from the list
@@ -321,15 +356,19 @@ function in_service_loads(part::Part)
                 # loads. Delete all NFC loads
                 nfc = []
                 # Calculate how much load we should serve. 
-                served_load_idx, unserved_load_idx, P = can_be_served([l.P for l in loads],
-                    capacity)
+                served_load_idx, unserved_load_idx, P =
+                    can_be_served([l.P for l in loads], capacity)
                 to_be_served = P
 
                 # These loads could not be served in this round. Set the
                 # appropriate serving time.
-                merge!(serve_times,
-                    Dict(loads[unserved_idx].bus => serve_time
-                         for unserved_idx in unserved_load_idx))
+                merge!(
+                    serve_times,
+                    Dict(
+                        loads[unserved_idx].bus => serve_time for
+                        unserved_idx in unserved_load_idx
+                    ),
+                )
 
                 # Remove the loads we could not serve from the list
                 deleteat!(loads, unserved_nfc_idx)
@@ -393,33 +432,41 @@ function loading(part::Part)
 end
 
 """ Calculate reachable vertices starting from a given edge"""
-function calc_R(network::RadialPowerGraph,
-    g::MetaGraph,
-    e::Branch)::Part
+function calc_R(network::RadialPowerGraph, g::MetaGraph, e::Branch)::Part
     v = get_node_number(network.G, e.dst)
     traverse(network, g, v, e.rateA)
 end
 
 """ Calculate reachable vertices starting from a given edge"""
-function calc_R(network::RadialPowerGraph,
-    g::MetaGraph,
-    b::Feeder)::Part
+function calc_R(network::RadialPowerGraph, g::MetaGraph, b::Feeder)::Part
     v = get_node_number(network.G, b.bus)
     traverse(network, g, v, b.rateA)
 end
 
-function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int=0,
-    feeder_cap::Real=Inf, seen=Vector{Int}())
-    part = Part(feeder_cap,
+function traverse(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    start::Int = 0,
+    feeder_cap::Real = Inf,
+    seen = Vector{Int}(),
+)
+    part = Part(
+        feeder_cap,
         get_load(g, network.mpc, start),
         get_gen(g, network.mpc, start),
-        start)
+        start,
+    )
     traverse!(network, g, part, start, seen)
     return part
 end
 
-function traverse!(network::RadialPowerGraph, g::MetaGraph, part::Part, start::Int=0,
-    seen=Vector{Int}())
+function traverse!(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    part::Part,
+    start::Int = 0,
+    seen = Vector{Int}(),
+)
     @assert start in vertices(g) "can't access $start in $(props(g, 1))"
 
     parents = Dict{Int,Int}()
@@ -494,12 +541,21 @@ mutable struct Overlapping
     tot_load::Real
 end
 
-function Overlapping(network::RadialPowerGraph, g::MetaGraph, parts::Vector{Part}, part::Part)
+function Overlapping(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    parts::Vector{Part},
+    part::Part,
+)
     Overlapping(network, g, parts, part, Part(), 0, Vector{Int}(), true, 0)
 end
 
-function update_overlapping!(o::Overlapping, old_p::Part,
-    old_i::Int, overlapping::Vector{Int})
+function update_overlapping!(
+    o::Overlapping,
+    old_p::Part,
+    old_i::Int,
+    overlapping::Vector{Int},
+)
     o.old_p = old_p
     o.old_i = old_i
     o.overlapping = overlapping
@@ -564,7 +620,7 @@ function evaluate_split!(split::Split, part::Part)
         return
     end
     # This is probably not correct. Because none of this may solve the overload.
-    recon_P = sum(part.loads[v].P for v in v_diff if !part.loads[v].shed; init=0.0)
+    recon_P = sum(part.loads[v].P for v in v_diff if !part.loads[v].shed; init = 0.0)
 
     # Iterate the vertices in the Part after the Split. Note that the split
     # May contain vertices that are not in the Part. We currently do, not
@@ -608,8 +664,12 @@ function parts_split(o::Overlapping, islands::Vector{Vector{Int}})
     return reserves_found == 2
 end
 
-function check_overlap_and_fix!(network::RadialPowerGraph, g::MetaGraph,
-    parts::Vector{Part}, part::Part)
+function check_overlap_and_fix!(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    parts::Vector{Part},
+    part::Part,
+)
     o = Overlapping(network, g, parts, part)
     for (old_i, old_p) in enumerate(parts)
         overlapping = intersect(old_p, part)
@@ -706,8 +766,12 @@ function find_reconfiguration_switches!(o::Overlapping)
 
                     if split_solved_overlap(o, splits_temp)
                         for (part, split) in splits_temp
-                            update_part_after_split!(getfield(o, part),
-                                o.g, split, get_switch(o.network, e))
+                            update_part_after_split!(
+                                getfield(o, part),
+                                o.g,
+                                split,
+                                get_switch(o.network, e),
+                            )
                         end
                         return
                     end
@@ -821,8 +885,11 @@ end
 """
     Evaluate the parts of the network we haven't investigated so far.
 """
-function evaluate_unpartitioned_parts!(network::RadialPowerGraph,
-    g::MetaGraph, parts::Vector{Part})
+function evaluate_unpartitioned_parts!(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    parts::Vector{Part},
+)
     seen = vcat([part.vertices for part in parts]...)
     for part in parts
         for switch in part.switches
@@ -831,8 +898,8 @@ function evaluate_unpartitioned_parts!(network::RadialPowerGraph,
             # this is a switch splitting parts and we should not search from it.
             starts = setdiff(switch_v, part.vertices)
             if isempty(starts)
-                starts = setdiff(
-                    vcat([all_neighbors(g, v) for v in switch_v]...), part.vertices)
+                starts =
+                    setdiff(vcat([all_neighbors(g, v) for v in switch_v]...), part.vertices)
             end
             # In case the splitting switch is right before an intersection we have
             # will have more than one direction to evaluate.

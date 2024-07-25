@@ -1,4 +1,13 @@
-using RelDist: segment_network, empty_network, Bus, Network, NetworkPart, KeyType, t_load, t_nfc_load, t_supply
+using RelDist:
+    segment_network,
+    empty_network,
+    Bus,
+    Network,
+    NetworkPart,
+    KeyType,
+    t_load,
+    t_nfc_load,
+    t_supply
 using RelDist: NewBranch
 using MetaGraphsNext: labels, neighbor_labels
 using Test
