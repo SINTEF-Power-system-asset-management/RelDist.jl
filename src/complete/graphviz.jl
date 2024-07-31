@@ -104,8 +104,6 @@ function to_dot(network::Network, parts=Vector{NetworkPart}(), layout="dot")
     $(nodes_str)
     }"""
 
-    println(dotstring)
-
     dotstring
 end
 
