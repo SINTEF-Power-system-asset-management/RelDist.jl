@@ -255,6 +255,13 @@ function remove_switchless_branches!(network::Network)
         end
     end
 end
+
+function remove_switchless_branches(network::Network)
+    newnet = deepcopy(network)
+    remove_switchless_branches!(newnet)
+    newnet
+end
+
 ## End of preprocessing
 
 ## Beginning of DFS in state space
