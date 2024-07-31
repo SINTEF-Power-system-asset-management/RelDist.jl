@@ -26,8 +26,4 @@ The case we want to look at is where there is a failure between mf and fail. The
 
 ## To run example with visualization
 
-Enter the julia repl
-
-`] activate RelDist`
-
-`] dev GLMakie`
+See plotting code in `../segmentation/simple_overlap.jl`

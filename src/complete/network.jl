@@ -106,13 +106,13 @@ struct NewSwitch
     bus::KeyType
     is_closed::Bool
     switching_time::Float64
-end
 
-NewSwitch(
-    bus="you should have a key here if you're not testing code",
-    is_closed=false,
-    switching_time=0.2,
-) = NewSwitch(bus, is_closed, switching_time)
+    NewSwitch(
+        bus::String="you should have a key here if you're not testing code",
+        is_closed::Bool=false,
+        switching_time::Float64=0.2,
+    ) = new(bus, is_closed, switching_time)
+end
 
 function time_to_cut(switch::NewSwitch)
     if !switch.is_closed

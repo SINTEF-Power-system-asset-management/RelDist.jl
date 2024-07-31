@@ -52,7 +52,7 @@ function to_dot_node(network::Network, parts::Vector{NetworkPart}, node::KeyType
         end
         push!(kwargs, "shape=record")
         push!(kwargs, "style=\"rounded,filled\"")
-        push!(kwargs, "label=\"$(join(labels, '|'))\"")
+        push!(kwargs, "label=\"$(node)|{$(join(labels, '|'))}\"")
     end
     "$(node) [ $(join(kwargs, ',')) ]\n"
 end
