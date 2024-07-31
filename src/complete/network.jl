@@ -78,7 +78,7 @@ function get_kile(
     load::LoadUnit,
     outage_time::Float64,
     cost_functions::AbstractDict{String,PieceWiseCost},
-    correction_factor::Float64 = 1.0,
+    correction_factor::Float64=1.0,
 )
     if load.is_nfc
         return 0.0
@@ -108,7 +108,11 @@ struct NewSwitch
     switching_time::Float64
 end
 
-NewSwitch() = NewSwitch("you should have a key here if you're not testing code", false, 0.2)
+NewSwitch(
+    bus="you should have a key here if you're not testing code",
+    is_closed=false,
+    switching_time=0.2,
+) = NewSwitch(bus, is_closed, switching_time)
 
 function time_to_cut(switch::NewSwitch)
     if !switch.is_closed
@@ -124,7 +128,10 @@ struct NewBranch
     switches::Vector{NewSwitch}
 end
 
-NewBranch() = NewBranch(0.512, 0.123, [NewSwitch()])
+"""Creates a branch with a single switch"""
+NewBranch(bus="you should have a key here too if you're not testing code") =
+    NewBranch(0.512, 0.123, [NewSwitch(bus)])
+NewBranch()
 
 function is_switch(branch::NewBranch)
     length(branch.switches) > 0
@@ -147,12 +154,12 @@ end
 """Create a Network. If this is a subgraph after a fault switching time and repair time
 are the times it takes to respectively reorganize and fix the fault on the network.
 If not then they don't mean anything."""
-function Network(switching_time = 0.5, repair_time = 4.0)
+function Network(switching_time=0.5, repair_time=4.0)
     network = MetaGraphsNext.MetaGraph(
         Graph();
-        label_type = KeyType,
-        vertex_data_type = VertexType,
-        edge_data_type = EdgeType,
+        label_type=KeyType,
+        vertex_data_type=VertexType,
+        edge_data_type=EdgeType,
     )
     Network(network, switching_time, repair_time)
 end
@@ -180,8 +187,8 @@ delete!(network::Network, key_a::KeyType, key_b::KeyType) =
 Pass in the switching and repair times for convenience."""
 function connected_components(
     network::Network,
-    switching_time = 0.592,
-    repair_time = 4.0,
+    switching_time=0.592,
+    repair_time=4.0,
 )::Vector{Network}
     comps = []
     for subnet_indices in connected_components(network.network)

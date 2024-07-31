@@ -146,9 +146,9 @@ loss_fn(optimal_split)
 """
 function kile_loss(
     network::Network,
-    repair_time::Float64 = 4.0,
-    cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
-    correction_factor = 1.0,
+    repair_time::Float64=4.0,
+    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor=1.0,
 )
     # TODO: switching time should be the highest of all the switches needed to isolate this part of the grid
     switching_time = network.switching_time
@@ -226,12 +226,18 @@ function remove_switchless_branches!(network::Network)
                 # If we want to remove them, we should do it below
                 continue
             end
-            did_change = true
 
             (node_a::KeyType, node_b::KeyType) = edge
-            @info "removing $(edge)"
             bus_a::Bus = network[node_a]
             bus_b::Bus = network[node_b]
+
+            if is_supply(bus_a) && is_supply(bus_b) # TODO: Make sure renewables don't trigger this
+                throw("Two supplies cannot be connected with no switch")
+            end
+            did_change = true
+
+
+            @info "removing $(edge)"
             append!(bus_a.loads, bus_b.loads)
             append!(bus_a.supplies, bus_b.supplies)
             for nbr in collect(neighbor_labels(network, node_b))
@@ -280,7 +286,7 @@ loss_fn(optimal_split)
 function segment_network(
     network::Network,
     parts::Vector{NetworkPart},
-    cost_function::Function = energy_not_served,
+    cost_function::Function=energy_not_served,
 )::Vector{NetworkPart}
     # Use the hashes as keys in the cache because its easier to debug
     # I'm annoyed i have to use Any when i know that the three Any types will always be the same
@@ -305,6 +311,7 @@ function segment_network(
         for part in parts,
             node_label in part.leaf_nodes,
             neighbour_idx in neighbor_labels(network, node_label)
+
             # Check this part first because it's more likely
             if neighbour_idx in part.subtree ||
                any(neighbour_idx in part.subtree for part in parts)
@@ -314,7 +321,6 @@ function segment_network(
             if get_load_power(neighbour) > part.rest_power
                 continue # Overload
             end
-
             visit!(network, parts, part, neighbour_idx)
             local hashy = hash(parts)
             local nested_result = if hashy in keys(cache)
@@ -348,7 +354,7 @@ function segment_network(
     res[2]
 end
 
-function segment_network(network::Network, cost_function::Function = energy_not_served)
+function segment_network(network::Network, cost_function::Function=energy_not_served)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
     segment_network(network, parts, cost_function)
@@ -359,7 +365,8 @@ end
 
 """DFS over all buses from the start bus, gobbling up all nodes we can. 
 TODO: If we encounter overload on a branch with no switch we return nothing to backtrack."""
-function traverse_classic(network::Network, part::NetworkPart, off_limits = Set{KeyType}())
+function traverse_classic(network::Network, part::NetworkPart, off_limits=Set{KeyType}())
+    part = deepcopy(part)
     visit = [part.subtree...]
 
     while !isempty(visit)
@@ -369,7 +376,6 @@ function traverse_classic(network::Network, part::NetworkPart, off_limits = Set{
         setdiff!(to_visit, off_limits)
         for v_dst in to_visit
             if get_load_power(network[v_dst]) > part.rest_power
-                # TODO: Handle the case where the branch doesn't have any switches
                 continue
             end
             visit!(network, part, v_dst)

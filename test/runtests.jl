@@ -30,3 +30,7 @@ end
     include("segmentation/nfc.jl")
     include("segmentation/kile.jl")
 end
+
+@testset "Testing the edge case where the load is connected to the fault with no switches" begin
+    include("test_branch_at_fault.jl")
+end
