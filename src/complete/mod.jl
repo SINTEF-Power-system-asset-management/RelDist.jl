@@ -6,8 +6,8 @@ include("network.jl")
 @reexport using .network_graph: NewBranch, NewSwitch, is_supply, is_nfc, is_load, is_switch
 
 include("section.jl")
-@reexport using .section: segment_network_ignore_overlap, get_start_guess_optimal
-@reexport using .section: segment_network, segment_network_fast, segment_network_classic, get_start_guess
+@reexport using .section: segment_network_ignore_overlap, get_start_guess
+@reexport using .section: segment_network, segment_network_fast, segment_network_classic
 @reexport using .section: remove_switchless_branches!, NetworkPart
 @reexport using .section: kile_loss, energy_not_served
 

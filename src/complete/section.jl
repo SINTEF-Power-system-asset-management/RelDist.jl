@@ -380,7 +380,7 @@ end
 
 """Get a good start point for the complete search using the data 
 from the `segment_network_classic` algorithm"""
-function get_start_guess_optimal(network::Network, old_parts::Vector{NetworkPart}; loss_function::Union{Function,Nothing}=nothing)
+function get_start_guess(network::Network, old_parts::Vector{NetworkPart}; loss_function::Union{Function,Nothing}=nothing)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
     all_supplied = Vector{NetworkPart}()
@@ -392,9 +392,23 @@ function get_start_guess_optimal(network::Network, old_parts::Vector{NetworkPart
     all_supplied
 end
 
+"""Get the union of all other parts' subtrees"""
+function get_off_limits(part::NetworkPart, parts::Vector{NetworkPart})
+    off_limits = Set()
+    for other_part in parts
+        if other_part == part
+            continue
+        end
+        union!(off_limits, other_part.subtree)
+    end
+    off_limits
+end
+
+"""Segment the network by finding the best set of loads for each part, backtracking the overlap
+and then doing the segmentation from that starting point."""
 function segment_network_fast(network::Network; loss_function::Union{Function,Nothing}=nothing)
     naive_parts = segment_network_ignore_overlap(network; loss_function=loss_function)
-    start_guess = get_start_guess_optimal(network, naive_parts; loss_function=loss_function)
+    start_guess = get_start_guess(network, naive_parts; loss_function=loss_function)
     segment_network(network, start_guess; loss_function=loss_function)
 end
 ## End of DFS in state space
@@ -438,32 +452,6 @@ function segment_network_classic(network::Network)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
     segment_network_classic(network, parts)
-end
-
-"""Get the union of all other """
-function get_off_limits(part::NetworkPart, parts::Vector{NetworkPart})
-    off_limits = Set()
-    for other_part in parts
-        if other_part == part
-            continue
-        end
-        union!(off_limits, other_part.subtree)
-    end
-    off_limits
-end
-
-"""Get a good start point for the complete search using the data 
-from the `segment_network_classic` algorithm"""
-function get_start_guess(network::Network, old_parts::Vector{NetworkPart})
-    supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
-    parts = [NetworkPart(network, supply) for supply in supplies]
-    all_supplied = Vector{NetworkPart}()
-    for (old_part, part) in zip(old_parts, parts)
-        off_limits = get_off_limits(old_part, old_parts)
-        supplied_by_this = traverse_classic(network, part; off_limits=off_limits)
-        push!(all_supplied, supplied_by_this)
-    end
-    all_supplied
 end
 ## End of classic reimpl
 

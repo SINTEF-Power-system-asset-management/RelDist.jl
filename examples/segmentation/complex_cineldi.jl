@@ -49,13 +49,11 @@ if true == true
         # Do the backtracking trick on the compressed graph
         # compressed_split_fast = segment_network_fast(compressed_network; loss_function=loss_fn)
         estimated_split = segment_network_ignore_overlap(compressed_network)
-        println(estimated_split)
-        without_overlap = get_start_guess_optimal(compressed_network, estimated_split)
-        display(dot_plot(compressed_network, without_overlap))
+        without_overlap = get_start_guess(compressed_network, estimated_split)
         compressed_split_fast = segment_network(compressed_network, without_overlap)
 
         display(dot_plot(compressed_network, compressed_split_fast))
 
-        @info "loss complex cineldi fast with trick" loss_fn(compressed_split_fast)
+        @info "loss complex cineldi fast" loss_fn(compressed_split_fast)
     end
 end
