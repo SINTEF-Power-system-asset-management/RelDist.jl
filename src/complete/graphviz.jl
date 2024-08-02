@@ -1,6 +1,6 @@
 module graphviz_mod
 using ..network_graph: Network, KeyType, NewSwitch, LoadUnit
-using ..network_graph: Bus, is_supply, is_load, is_nfc
+using ..network_graph: Bus, is_supply, is_battery, is_load, is_nfc
 using ..network_graph: labels, edge_labels
 using ..section: NetworkPart
 using GraphViz: GraphViz
@@ -42,6 +42,8 @@ function to_dot_node(network::Network, parts::Vector{NetworkPart}, node::KeyType
     bus::Bus = network[node]
     if is_supply(bus)
         push!(kwargs, "fillcolor=\"lightgreen\"")
+    elseif is_battery(bus)
+        push!(kwargs, "fillcolor=\"gold\"")
     elseif is_nfc(bus)
         push!(kwargs, "fillcolor=\"lightskyblue\"")
     elseif is_load(bus)

@@ -14,10 +14,11 @@ import Base
 using ...RelDist: PieceWiseCost, calculate_kile
 
 ### Bus
-@enum BusKind t_supply t_load t_nfc_load
+@enum BusKind t_supply t_battery t_load t_nfc_load
 struct SupplyUnit
     id::String
     power::Float64
+    is_battery::Bool
 end
 
 struct LoadUnit
@@ -36,7 +37,9 @@ end
 """Simple constructor to be compatible with previous versions of tests"""
 function Bus(id::String, type::BusKind, power::Float64)
     if type == t_supply
-        Bus([], [SupplyUnit(id, power)])
+        Bus([], [SupplyUnit(id, power, false)])
+    elseif type == t_battery
+        Bus([], [SupplyUnit(id, power, true)])
     elseif type == t_load
         Bus([LoadUnit(id, power, "residental", 1.0, false)], [])
     elseif type == t_nfc_load
@@ -44,13 +47,32 @@ function Bus(id::String, type::BusKind, power::Float64)
     end
 end
 
-function get_supply_power(bus::Bus)
+function get_supply_power_and_is_battery(bus::Bus)
+    # If a battery and a feeder is on the same bus, we can treat the bus as a feeder
     summy = 0.0
+    is_battery = true
     for supply in bus.supplies
+        if !supply.is_battery
+            is_battery = false
+        end
         summy += supply.power
     end
-    summy
+    summy, is_battery
 end
+
+function get_supply_power(bus::Bus)
+    power, is_battery = get_supply_power_and_is_battery(bus)
+    !is_battery ? power : 0.0
+end
+
+is_supply(bus::Bus) = get_supply_power(bus) > 0.0
+
+function get_battery_supply_power(bus::Bus)
+    power, is_battery = get_supply_power_and_is_battery(bus)
+    is_battery ? power : 0.0
+end
+
+is_battery(bus::Bus) = get_battery_supply_power(bus) > 0.0
 
 function get_load_power(bus::Bus)
     summy = 0.0
@@ -89,13 +111,11 @@ end
 # only for visualization
 is_nfc(bus::Bus) = get_nfc_load_power(bus) > 0.0
 
-function is_supply(bus::Bus)
-    length(bus.supplies) !== 0
-end
 
 function is_load(bus::Bus)
     length(bus.loads) !== 0
 end
+
 
 ### /Bus
 ### Branch
@@ -182,6 +202,16 @@ getindex(network::Network, key_a::KeyType, key_b::KeyType) =
 delete!(network::Network, key::KeyType) = delete!(network.network, key)
 delete!(network::Network, key_a::KeyType, key_b::KeyType) =
     delete!(network.network, key_a, key_b)
+
+# Forwarding methods to the bus
+get_supply_power(network::Network, node::KeyType) = get_supply_power(network[node])
+is_supply(network::Network, node::KeyType) = is_supply(network[node])
+get_battery_supply_power(network::Network, node::KeyType) = get_battery_supply_power(network[node])
+is_battery(network::Network, node::KeyType) = is_battery(network[node])
+get_load_power(network::Network, node::KeyType) = get_load_power(network[node])
+get_nfc_load_power(network::Network, node::KeyType) = get_nfc_load_power(network[node])
+is_nfc(network::Network, node::KeyType) = is_nfc(network[node])
+is_load(network::Network, node::KeyType) = is_load(network[node])
 
 """Create Network instances for each of the connected_components in the network.
 Pass in the switching and repair times for convenience."""

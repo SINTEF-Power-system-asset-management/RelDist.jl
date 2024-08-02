@@ -34,3 +34,7 @@ end
 @testset "Testing the edge case where the load is connected to the fault with no switches" begin
     include("test_branch_at_fault.jl")
 end
+
+@testset "Testing battery functionality" begin
+    include("battery/runtests.jl")
+end

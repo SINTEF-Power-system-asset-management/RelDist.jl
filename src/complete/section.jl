@@ -15,78 +15,9 @@ using DataStructures: DefaultDict, Queue
 using ..network_graph: Network, KeyType, is_supply
 using ..network_graph: Bus, is_switch, get_supply_power, get_load_power, get_nfc_load_power
 using ..network_graph: NewBranch, NewSwitch, get_kile
+using ..network_part: NetworkPart, visit!, unvisit!, is_leaf
+using ..battery: prepare_battery, visit_battery!, unvisit_battery!
 using ...RelDist: PieceWiseCost
-
-"""Representation of the subgraph of the network that is supplied by a given bus.
-Note: This is an implementation detail to `segment_network` and should not be used outside it."""
-mutable struct NetworkPart
-    rest_power::Float64
-    subtree::Set{KeyType}
-    leaf_nodes::Set{KeyType}
-end
-
-function NetworkPart(network::Network, supply::KeyType)
-    bus = network[supply]
-    if !is_supply(bus)
-        error("Parts should only be instantiated at power supplies")
-    end
-    subtree = Set([supply])
-    leaf_nodes = Set([supply])
-    NetworkPart(get_supply_power(bus), subtree, leaf_nodes)
-end
-
-Base.hash(party::NetworkPart, h::UInt) = hash(party.subtree, h)
-Base.:(==)(a::NetworkPart, b::NetworkPart) = hash(a) == hash(b)
-Base.keys(party::NetworkPart) = Base.keys(party.subtree)
-
-function visit!(network::Network, part::NetworkPart, visitation::KeyType)
-    bus::Bus = network[visitation]
-    part.rest_power -= get_load_power(bus)
-    push!(part.subtree, visitation)
-    push!(part.leaf_nodes, visitation)
-end
-
-function unvisit!(network::Network, part::NetworkPart, visitation::KeyType)
-    bus::Bus = network[visitation]
-    part.rest_power += get_load_power(bus)
-    pop!(part.subtree, visitation)
-    pop!(part.leaf_nodes, visitation)
-end
-
-function visit!(
-    network::Network,
-    parts::Vector{NetworkPart},
-    part::NetworkPart,
-    visitation::KeyType,
-)
-    # Warning: by modifying something in a set we open up the possibility for a lot of errors.
-    # for example this following line will throw even though part is in parts
-    # because part has been modified.
-    # if !(part in parts)
-    #     error("Part to visit must be in list of parts")
-    # end
-    # pop!(parts, part)
-    visit!(network, part, visitation)
-    # push!(parts, part)
-end
-
-function unvisit!(
-    network::Network,
-    parts::Vector{NetworkPart},
-    part::NetworkPart,
-    visitisation::KeyType,
-)
-    # if !(part in parts)
-    #     error("Part to unvisit must be in list of parts")
-    # end
-    # pop!(parts, part)
-    unvisit!(network, part, visitisation)
-    # push!(parts, part)
-end
-
-function is_leaf(network::Network, part::NetworkPart, node_idx::KeyType)::Bool
-    any(nbr_idx -> !(nbr_idx in part.subtree), neighbor_labels(network, node_idx))
-end
 
 function clean_leaf_nodes!(network::Network, part::NetworkPart)::Vector{KeyType}
     removed =
@@ -310,7 +241,9 @@ function segment_network(
         parts::Vector{NetworkPart} -> (kile_fn(parts), nfc_fn(parts))
     end
 
-    function recurse(parts::Vector{NetworkPart})::Tuple{Any,Vector{NetworkPart}}
+    batteries, visited_batteries = prepare_battery(network)
+
+    function recurse(parts::Vector{NetworkPart}, visited_batteries::Vector{Bool})::Tuple{Any,Vector{NetworkPart}}
         choices::Vector{Tuple{Any,Vector{NetworkPart}}} = []
         iters += 1
         if iters === 30_000
@@ -334,22 +267,32 @@ function segment_network(
                 continue
             end
             local neighbour = network[neighbour_idx]
-            if get_load_power(neighbour) > part.rest_power
-                continue # Overload
+
+            # battery stuff must be done before checking for overload
+            battery_result = visit_battery!(batteries, visited_batteries, part, neighbour_idx)
+            if (battery_result === nothing) # I'm sorry for this mess :'(
+                if get_load_power(neighbour) > part.rest_power
+                    continue # Overload
+                end
+                visit!(network, parts, part, neighbour_idx)
             end
-            visit!(network, parts, part, neighbour_idx)
             local hashy = hash(parts)
             local nested_result = if hashy in keys(cache)
                 cache[hashy]
             else
                 local dropped_leaves = clean_leaf_nodes!(network, part)
-                local nested_result = recurse(parts)
+                local nested_result = recurse(parts, visited_batteries)
                 cache[hashy] = nested_result
                 restore_leaf_nodes!(part, dropped_leaves)
                 nested_result
             end
             push!(choices, nested_result)
-            unvisit!(network, parts, part, neighbour_idx)
+            if battery_result !== nothing
+                visited, bonus_power, battery_idx = battery_result
+                unvisit_battery!(visited_batteries, part, visited, bonus_power, battery_idx)
+            else
+                unvisit!(network, parts, part, neighbour_idx)
+            end
         end
 
         res = if length(choices) == 0
@@ -363,7 +306,7 @@ function segment_network(
         res
     end # function recurse
 
-    res = recurse(parts)
+    res = recurse(parts, visited_batteries)
     res[2]
 end
 

@@ -22,6 +22,7 @@ function test_load_dropping()
             @test "nfc" in part.subtree
         end
     end
+    @test length(optimal_split) == 1
 end
 
 test_load_dropping()
