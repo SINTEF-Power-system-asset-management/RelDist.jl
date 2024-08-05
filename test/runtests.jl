@@ -38,3 +38,7 @@ end
 @testset "Testing battery functionality" begin
     include("battery/runtests.jl")
 end
+
+@testset "Test reliability analysis" begin
+    include("reliability/runtests.jl")
+end

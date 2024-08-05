@@ -28,7 +28,7 @@ if true == false # NB: NOT OPTIMAL
     display(dot_plot(network, optimal_split))
 end
 
-if true == true
+if true == false
     # Removing all edges without switches to make it smaller
     compressed_network = deepcopy(network)
     remove_switchless_branches!(compressed_network)
@@ -37,7 +37,7 @@ if true == true
     kile_loss_fn = kile_loss(compressed_network) # create loss closure
     loss_fn = kile_loss_fn
 
-    if true == false
+    if true == true
         # Do a complete search on the full network
         compressed_wo_trick = segment_network(compressed_network)
         display(dot_plot(compressed_network, compressed_wo_trick))

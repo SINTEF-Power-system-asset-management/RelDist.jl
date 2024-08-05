@@ -4,6 +4,7 @@ authors = ["Sigurd Hofsmo Jakobsen <sigurd.jakobsen@sintef.no>"]
 version = "0.1.0"
 
 [deps]
+Accessors = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"

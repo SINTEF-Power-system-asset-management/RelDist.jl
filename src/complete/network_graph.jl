@@ -162,7 +162,7 @@ get_min_cutting_time(branch::NewBranch) = minimum(s -> time_to_cut(s), branch.sw
 const VertexType = Bus
 const EdgeType = NewBranch
 
-mutable struct Network
+struct Network
     network::MetaGraphsNext.MetaGraph{Int,SimpleGraph{Int},KeyType,VertexType,EdgeType}
     switching_time::Float64
     repair_time::Float64
@@ -212,6 +212,10 @@ get_load_power(network::Network, node::KeyType) = get_load_power(network[node])
 get_nfc_load_power(network::Network, node::KeyType) = get_nfc_load_power(network[node])
 is_nfc(network::Network, node::KeyType) = is_nfc(network[node])
 is_load(network::Network, node::KeyType) = is_load(network[node])
+
+# Convenience iterators
+branches(network) = map(edge -> network[edge...], edge_labels(network))
+buses(network) = map(node -> network[node], labels(network))
 
 """Create Network instances for each of the connected_components in the network.
 Pass in the switching and repair times for convenience."""

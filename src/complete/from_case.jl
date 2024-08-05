@@ -16,9 +16,9 @@ using ..network_graph:
 
 function add_buses!(graphy::Network, case::Case)
     bus_withgen =
-        outerjoin(case.bus, case.gen, on = :ID => :bus, renamecols = "_bus" => "_gen")
+        outerjoin(case.bus, case.gen, on=:ID => :bus, renamecols="_bus" => "_gen")
     buses_joined =
-        outerjoin(bus_withgen, case.load, on = :ID => :bus, renamecols = "" => "_load")
+        outerjoin(bus_withgen, case.load, on=:ID => :bus, renamecols="" => "_load")
     loads::Vector{LoadUnit} = []
     gens::Vector{SupplyUnit} = []
     prev_id::Union{KeyType,Nothing} = nothing
@@ -38,7 +38,7 @@ function add_buses!(graphy::Network, case::Case)
             push!(loads, loady)
         end
         if bus[:Pmax_gen] !== missing
-            supplyy = SupplyUnit(bus[:ID_gen], bus[:Pmax_gen])
+            supplyy = SupplyUnit(bus[:ID_gen], bus[:Pmax_gen], !bus[:external_gen])
             push!(gens, supplyy)
         end
     end
@@ -52,7 +52,7 @@ function add_branches!(graphy::Network, case::Case)
     else
         case.reldata
     end
-    branch_joined = outerjoin(case.branch, reldata, on = [:f_bus, :t_bus])
+    branch_joined = outerjoin(case.branch, reldata, on=[:f_bus, :t_bus])
     # Sort the branches such that (a->b) and (b->a) are immediately after each other
     permute!(
         branch_joined,

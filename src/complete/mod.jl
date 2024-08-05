@@ -7,6 +7,7 @@ include("network_graph.jl")
 @reexport using .network_graph: t_load, t_battery, t_supply, t_nfc_load
 @reexport using .network_graph: NewBranch, NewSwitch, is_switch
 @reexport using .network_graph: Bus, BusKind, is_supply, is_battery, is_nfc, is_load
+@reexport using .network_graph: branches, buses
 
 include("network_part.jl")
 @reexport using .network_part: NetworkPart
