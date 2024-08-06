@@ -8,6 +8,7 @@ import MetaGraphsNext: haskey, setindex!, getindex, delete!
 using SintPowerCase: Case
 using DataFrames: DataFrame, outerjoin, keys, Not, select, nrow
 using DataStructures: DefaultDict, Queue
+using Accessors: @set, @reset
 
 import Base
 
@@ -15,6 +16,7 @@ using ..network_graph:
     Network, KeyType, LoadUnit, NewSwitch, NewBranch, time_to_cut, get_min_cutting_time
 using ..network_graph: is_switch, get_kile
 using ..section: kile_loss, unsupplied_nfc_loss, segment_network, get_outage_time
+using ..section: remove_switchless_branches, sort
 using ...RelDist: PieceWiseCost
 
 """Get the switch to cut off the given node from the given edge.
@@ -111,7 +113,7 @@ function relrad_calc_2(network::Network)
     nrows = length(edge_labels(network))
     vals = fill(1337.0, (nrows, ncols))
     outage_times = DataFrame(vals, colnames)
-    outage_times[!, :cut_edge] = collect(edge_labels(network))
+    outage_times[!, :cut_edge] = collect(map(sort, edge_labels(network)))
     networks::Vector{Network} = []
 
     for (edge_idx, edge) in enumerate(edge_labels(network))
@@ -123,16 +125,14 @@ function relrad_calc_2(network::Network)
             push!(networks, network)
 
             for subnet in connected_components(network, isolation_time, repair_time)
-                let network = nothing # Shadow old network again
-                    kile_fn = kile_loss(subnet)
-                    nfc_fn = unsupplied_nfc_loss(subnet)
-                    optimal_split =
-                        segment_network(subnet; loss_function=parts -> (kile_fn(parts), nfc_fn(parts)))
-                    for vertex in labels(subnet)
-                        for load::LoadUnit in subnet[vertex].loads
-                            outage_times[edge_idx, load.id] =
-                                get_outage_time(subnet, optimal_split, vertex)
-                        end
+                kile_fn = kile_loss(subnet)
+                nfc_fn = unsupplied_nfc_loss(subnet)
+                optimal_split =
+                    segment_network(subnet; loss_function=parts -> (kile_fn(parts), nfc_fn(parts)))
+                for vertex in labels(subnet)
+                    for load::LoadUnit in subnet[vertex].loads
+                        outage_times[edge_idx, load.id] =
+                            get_outage_time(subnet, optimal_split, vertex)
                     end
                 end
             end
@@ -140,6 +140,23 @@ function relrad_calc_2(network::Network)
     end
 
     outage_times
+end
+
+
+function compress_relrad(network::Network)
+    compressed_network, edge_mapping = remove_switchless_branches(network)
+    res = relrad_calc_2(compressed_network)
+    mapped_res = empty(res)
+
+    for row in eachrow(res)
+        old_edges = edge_mapping[sort(row[:cut_edge])]
+        for edge in old_edges
+            mapped_row = copy(row)
+            @reset mapped_row.cut_edge = edge
+            push!(mapped_res, mapped_row)
+        end
+    end
+    mapped_res
 end
 
 """Get power data on the same format as the times df."""

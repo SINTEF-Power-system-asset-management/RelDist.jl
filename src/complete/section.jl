@@ -11,6 +11,7 @@ using MetaGraphsNext: MetaGraphsNext, label_for
 using SintPowerCase: Case
 using DataFrames: outerjoin, keys
 using DataStructures: DefaultDict, Queue
+using Accessors: @set
 
 using ..network_graph: Network, KeyType, is_supply
 using ..network_graph: Bus, is_switch, get_supply_power, get_load_power, get_nfc_load_power
@@ -18,6 +19,7 @@ using ..network_graph: NewBranch, NewSwitch, get_kile
 using ..network_part: NetworkPart, visit!, unvisit!, is_leaf
 using ..battery: prepare_battery, visit_battery!, unvisit_battery!
 using ...RelDist: PieceWiseCost
+
 
 function clean_leaf_nodes!(network::Network, part::NetworkPart)::Vector{KeyType}
     removed =
@@ -139,15 +141,50 @@ function move_edge!(
     # Add the probabilities together, pick the max repair time
     # As long as we don't use them we don't really need this, we only need to keep the topology
     network[new_edge...] = network[old_edge...]
-    # network[old_edge...] = missing
     delete!(network, old_edge...)
 end
 
+const Edge = Tuple{KeyType,KeyType}
+"""When moving edge a->b to a->c, add a mapping that says a->c => a->b.
+To handle multiple edges becoming the same we use vector"""
+function update_edge_mapping!(edge_mapping::Dict{Edge,Vector{Edge}}, old_edge::Edge, new_edge::Edge)
+    old_edges = pop!(edge_mapping, old_edge)
+
+    if !(new_edge in keys(edge_mapping))
+        edge_mapping[new_edge] = old_edges
+    else
+        append!(edge_mapping[new_edge], old_edges)
+    end
+end
+
 ## Beginning of preprocessing
+"""This not being in the standard library is crazy"""
+function sort(tuppy::Tuple{KeyType,KeyType})
+    a, b = tuppy
+    a < b ? (a, b) : (b, a)
+end
+
+"""When removing an edge, we ofen have to move another. Take the case:
+    a --- b []-- c => (ab) []-- c
+Here we have to make sure that the switch between ab and c get the correct key, 
+which is what this function does. 
+"""
+function fix_moved_switches!(network::Network, new_edge::Edge, from::KeyType, to::KeyType)
+    branch::NewBranch = network[new_edge...]
+    for switch_idx in 1:length(branch.switches)
+        switch::NewSwitch = branch.switches[switch_idx]
+        if switch.bus == from
+            branch.switches[switch_idx] = @set switch.bus = to
+        end
+    end
+end
+
+
 """Transform the graph such that edges with no switches are removed and its vertices are combined.
 Used as preprocessing to reduce the size of the graph and to avoid edge-cases where the search ends at
 an edge that cannot be cut."""
 function remove_switchless_branches!(network::Network)
+    edge_mapping = Dict(sort(edge) => [sort(edge)] for edge in edge_labels(network))
     did_change = true
     while did_change
         did_change = false
@@ -171,13 +208,18 @@ function remove_switchless_branches!(network::Network)
             append!(bus_a.loads, bus_b.loads)
             append!(bus_a.supplies, bus_b.supplies)
             for nbr in collect(neighbor_labels(network, node_b))
-                old_edge = (nbr, node_b)
-                new_edge = (nbr, node_a)
+                old_edge = sort((nbr, node_b))
+                new_edge = sort((nbr, node_a))
                 move_edge!(network, old_edge, new_edge)
+                update_edge_mapping!(edge_mapping, old_edge, new_edge)
+                fix_moved_switches!(network, new_edge, node_b, node_a)
             end
 
             if haskey(network, node_b, node_b)
-                move_edge!(network, (node_b, node_b), (node_a, node_a))
+                old_edge = sort((node_b, node_b))
+                new_edge = sort((node_a, node_a))
+                move_edge!(network, old_edge, new_edge)
+                update_edge_mapping!(edge_mapping, old_edge, new_edge)
             end
 
             delete!(network, node_b)
@@ -185,12 +227,13 @@ function remove_switchless_branches!(network::Network)
             break
         end
     end
+    edge_mapping
 end
 
 function remove_switchless_branches(network::Network)
     newnet = deepcopy(network)
-    remove_switchless_branches!(newnet)
-    newnet
+    edge_mapping = remove_switchless_branches!(newnet)
+    newnet, edge_mapping
 end
 
 ## End of preprocessing
