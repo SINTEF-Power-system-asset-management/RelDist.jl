@@ -1,0 +1,11 @@
+[files]
+branch = "branch.csv"
+bus = "bus.csv"
+gen = "gen.csv"
+load = "load.csv"
+reldata = "reldata.csv"
+switch = "switch.csv"
+
+[configuration]
+baseMVA = 100.0
+ref_bus = 0
