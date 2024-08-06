@@ -135,9 +135,12 @@ function relrad_calc_2(network::Network)
                             get_outage_time(subnet, optimal_split, vertex)
                     end
                 end
+                # TODO: NBNB. At approx this point we should figure out which nfc loads are served
+                # The parts might have rest power that we can use
             end
         end
     end
+
 
     outage_times
 end

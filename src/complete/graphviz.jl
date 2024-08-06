@@ -1,5 +1,5 @@
 module graphviz_mod
-using ..network_graph: Network, KeyType, NewSwitch, LoadUnit
+using ..network_graph: Network, KeyType, NewSwitch, LoadUnit, SupplyUnit
 using ..network_graph: Bus, is_supply, is_battery, is_load, is_nfc
 using ..network_graph: labels, edge_labels
 using ..section: NetworkPart
@@ -37,26 +37,52 @@ function to_dot_edge(network::Network, parts::Vector{NetworkPart}, from::KeyType
     "$(from) -> $(to) [ $(join(kwargs, ',')) ]\n"
 end
 
-function to_dot_node(network::Network, parts::Vector{NetworkPart}, node::KeyType)
-    kwargs = Vector{String}()
-    bus::Bus = network[node]
-    if is_supply(bus)
-        push!(kwargs, "fillcolor=\"lightgreen\"")
-    elseif is_battery(bus)
-        push!(kwargs, "fillcolor=\"gold\"")
-    elseif is_nfc(bus)
-        push!(kwargs, "fillcolor=\"lightskyblue\"")
-    elseif is_load(bus)
-        push!(kwargs, "fillcolor=\"deepskyblue3\"")
-        labels = Vector{String}()
-        for load::LoadUnit in bus.loads
-            push!(labels, load.id)
-        end
-        push!(kwargs, "shape=record")
-        push!(kwargs, "style=\"rounded,filled\"")
-        push!(kwargs, "label=\"$(node)|{$(join(labels, '|'))}\"")
+function to_dot_load(load::LoadUnit)
+    color = if load.is_nfc
+        "lightskyblue"
+    else
+        "deepskyblue3"
     end
-    "$(node) [ $(join(kwargs, ',')) ]\n"
+
+    """<tr><td style="rounded" border="1" bgcolor="$(color)">$(load.id)</td></tr>"""
+end
+function to_dot_supply(supply::SupplyUnit)
+    color = if supply.is_battery
+        "gold"
+    else
+        "lightgreen"
+    end
+    """<tr><td style="rounded" border="1" bgcolor="$(color)" >$(supply.id)</td></tr>"""
+end
+
+function to_dot_node(network::Network, parts::Vector{NetworkPart}, node::KeyType)
+    bus::Bus = network[node]
+    color = if is_supply(bus)
+        "lightgreen"
+    elseif is_battery(bus)
+        "gold"
+    elseif is_load(bus)
+        "deepskyblue3"
+    elseif is_nfc(bus)
+        "lightskyblue"
+    else
+        "gray83"
+    end
+
+    rows = Vector{String}()
+    for supply::SupplyUnit in bus.supplies
+        push!(rows, to_dot_supply(supply))
+    end
+    for load::LoadUnit in bus.loads
+        push!(rows, to_dot_load(load))
+    end
+    """
+    $(node) [ fillcolor="transparent" shape="plain" label=<
+    <table bgcolor="$(color)" style="rounded" border="1" cellspacing="4" >
+        <tr><td border="0">$(node)</td></tr>
+        $(join(rows, "\n"))
+    </table>> ]
+    """
 end
 
 function to_dot(network::Network, parts=Vector{NetworkPart}(), layout="dot")
