@@ -6,7 +6,7 @@ using MetaGraphsNext: MetaGraphsNext, label_for
 import MetaGraphsNext: labels, edge_labels, neighbor_labels
 import MetaGraphsNext: haskey, setindex!, getindex, delete!
 using SintPowerCase: Case
-using DataFrames: DataFrame, outerjoin, keys, Not, select, nrow
+using DataFrames: DataFrame, outerjoin, keys, Not, select, nrow, select!
 using DataStructures: DefaultDict, Queue
 using Accessors: @set, @reset
 
@@ -129,18 +129,29 @@ function relrad_calc_2(network::Network)
                 nfc_fn = unsupplied_nfc_loss(subnet)
                 optimal_split =
                     segment_network(subnet; loss_function=parts -> (kile_fn(parts), nfc_fn(parts)))
+                # TODO: NBNB. At approx this point we should figure out which nfc loads are served
                 for vertex in labels(subnet)
                     for load::LoadUnit in subnet[vertex].loads
-                        outage_times[edge_idx, load.id] =
-                            get_outage_time(subnet, optimal_split, vertex)
+                        if load.is_nfc
+                            outage_times[edge_idx, load.id] =
+                                get_outage_time(subnet, optimal_split, vertex)
+                        else
+                            outage_times[edge_idx, load.id] =
+                                get_outage_time(subnet, optimal_split, vertex)
+                        end
                     end
                 end
-                # TODO: NBNB. At approx this point we should figure out which nfc loads are served
-                # The parts might have rest power that we can use
             end
         end
     end
 
+    for vertex in labels(network)
+        for load::LoadUnit in network[vertex].loads
+            if load.is_nfc
+                select!(outage_times, Not(load.id))
+            end
+        end
+    end
 
     outage_times
 end
@@ -166,7 +177,11 @@ end
 function power_matrix(network::Network, times::DataFrame)
     power_df = copy(times)
     for row in eachrow(power_df)
+        # Loads that are both in the df and the network
         for vertex in labels(network), load in network[vertex].loads
+            if !(load.id in names(power_df))
+                continue
+            end
             row[load.id] = load.power
         end
     end
@@ -177,11 +192,16 @@ end
 function fault_rate_matrix(network::Network, times::DataFrame)
     fault_rate_df = copy(times)
     for row in eachrow(fault_rate_df)
+        # Loads that are both in the df and the network
         for vertex in labels(network), load in network[vertex].loads
+            if !(load.id in names(fault_rate_df))
+                continue
+            end
             edge = row[:cut_edge]
             branch::NewBranch = network[edge...]
             fault_rate = branch.permanent_fault_frequency
             row[load.id] = fault_rate
+
         end
     end
     fault_rate_df
@@ -196,7 +216,11 @@ function cens_matrix(
     cens_df = copy(times)
     for row_idx = 1:nrow(cens_df)
         row = cens_df[row_idx, :]
+        # Loads that are both in the df and the network
         for vertex in labels(network), load in network[vertex].loads
+            if !(load.id in names(cens_df))
+                continue
+            end
             row[load.id] = load.power
             t = times[row_idx, load.id]
             kile = get_kile(load, t, cost_functions, correction_factor)

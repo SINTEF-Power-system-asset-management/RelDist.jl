@@ -285,7 +285,6 @@ function segment_network(
     end
 
     batteries, visited_batteries = prepare_battery(network)
-
     function recurse(parts::Vector{NetworkPart}, visited_batteries::Vector{Bool})::Tuple{Any,Vector{NetworkPart}}
         choices::Vector{Tuple{Any,Vector{NetworkPart}}} = []
         iters += 1

@@ -1,0 +1,1206 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="759.99329pt"
+   height="467.47861pt"
+   viewBox="0 0 760.16741 467.9647"
+   version="1.1"
+   id="svg72"
+   sodipodi:docname="net_w_fault.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   inkscape:export-filename="net_w_fault.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs72">
+    <linearGradient
+       id="swatch432"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#fb8072;stop-opacity:1;"
+         offset="0"
+         id="stop432" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="namedview72"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="pt"
+     inkscape:zoom="1"
+     inkscape:cx="504"
+     inkscape:cy="294.5"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="graph0" />
+  <g
+     id="graph0"
+     class="graph"
+     transform="translate(11.997496,455.37021)"
+     style="stroke-width:1.00004;stroke-dasharray:none">
+    <rect
+       style="fill:#f5f4f3;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.00104;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       id="rect427"
+       width="222.95996"
+       height="210.19656"
+       x="-11.79773"
+       y="-427.43735"
+       ry="9.9086399" />
+    <rect
+       style="fill:#f5f4f3;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.00104;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       id="rect427-3-5"
+       width="307.04736"
+       height="221.45834"
+       x="440.93738"
+       y="-209.3644"
+       ry="9.9086399" />
+    <rect
+       style="fill:#f5f4f3;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.00104;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       id="rect427-3"
+       width="271.76071"
+       height="237.22472"
+       x="443.16403"
+       y="-454.86969"
+       ry="9.9086399" />
+    <!-- 4 -->
+    <g
+       id="4"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title1">4</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="53.71,-333.22 113.71,-333.22 113.71,-412.22 53.71,-412.22 "
+         id="polygon1"
+         style="fill:#fef8f2;fill-opacity:0;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 65.71,-333.22 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-55 0,-55 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,55 0,55 0,6 6,12 12,12"
+         id="path1"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="80.209999"
+         y="-393.51999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text1"
+         style="stroke-width:1.00004;stroke-dasharray:none">4</text>
+      <path
+         fill="#f3995f"
+         stroke="transparent"
+         d="m 65.71,-362.72 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path2"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 65.71,-362.72 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path3"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="70.709999"
+         y="-369.51999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text3"
+         style="stroke-width:1.00004;stroke-dasharray:none">RN1</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 65.71,-337.72 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path4"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 65.71,-337.72 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path5"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="75.709999"
+         y="-344.51999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text5"
+         style="stroke-width:1.00004;stroke-dasharray:none">L2</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 65.71,-333.22 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-55 0,-55 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,55 0,55 0,6 6,12 12,12"
+         id="path6"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 3 -->
+    <g
+       id="3"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title6">3</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="135.47,-271.22 195.47,-271.22 195.47,-325.22 135.47,-325.22 "
+         id="polygon6"
+         style="fill:#fef8f2;fill-opacity:0;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 147.47,-271.22 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path7"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="161.97"
+         y="-307.01999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text7"
+         style="stroke-width:1.00004;stroke-dasharray:none">3</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 147.47,-276.22 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path8"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 147.47,-276.22 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path9"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="157.47"
+         y="-283.01999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text9"
+         style="stroke-width:1.00004;stroke-dasharray:none">L1</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 147.47,-271.22 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path10"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 4&#45;&gt;3 -->
+    <g
+       id="3-4"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title10">4-&gt;3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 114.15,-344.98 c 4.65,4.23 9.49,8.65 14.26,12.99"
+         id="path11"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="132.59,-333.59 127.21,-327.67 133.12,-322.29 138.51,-328.2 "
+         id="polygon11"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="129.9,-330.63 128.42,-331.98 "
+         id="polyline11"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 3&#45;&gt;3 -->
+    <g
+       id="3-3"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title11">3-&gt;3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 195.93,-304.97 c 9.78,0.07 17.54,2.32 17.54,6.75 0,4.43 -7.76,6.68 -17.54,6.75"
+         id="path12"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 1 -->
+    <g
+       id="1"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title12">1</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="0,-232.1 60,-232.1 60,-286.1 0,-286.1 "
+         id="polygon12"
+         style="fill:#fef8f2;fill-opacity:0;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 12,-232.1 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path13"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="26.5"
+         y="-267.89999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text13"
+         style="stroke-width:1.00004;stroke-dasharray:none">1</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 12,-237.1 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path14"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-237.1 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path15"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="19.5"
+         y="-243.89999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text15"
+         style="stroke-width:1.00004;stroke-dasharray:none">MF</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-232.1 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path16"
+         style="stroke-width:1.00004;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;paint-order:stroke fill markers" />
+    </g>
+    <!-- 3&#45;&gt;1 -->
+    <g
+       id="1-3"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title16">3-&gt;1</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 125.57,-286.7 c -17.41,5.03 -37.77,10.91 -55.23,15.95"
+         id="path17"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="126.61,-291.16 128.83,-283.48 136.51,-285.7 134.29,-293.38 "
+         id="polygon17"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="127.72,-287.32 125.79,-286.76 "
+         id="polyline17"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="69.24,-266.27 67.02,-273.96 59.34,-271.74 61.56,-264.05 "
+         id="polygon18"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="68.13,-270.11 70.06,-270.67 "
+         id="polyline18"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 7 -->
+    <g
+       id="7"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title18">7</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="624.38,-232.96 684.38,-232.96 684.38,-336.96 624.38,-336.96 "
+         id="polygon19"
+         style="fill:none;fill-opacity:1;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 636.38,-232.96 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-80 0,-80 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,80 0,80 0,6 6,12 12,12"
+         id="path19"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="650.88"
+         y="-318.76001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text19"
+         style="stroke-width:1.00004;stroke-dasharray:none">7</text>
+      <path
+         fill="#f3995f"
+         stroke="transparent"
+         d="m 636.38,-287.96 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path20"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 636.38,-287.96 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path21"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="641.38"
+         y="-294.76001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text21"
+         style="stroke-width:1.00004;stroke-dasharray:none">RN2</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 636.38,-262.96 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path22"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 636.38,-262.96 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path23"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="646.38"
+         y="-269.76001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text23"
+         style="stroke-width:1.00004;stroke-dasharray:none">L4</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 636.38,-237.96 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path24"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 636.38,-237.96 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path25"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="646.38"
+         y="-244.75999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text25"
+         style="stroke-width:1.00004;stroke-dasharray:none">L3</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 636.38,-232.96 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-80 0,-80 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,80 0,80 0,6 6,12 12,12"
+         id="path26"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 7&#45;&gt;7 -->
+    <g
+       id="7-7"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title26">7-&gt;7</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 684.85,-291.71 c 9.78,0.07 17.53,2.32 17.53,6.75 0,4.43 -7.75,6.68 -17.53,6.75"
+         id="path27"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 9 -->
+    <g
+       id="9"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title27">9</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="454.99,-241.86 514.99,-241.86 514.99,-295.86 454.99,-295.86 "
+         id="polygon27"
+         style="fill:none;fill-opacity:1;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 466.99,-241.86 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path28"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="481.48999"
+         y="-277.66"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text28"
+         style="stroke-width:1.00004;stroke-dasharray:none">9</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 466.99,-246.86 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path29"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 466.99,-246.86 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path30"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="476.98999"
+         y="-253.66"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text30"
+         style="stroke-width:1.00004;stroke-dasharray:none">L5</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 466.99,-241.86 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path31"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 7&#45;&gt;9 -->
+    <g
+       id="7-9"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title31">7-&gt;9</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 624.1,-282.08 c -27.58,2.62 -68.51,6.51 -98.84,9.39"
+         id="path32"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="523.36,-268.49 522.6,-276.45 514.63,-275.7 515.39,-267.73 "
+         id="polygon32"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="522.98,-272.47 524.97,-272.66 "
+         id="polyline32"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 9&#45;&gt;9 -->
+    <g
+       id="9-9"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title32">9-&gt;9</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 515.46,-275.61 c 9.78,0.07 17.53,2.32 17.53,6.75 0,4.43 -7.75,6.68 -17.53,6.74"
+         id="path33"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 10 -->
+    <g
+       id="10"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title33">10</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="488.91,-323.11 548.91,-323.11 548.91,-377.11 488.91,-377.11 "
+         id="polygon33"
+         style="fill:none;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 500.91,-323.11 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path34"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="511.91"
+         y="-358.91"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text34"
+         style="stroke-width:1.00004;stroke-dasharray:none">10</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 500.91,-328.11 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path35"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 500.91,-328.11 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path36"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="510.91"
+         y="-334.91"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text36"
+         style="stroke-width:1.00004;stroke-dasharray:none">L6</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 500.91,-323.11 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path37"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 10&#45;&gt;9 -->
+    <g
+       id="10-9"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title37">10-&gt;9</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 507.62,-323.05 c -2.32,5.56 -4.8,11.5 -7.24,17.34"
+         id="path38"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="503.13,-301.92 495.75,-305 492.66,-297.62 500.05,-294.53 "
+         id="polygon38"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="499.44,-303.46 500.21,-305.3 "
+         id="polyline38"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 11 -->
+    <g
+       id="11"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title38">11</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="587.72,-390.47 647.72,-390.47 647.72,-444.47 587.72,-444.47 "
+         id="polygon39"
+         style="fill:none;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 599.72,-390.47 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path39"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="610.71997"
+         y="-426.26999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text39"
+         style="stroke-width:1.00004;stroke-dasharray:none">11</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 599.72,-395.47 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path40"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 599.72,-395.47 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path41"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="605.71997"
+         y="-402.26999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text41"
+         style="stroke-width:1.00004;stroke-dasharray:none">BF1</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 599.72,-390.47 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path42"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 10&#45;&gt;11 -->
+    <g
+       id="10-11"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title42">10-&gt;11</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 557.59,-376.47 c 6.96,-4.75 14.21,-9.69 21.17,-14.44"
+         id="path43"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="557.96,-371.88 553.45,-378.49 546.84,-373.99 551.35,-367.38 "
+         id="polygon43"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="555.71,-375.19 557.36,-376.32 "
+         id="polyline43"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="578.52,-395.58 583.03,-388.97 589.64,-393.48 585.13,-400.09 "
+         id="polygon44"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="580.77,-392.28 579.12,-391.15 "
+         id="polyline44"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 13 -->
+    <g
+       id="13"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title44">13</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="674.17,-139.14 734.17,-139.14 734.17,-193.14 674.17,-193.14 "
+         id="polygon45"
+         style="fill:none;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 686.17,-139.14 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path45"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="697.16998"
+         y="-174.94"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text45"
+         style="stroke-width:1.00004;stroke-dasharray:none">13</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 686.17,-144.14 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path46"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 686.17,-144.14 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path47"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="696.16998"
+         y="-150.94"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text47"
+         style="stroke-width:1.00004;stroke-dasharray:none">L7</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 686.17,-139.14 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path48"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 12 -->
+    <g
+       id="12"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title48">12</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="523.8,-174 563.8,-174 563.8,-203 523.8,-203 "
+         id="polygon48"
+         style="fill:none;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 533.47,-174 c 0,0 20.67,0 20.67,0 4.83,0 9.66,-4.83 9.66,-9.67 0,0 0,-9.66 0,-9.66 0,-4.84 -4.83,-9.67 -9.66,-9.67 0,0 -20.67,0 -20.67,0 -4.83,0 -9.67,4.83 -9.67,9.67 0,0 0,9.66 0,9.66 0,4.84 4.84,9.67 9.67,9.67"
+         id="path49"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="536.79999"
+         y="-184.3"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text49"
+         style="stroke-width:1.00004;stroke-dasharray:none">12</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 533.47,-174 c 0,0 20.67,0 20.67,0 4.83,0 9.66,-4.83 9.66,-9.67 0,0 0,-9.66 0,-9.66 0,-4.84 -4.83,-9.67 -9.66,-9.67 0,0 -20.67,0 -20.67,0 -4.83,0 -9.67,4.83 -9.67,9.67 0,0 0,9.66 0,9.66 0,4.84 4.84,9.67 9.67,9.67"
+         id="path50"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 13&#45;&gt;12 -->
+    <g
+       id="12-13"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title50">13-&gt;12</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 674.01,-170.34 c -28.48,-3.97 -70.98,-9.9 -99.61,-13.89"
+         id="path51"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="571.54,-180.59 572.65,-188.52 564.72,-189.62 563.62,-181.7 "
+         id="polygon51"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="572.09,-184.55 574.08,-184.28 "
+         id="polyline51"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 12&#45;&gt;9 -->
+    <g
+       id="12-9"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title51">12-&gt;9</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 533.02,-203.24 c -6.23,-8.51 -14.35,-19.61 -22.14,-30.25"
+         id="path52"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="506.25,-233.04 512.7,-237.77 507.98,-244.22 501.52,-239.5 "
+         id="polygon52"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="509.48,-235.41 510.66,-233.79 "
+         id="polyline52"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 14 -->
+    <g
+       id="14"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title52">14</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="478.07,-62 538.07,-62 538.07,-166 478.07,-166 "
+         id="polygon53"
+         style="fill:none;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 490.07,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-80 0,-80 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,80 0,80 0,6 6,12 12,12"
+         id="path53"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="501.07001"
+         y="-147.8"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text53"
+         style="stroke-width:1.00004;stroke-dasharray:none">14</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 490.07,-117 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path54"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 490.07,-117 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path55"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="500.07001"
+         y="-123.8"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text55"
+         style="stroke-width:1.00004;stroke-dasharray:none">L8</text>
+      <path
+         fill="#aaa1e3"
+         stroke="transparent"
+         d="m 490.07,-92 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path56"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 490.07,-92 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path57"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="500.07001"
+         y="-98.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text57"
+         style="stroke-width:1.00004;stroke-dasharray:none">L9</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 490.07,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path58"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 490.07,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path59"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="497.07001"
+         y="-73.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text59"
+         style="stroke-width:1.00004;stroke-dasharray:none">L10</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 490.07,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-80 0,-80 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,80 0,80 0,6 6,12 12,12"
+         id="path60"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 14&#45;&gt;12 -->
+    <g
+       id="12-14"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title60">14-&gt;12</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 533.08,-166.15 c 0.04,-0.08 0.08,-0.17 0.12,-0.25"
+         id="path61"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="529.73,-168.42 536.95,-164.96 540.41,-172.17 533.19,-175.63 "
+         id="polygon61"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="533.34,-166.69 532.48,-164.89 "
+         id="polyline61"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 14&#45;&gt;14 -->
+    <g
+       id="14-14"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title61">14-&gt;14</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 538.53,-120.75 c 9.78,0.07 17.54,2.32 17.54,6.75 0,4.43 -7.76,6.68 -17.54,6.75"
+         id="path62"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 17 -->
+    <g
+       id="17"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title62">17</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="481.04,0 541.04,0 541.04,-54 481.04,-54 "
+         id="polygon62"
+         style="fill:none;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 493.04,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path63"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="504.04001"
+         y="-35.799999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text63"
+         style="stroke-width:1.00004;stroke-dasharray:none">17</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 493.04,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path64"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 493.04,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path65"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="499.04001"
+         y="-11.8"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text65"
+         style="stroke-width:1.00004;stroke-dasharray:none">BF2</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 493.04,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path66"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 14&#45;&gt;17 -->
+    <g
+       id="14-17"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title66">14-&gt;17</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 510.09,-54.7 c 0.01,0.08 0.01,0.15 0.01,0.23"
+         id="path67"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="506.12,-53.75 514.12,-54.03 513.84,-62.02 505.85,-61.75 "
+         id="polygon67"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="510.12,-53.89 510.19,-51.89 "
+         id="polyline67"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="513.83,-62.37 505.83,-62.09 506.11,-54.1 514.11,-54.37 "
+         id="polygon68"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="509.83,-62.23 509.76,-64.23 "
+         id="polyline68"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+    <!-- 5 -->
+    <g
+       id="5"
+       class="node"
+       style="stroke-width:1.00004;stroke-dasharray:none">
+      <title
+         id="title68">5</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="301.03,-267.44 341.03,-267.44 341.03,-296.44 301.03,-296.44 "
+         id="polygon69"
+         style="fill:#ff0b0b;fill-opacity:0;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 310.7,-267.44 c 0,0 20.67,0 20.67,0 4.83,0 9.66,-4.84 9.66,-9.67 0,0 0,-9.67 0,-9.67 0,-4.83 -4.83,-9.66 -9.66,-9.66 0,0 -20.67,0 -20.67,0 -4.83,0 -9.67,4.83 -9.67,9.66 0,0 0,9.67 0,9.67 0,4.83 4.84,9.67 9.67,9.67"
+         id="path69"
+         style="fill:#fb8072;fill-opacity:1;stroke-width:1.00004;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="317.53"
+         y="-277.73999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text69"
+         style="display:inline;opacity:1;mix-blend-mode:normal;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke-width:1.00004;stroke-dasharray:none;paint-order:stroke markers fill">5</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 310.7,-267.44 c 0,0 20.67,0 20.67,0 4.83,0 9.66,-4.84 9.66,-9.67 0,0 0,-9.67 0,-9.67 0,-4.83 -4.83,-9.66 -9.66,-9.66 0,0 -20.67,0 -20.67,0 -4.83,0 -9.67,4.83 -9.67,9.66 0,0 0,9.67 0,9.67 0,4.83 4.84,9.67 9.67,9.67"
+         id="path70"
+         style="display:inline;fill:none;fill-opacity:0.30597;stroke-width:1.00004;stroke-dasharray:none" />
+      <path
+         style="fill:#fb8072;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.00004;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+         d="m 268.98311,-350.49323 22.52339,-0.37539 -21.02184,27.77885 18.01872,-0.75078 -35.66204,33.40971 12.38787,-23.27418 -11.2617,0.75078 z"
+         id="path73"
+         sodipodi:nodetypes="cccccccc" />
+      <path
+         style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.00004;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+         d="m 214.95293,-276.46431 6.30488,-12.1161 -4.83863,-10.09675 5.42513,-12.28438"
+         id="path424" />
+      <path
+         style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.00004;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+         d="m 356.20735,-263.21572 6.30488,-12.1161 -4.83863,-10.09675 5.42513,-12.28438"
+         id="path424-4" />
+    </g>
+    <!-- 5&#45;&gt;3 -->
+    <g
+       id="3-5"
+       class="edge"
+       style="stroke:#000000;stroke-width:1.00004;stroke-dasharray:none;stroke-opacity:1">
+      <title
+         id="title70">5-&gt;3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 301.01,-284.04 c -23.93,-2.5 -64.57,-6.75 -95.12,-9.95"
+         id="path71"
+         style="fill:#ff2a2a;stroke:#fb8072;stroke-width:1.00004;stroke-dasharray:none;stroke-opacity:1" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="203.08,-290.26 203.92,-298.22 195.96,-299.05 195.13,-291.1 "
+         id="polygon71"
+         style="stroke:#000000;stroke-width:1.00004;stroke-dasharray:none;stroke-opacity:1" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="203.5,-294.24 205.49,-294.03 "
+         id="polyline71"
+         style="stroke:#000000;stroke-width:1.00004;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <!-- 5&#45;&gt;9 -->
+    <g
+       id="5-9"
+       class="edge"
+       style="stroke-width:1.00004;stroke-dasharray:none"
+       inkscape:export-filename="net_w_fault.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96">
+      <title
+         id="title71">5-&gt;9</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 351.28,-279.53 c 29.54,2.36 74.24,5.92 103.7,8.27"
+         id="path72"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polygon
+         fill="#000000"
+         stroke="#000000"
+         points="348.79,-275.72 349.43,-283.69 341.46,-284.33 340.82,-276.35 "
+         id="polygon72"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="349.11,-279.7 351.11,-279.54 "
+         id="polyline72"
+         style="stroke-width:1.00004;stroke-dasharray:none" />
+    </g>
+  </g>
+</svg>

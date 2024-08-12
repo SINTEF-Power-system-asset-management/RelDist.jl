@@ -31,5 +31,6 @@ parts = [NetworkPart(network, supply) for supply in supplies]
 # plot_that_graph(network, parts)
 optimal_split = segment_network(network, parts)
 
+# dot_plot(network; layout="neato")
 dot_plot(network, optimal_split)
 

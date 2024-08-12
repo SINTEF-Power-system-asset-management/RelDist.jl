@@ -6,7 +6,7 @@ using MetaGraphsNext: MetaGraphsNext, label_for
 import MetaGraphsNext: labels, edge_labels, neighbor_labels
 import MetaGraphsNext: haskey, setindex!, getindex, delete!
 using SintPowerCase: Case
-using DataFrames: outerjoin, keys
+using DataFrames: outerjoin, keys, Not, select
 using DataStructures: DefaultDict, Queue
 
 import Base

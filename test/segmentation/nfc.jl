@@ -1,3 +1,12 @@
+"""
+NFC are loads that have no cost of disconnecting. This really means we just skip them,
+but by changing the cost function we can choose to take them into account. By default
+we use them as a tie-breaker, such that if two states are equal otherwise we include the
+NFC load in the networkpart (without reducing the rest power)
+
+NFC is short for Non-Firm Connection (norsk: tilknytting med vilkår)
+"""
+
 using RelDist: segment_network, empty_network, t_load, t_nfc_load, t_supply
 using RelDist: Bus, NewBranch, NetworkPart
 using MetaGraphsNext: labels, neighbor_labels

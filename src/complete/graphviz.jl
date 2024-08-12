@@ -2,8 +2,20 @@ module graphviz_mod
 using ..network_graph: Network, KeyType, NewSwitch, LoadUnit, SupplyUnit
 using ..network_graph: Bus, is_supply, is_battery, is_load, is_nfc
 using ..network_graph: labels, edge_labels
-using ..section: NetworkPart
+using ..section: NetworkPart, sort
 using GraphViz: GraphViz
+
+text_color = "#000000"
+# Colors kindly yoinked from set39 at https://graphviz.org/doc/info/colors.html
+_bluegreen = "#8dd3c7"
+node_color = "#fef8f2"
+nfc_color = "#aaa1e3"
+load_color = "#4e89b7"
+_fault_colors = "#fb8072"  # used in external figures
+battery_color = "#f3995f"
+supply_color = "#6aa764"
+_pink = "#fccde5"
+_gray = "#d9d9d9"
 
 function dot_edge_decor(switch::NewSwitch)
     if switch.is_closed
@@ -14,7 +26,8 @@ function dot_edge_decor(switch::NewSwitch)
 end
 
 function to_dot_edge(network::Network, parts::Vector{NetworkPart}, from::KeyType, to::KeyType, layout="dot")
-    kwargs = Set{String}()
+    a, b = sort((from, to))
+    kwargs = Set{String}(["id=\"$(a)-$(b)\""])
     for switch in network[from, to].switches
         if from == switch.bus
             push!(kwargs, "arrowtail=$(dot_edge_decor(switch))")
@@ -39,36 +52,24 @@ end
 
 function to_dot_load(load::LoadUnit)
     color = if load.is_nfc
-        "lightskyblue"
+        nfc_color
     else
-        "deepskyblue3"
+        load_color
     end
 
-    """<tr><td style="rounded" border="1" bgcolor="$(color)">$(load.id)</td></tr>"""
+    """<tr><td style="rounded" border="1" width="50" bgcolor="$(color)">$(load.id)</td></tr>"""
 end
 function to_dot_supply(supply::SupplyUnit)
     color = if supply.is_battery
-        "gold"
+        battery_color
     else
-        "lightgreen"
+        supply_color
     end
-    """<tr><td style="rounded" border="1" bgcolor="$(color)" >$(supply.id)</td></tr>"""
+    """<tr><td style="rounded" border="1" width="50" bgcolor="$(color)">$(supply.id)</td></tr>"""
 end
 
 function to_dot_node(network::Network, parts::Vector{NetworkPart}, node::KeyType)
     bus::Bus = network[node]
-    color = if is_supply(bus)
-        "lightgreen"
-    elseif is_battery(bus)
-        "gold"
-    elseif is_load(bus)
-        "deepskyblue3"
-    elseif is_nfc(bus)
-        "lightskyblue"
-    else
-        "gray83"
-    end
-
     rows = Vector{String}()
     for supply::SupplyUnit in bus.supplies
         push!(rows, to_dot_supply(supply))
@@ -77,15 +78,15 @@ function to_dot_node(network::Network, parts::Vector{NetworkPart}, node::KeyType
         push!(rows, to_dot_load(load))
     end
     """
-    $(node) [ fillcolor="transparent" shape="plain" label=<
-    <table bgcolor="$(color)" style="rounded" border="1" cellspacing="4" >
-        <tr><td border="0">$(node)</td></tr>
+    $(node) [ fillcolor="transparent" shape="plain" id="$(node)" label=<
+    <table bgcolor="$(node_color)" style="rounded" border="1" cellspacing="4" >
+        <tr><td width="30" border="0"><font color="$(text_color)">$(node)</font></td></tr>
         $(join(rows, "\n"))
     </table>> ]
     """
 end
 
-function to_dot(network::Network, parts=Vector{NetworkPart}(), layout="dot")
+function to_dot(network::Network, parts=Vector{NetworkPart}(); layout="dot")
     """Creates a graphviz DOT language string containing the graph."""
     @assert layout in ["dot", "neato", "fdp", "sfdp"]
     label_to_idx = Dict{Int,String}()
@@ -122,9 +123,12 @@ function to_dot(network::Network, parts=Vector{NetworkPart}(), layout="dot")
     dotstring = """
     digraph {
     layout=$(layout)
+    $(layout != "sfdp" ? "" : "repulsiveforce=5.0")
     overlap=vpsc
-    edge [ arrowhead=none, arrowtail=none, dir=both ]
-    node [ style=filled ]
+    ratio=0.56
+    edge [ arrowhead=none, arrowtail=none, dir=both color="$(text_color)" ]
+    node [ style=filled color="$(text_color)" fontcolor="$(text_color)" ]
+    bgcolor="transparent"
     $(edges_str)
 
     $(clusters_str)
@@ -135,8 +139,9 @@ function to_dot(network::Network, parts=Vector{NetworkPart}(), layout="dot")
     dotstring
 end
 
-function dot_plot(network::Network, parts=Vector{NetworkPart}(), layout="dot")
-    dotstr = to_dot(network, parts, layout)
+"""Plot the network. Use layout="neato" or "sfdp" to get more network-like structures"""
+function dot_plot(network::Network, parts=Vector{NetworkPart}(); layout="dot")
+    dotstr = to_dot(network, parts; layout=layout)
     buffer = IOBuffer(dotstr)
     graph = GraphViz.load(buffer)
     graph

@@ -92,14 +92,17 @@ and both will be visited."""
 function visit_battery!(batteries::Vector{Battery}, visited_batteries::Vector{Bool}, part::NetworkPart, node::KeyType)
     # 1. check if any part visited any battery
     # 2. give the nodes, mark battery as visited
-    gen = (battery for (battery, is_visited) in zip(batteries, visited_batteries) if !is_visited)
-    for (battery_idx, battery) in enumerate(gen)
+    for (battery_idx, (battery, is_visited)) in enumerate(zip(batteries, visited_batteries))
+        if is_visited
+            continue
+        end
         visited = Vector{KeyType}()
         bonus_power = get(battery.rest_power, node, nothing)
         if bonus_power === nothing
             # Node is not in battery's reach
             continue
         end
+
         part.rest_power += bonus_power
         visited_batteries[battery_idx] = true
         visiting = node
@@ -109,6 +112,10 @@ function visit_battery!(batteries::Vector{Battery}, visited_batteries::Vector{Bo
             push!(part.leaf_nodes, visiting)
             visiting = battery.prevs[visiting]
         end
+
+        # TODO: If this path visits another battery, visit that one too
+
+
         return visited, bonus_power, battery_idx
     end
     return nothing

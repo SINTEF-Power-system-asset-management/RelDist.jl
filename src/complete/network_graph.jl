@@ -47,6 +47,7 @@ function Bus(id::String, type::BusKind, power::Float64)
     end
 end
 
+"""JUST A HELPER FOR THE FOLLOWING FUNCTIONS, DO NOT EXPORT"""
 function get_supply_power_and_is_battery(bus::Bus)
     # If a battery and a feeder is on the same bus, we can treat the bus as a feeder
     summy = 0.0
@@ -57,7 +58,15 @@ function get_supply_power_and_is_battery(bus::Bus)
         end
         summy += supply.power
     end
-    summy, is_battery
+    # If there are loads on the same bus then we must supply them
+    for load::LoadUnit in bus.loads
+        if !load.is_nfc
+            summy -= load.power
+        end
+    end
+    # If the loads are bigger than the supply then we should treat it as a load
+    # not a negative power supply.
+    max(summy, 0.0), is_battery
 end
 
 function get_supply_power(bus::Bus)
@@ -76,13 +85,17 @@ is_battery(bus::Bus) = get_battery_supply_power(bus) > 0.0
 
 function get_load_power(bus::Bus)
     summy = 0.0
-    for load in bus.loads
+    for load::LoadUnit in bus.loads
         if load.is_nfc
             continue
         end
         summy += load.power
     end
-    summy
+
+    for supply::SupplyUnit in bus.supplies
+        summy -= supply.power
+    end
+    max(summy, 0.0)
 end
 
 function get_nfc_load_power(bus::Bus)
@@ -108,14 +121,8 @@ function get_kile(
     calculate_kile(load.power, outage_time, cost_functions[load.type], correction_factor)
 end
 
-# only for visualization
 is_nfc(bus::Bus) = get_nfc_load_power(bus) > 0.0
-
-
-function is_load(bus::Bus)
-    length(bus.loads) !== 0
-end
-
+is_load(bus::Bus) = get_load_power(bus) > 0.0
 
 ### /Bus
 ### Branch
