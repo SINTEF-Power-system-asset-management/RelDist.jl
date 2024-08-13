@@ -129,7 +129,7 @@ function relrad_calc_2(network::Network)
                 nfc_fn = unsupplied_nfc_loss(subnet)
                 optimal_split =
                     segment_network(subnet; loss_function=parts -> (kile_fn(parts), nfc_fn(parts)))
-                # TODO: NBNB. At approx this point we should figure out which nfc loads are served
+
                 for vertex in labels(subnet)
                     for load::LoadUnit in subnet[vertex].loads
                         if load.is_nfc

@@ -2,7 +2,7 @@ module battery
 
 using ..network_graph: Network, KeyType, labels, neighbor_labels
 using ..network_graph: is_battery, get_battery_supply_power, get_load_power
-using ..network_part: NetworkPart
+using ..network_part: NetworkPart, Bus
 using ...RelDist: Option
 
 using DataStructures: PriorityQueue, dequeue_pair!
@@ -42,7 +42,7 @@ In the example above, exactly two loads should be supplied.
 
 """
 struct Battery
-    rest_power::RestPowerDict
+    battery_power::Float64
     prevs::PrevNodeDict
 end
 
@@ -81,7 +81,7 @@ function prepare_battery(network::Network)
             end
         end
 
-        push!(batteries, Battery(visited, prev))
+        push!(batteries, Battery(start_power, prev))
     end
     batteries, [false for _ in batteries]
 end
@@ -89,7 +89,7 @@ end
 """Check if any active battery reach overlaps with any networkpart, and if they do immediately consume it.
 This is NOT optional. If two parts both might consume a battery, which one does will be determined by iteration order,
 and both will be visited."""
-function visit_battery!(batteries::Vector{Battery}, visited_batteries::Vector{Bool}, part::NetworkPart, node::KeyType)
+function visit_battery!(network::Network, batteries::Vector{Battery}, visited_batteries::Vector{Bool}, part::NetworkPart, node::KeyType)
     # 1. check if any part visited any battery
     # 2. give the nodes, mark battery as visited
     for (battery_idx, (battery, is_visited)) in enumerate(zip(batteries, visited_batteries))
@@ -97,37 +97,45 @@ function visit_battery!(batteries::Vector{Battery}, visited_batteries::Vector{Bo
             continue
         end
         visited = Vector{KeyType}()
-        bonus_power = get(battery.rest_power, node, nothing)
-        if bonus_power === nothing
+        _prev = get(battery.prevs, node, nothing)
+        if _prev === nothing
             # Node is not in battery's reach
             continue
         end
 
-        part.rest_power += bonus_power
+        part.rest_power += battery.battery_power
         visited_batteries[battery_idx] = true
         visiting = node
         while visiting !== nothing
-            push!(visited, visiting)
-            push!(part.subtree, visiting)
-            push!(part.leaf_nodes, visiting)
+            if !(visiting in part.subtree)
+                push!(visited, visiting)
+                push!(part.subtree, visiting)
+                push!(part.leaf_nodes, visiting)
+
+                bus::Bus = network[visiting]
+                part.rest_power -= get_load_power(bus)
+            end
             visiting = battery.prevs[visiting]
         end
 
         # TODO: If this path visits another battery, visit that one too
 
 
-        return visited, bonus_power, battery_idx
+        return visited, battery.battery_power, battery_idx
     end
     return nothing
 end
 
-function unvisit_battery!(visited_batteries::Vector{Bool}, part::NetworkPart, visited::Vector{KeyType}, bonus_power::Float64, battery_idx::Int)
+function unvisit_battery!(network::Network, visited_batteries::Vector{Bool}, part::NetworkPart, visited::Vector{KeyType}, bonus_power::Float64, battery_idx::Int)
     # undo all the modifications made by visit_battery!()
     visited_batteries[battery_idx] = false
     part.rest_power -= bonus_power
     for node in visited
         pop!(part.subtree, node)
         pop!(part.leaf_nodes, node)
+
+        bus::Bus = network[node]
+        part.rest_power -= get_load_power(bus)
     end
 end
 

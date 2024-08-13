@@ -311,7 +311,7 @@ function segment_network(
             local neighbour = network[neighbour_idx]
 
             # battery stuff must be done before checking for overload
-            battery_result = visit_battery!(batteries, visited_batteries, part, neighbour_idx)
+            battery_result = visit_battery!(network, batteries, visited_batteries, part, neighbour_idx)
             if (battery_result === nothing) # I'm sorry for this mess :'(
                 if get_load_power(neighbour) > part.rest_power
                     continue # Overload
@@ -331,7 +331,7 @@ function segment_network(
             push!(choices, nested_result)
             if battery_result !== nothing
                 visited, bonus_power, battery_idx = battery_result
-                unvisit_battery!(visited_batteries, part, visited, bonus_power, battery_idx)
+                unvisit_battery!(network, visited_batteries, part, visited, bonus_power, battery_idx)
             else
                 unvisit!(network, parts, part, neighbour_idx)
             end

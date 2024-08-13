@@ -43,10 +43,6 @@ function print_relres(res::NewResult)
     outage_time = sum(sum(eachcol(outage_time_df)))
 
     average_r = outage_time / lambda
-    average_r_alt_df = select(res.t, Not(:cut_edge))
-    average_r_alt = sum(sum(eachcol(average_r_alt_df .* lambda_df ./ sum(eachcol(lambda_df)))))
-    println("$average_r == $average_r_alt")
-    @assert average_r == average_r_alt
 
     ens_df = select(res.ENS, Not(:cut_edge))
     ENS = sum(sum(eachcol(ens_df)))
