@@ -25,7 +25,13 @@ function dot_edge_decor(switch::NewSwitch)
     end
 end
 
-function to_dot_edge(network::Network, parts::Vector{NetworkPart}, from::KeyType, to::KeyType, layout="dot")
+function to_dot_edge(
+    network::Network,
+    parts::Vector{NetworkPart},
+    from::KeyType,
+    to::KeyType,
+    layout = "dot",
+)
     a, b = sort((from, to))
     kwargs = Set{String}(["id=\"$(a)-$(b)\""])
     for switch in network[from, to].switches
@@ -86,7 +92,7 @@ function to_dot_node(network::Network, parts::Vector{NetworkPart}, node::KeyType
     """
 end
 
-function to_dot(network::Network, parts=Vector{NetworkPart}(); layout="dot")
+function to_dot(network::Network, parts = Vector{NetworkPart}(); layout = "dot")
     """Creates a graphviz DOT language string containing the graph."""
     @assert layout in ["dot", "neato", "fdp", "sfdp"]
     label_to_idx = Dict{Int,String}()
@@ -132,7 +138,7 @@ function to_dot(network::Network, parts=Vector{NetworkPart}(); layout="dot")
     $(edges_str)
 
     $(clusters_str)
-    
+
     $(nodes_str)
     }"""
 
@@ -140,8 +146,8 @@ function to_dot(network::Network, parts=Vector{NetworkPart}(); layout="dot")
 end
 
 """Plot the network. Use layout="neato" or "sfdp" to get more network-like structures"""
-function dot_plot(network::Network, parts=Vector{NetworkPart}(); layout="dot")
-    dotstr = to_dot(network, parts; layout=layout)
+function dot_plot(network::Network, parts = Vector{NetworkPart}(); layout = "dot")
+    dotstr = to_dot(network, parts; layout = layout)
     buffer = IOBuffer(dotstr)
     graph = GraphViz.load(buffer)
     graph

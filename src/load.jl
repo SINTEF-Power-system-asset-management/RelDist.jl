@@ -18,4 +18,3 @@ end
 function get_loads(case::Case, corr::Dict{String,<:Real})
     return [Load(load, corr) for load in eachrow(case.load)]
 end
-

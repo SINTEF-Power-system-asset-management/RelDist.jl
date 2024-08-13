@@ -33,4 +33,3 @@ optimal_split = segment_network(network, parts)
 
 # dot_plot(network; layout="neato")
 dot_plot(network, optimal_split)
-

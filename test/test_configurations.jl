@@ -9,4 +9,3 @@ conf = RelDistConf()
 @test failures.communication_failure_prob == 0.0
 
 @test conf.traverse.consider_cap
-

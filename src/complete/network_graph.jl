@@ -113,7 +113,7 @@ function get_kile(
     load::LoadUnit,
     outage_time::Float64,
     cost_functions::AbstractDict{String,PieceWiseCost},
-    correction_factor::Float64=1.0,
+    correction_factor::Float64 = 1.0,
 )
     if load.is_nfc
         return 0.0
@@ -135,9 +135,9 @@ struct NewSwitch
     switching_time::Float64
 
     NewSwitch(
-        bus::String="you should have a key here if you're not testing code",
-        is_closed::Bool=false,
-        switching_time::Float64=0.2,
+        bus::String = "you should have a key here if you're not testing code",
+        is_closed::Bool = false,
+        switching_time::Float64 = 0.2,
     ) = new(bus, is_closed, switching_time)
 end
 
@@ -156,7 +156,7 @@ struct NewBranch
 end
 
 """Creates a branch with a single switch"""
-NewBranch(bus="you should have a key here too if you're not testing code") =
+NewBranch(bus = "you should have a key here too if you're not testing code") =
     NewBranch(0.512, 0.123, [NewSwitch(bus)])
 NewBranch()
 
@@ -181,12 +181,12 @@ end
 """Create a Network. If this is a subgraph after a fault switching time and repair time
 are the times it takes to respectively reorganize and fix the fault on the network.
 If not then they don't mean anything."""
-function Network(switching_time=0.5, repair_time=4.0)
+function Network(switching_time = 0.5, repair_time = 4.0)
     network = MetaGraphsNext.MetaGraph(
         Graph();
-        label_type=KeyType,
-        vertex_data_type=VertexType,
-        edge_data_type=EdgeType,
+        label_type = KeyType,
+        vertex_data_type = VertexType,
+        edge_data_type = EdgeType,
     )
     Network(network, switching_time, repair_time)
 end
@@ -213,7 +213,8 @@ delete!(network::Network, key_a::KeyType, key_b::KeyType) =
 # Forwarding methods to the bus
 get_supply_power(network::Network, node::KeyType) = get_supply_power(network[node])
 is_supply(network::Network, node::KeyType) = is_supply(network[node])
-get_battery_supply_power(network::Network, node::KeyType) = get_battery_supply_power(network[node])
+get_battery_supply_power(network::Network, node::KeyType) =
+    get_battery_supply_power(network[node])
 is_battery(network::Network, node::KeyType) = is_battery(network[node])
 get_load_power(network::Network, node::KeyType) = get_load_power(network[node])
 get_nfc_load_power(network::Network, node::KeyType) = get_nfc_load_power(network[node])
@@ -228,8 +229,8 @@ buses(network) = map(node -> network[node], labels(network))
 Pass in the switching and repair times for convenience."""
 function connected_components(
     network::Network,
-    switching_time=0.592,
-    repair_time=4.0,
+    switching_time = 0.592,
+    repair_time = 4.0,
 )::Vector{Network}
     comps = []
     for subnet_indices in connected_components(network.network)

@@ -241,4 +241,3 @@ case_new.switch[!, :t_manual] .= 0.5 # I set the manual switching time to 30 min
 rename!(case.reldata, :sectioning_time => :sectioningTime)
 
 to_csv(case_new, "cineldi_simple")
-

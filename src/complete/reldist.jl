@@ -99,7 +99,7 @@ function isolate_and_get_time!(network::Network, edge::Tuple{KeyType,KeyType})
     ]
     switching_times =
         [get_min_cutting_time(network[branch...]) for branch in branches_to_cut]
-    switching_time = maximum(switching_times; init=min_switching_time)
+    switching_time = maximum(switching_times; init = min_switching_time)
 
     [delete!(network, edge...) for edge in edges_to_rm]
     [delete!(network, node) for node in nodes_to_rm]
@@ -127,8 +127,10 @@ function relrad_calc_2(network::Network)
             for subnet in connected_components(network, isolation_time, repair_time)
                 kile_fn = kile_loss(subnet)
                 nfc_fn = unsupplied_nfc_loss(subnet)
-                optimal_split =
-                    segment_network(subnet; loss_function=parts -> (kile_fn(parts), nfc_fn(parts)))
+                optimal_split = segment_network(
+                    subnet;
+                    loss_function = parts -> (kile_fn(parts), nfc_fn(parts)),
+                )
 
                 for vertex in labels(subnet)
                     for load::LoadUnit in subnet[vertex].loads
@@ -210,8 +212,8 @@ end
 function cens_matrix(
     network::Network,
     times::DataFrame,
-    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
-    correction_factor=1.0,
+    cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor = 1.0,
 )
     cens_df = copy(times)
     for row_idx = 1:nrow(cens_df)
@@ -242,8 +244,8 @@ end
 function transform_relrad_data(
     network::Network,
     times::DataFrame,
-    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
-    correction_factor=1.0,
+    cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor = 1.0,
 )
     # To get times, we should use the compressed network. For everything else we can use the original
     power = power_matrix(network, times)

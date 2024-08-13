@@ -4,7 +4,8 @@ using RelDist: sort, edge_labels
 using DataFrames: DataFrame, filter, names, select!, Not, select
 using Test
 
-network = Network(joinpath(@__DIR__, "../../examples/simplified_cineldi/cineldi_simple.toml"))
+network =
+    Network(joinpath(@__DIR__, "../../examples/simplified_cineldi/cineldi_simple.toml"))
 
 res = relrad_calc_2(network)
 compres = compress_relrad(network)

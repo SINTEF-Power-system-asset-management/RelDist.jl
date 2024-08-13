@@ -89,7 +89,13 @@ end
 """Check if any active battery reach overlaps with any networkpart, and if they do immediately consume it.
 This is NOT optional. If two parts both might consume a battery, which one does will be determined by iteration order,
 and both will be visited."""
-function visit_battery!(network::Network, batteries::Vector{Battery}, visited_batteries::Vector{Bool}, part::NetworkPart, node::KeyType)
+function visit_battery!(
+    network::Network,
+    batteries::Vector{Battery},
+    visited_batteries::Vector{Bool},
+    part::NetworkPart,
+    node::KeyType,
+)
     # 1. check if any part visited any battery
     # 2. give the nodes, mark battery as visited
     for (battery_idx, (battery, is_visited)) in enumerate(zip(batteries, visited_batteries))
@@ -126,7 +132,14 @@ function visit_battery!(network::Network, batteries::Vector{Battery}, visited_ba
     return nothing
 end
 
-function unvisit_battery!(network::Network, visited_batteries::Vector{Bool}, part::NetworkPart, visited::Vector{KeyType}, bonus_power::Float64, battery_idx::Int)
+function unvisit_battery!(
+    network::Network,
+    visited_batteries::Vector{Bool},
+    part::NetworkPart,
+    visited::Vector{KeyType},
+    bonus_power::Float64,
+    battery_idx::Int,
+)
     # undo all the modifications made by visit_battery!()
     visited_batteries[battery_idx] = false
     part.rest_power -= bonus_power

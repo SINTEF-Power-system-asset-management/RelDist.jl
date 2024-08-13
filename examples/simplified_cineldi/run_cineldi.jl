@@ -39,5 +39,3 @@ network.mpc.gen[4:6, :external] .= false
 network = RadialPowerGraph(network.mpc)
 res, L, edge_pos = relrad_calc(cost_functions, network)
 results = ResFrames(res, edge_pos, L)
-
-

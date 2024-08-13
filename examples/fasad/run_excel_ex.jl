@@ -21,4 +21,3 @@ conf = RelDistConf(
     ),
 )
 res, L, edge_pos = relrad_calc(cost_functions, network, conf)
-

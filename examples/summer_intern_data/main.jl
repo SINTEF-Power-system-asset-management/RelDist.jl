@@ -1,5 +1,10 @@
 using RelDist: Network, NetworkPart, dot_plot, to_dot, energy_not_served, is_supply, labels
-using RelDist: remove_switchless_branches!, segment_network, relrad_calc_2, compress_relrad, transform_relrad_data
+using RelDist:
+    remove_switchless_branches!,
+    segment_network,
+    relrad_calc_2,
+    compress_relrad,
+    transform_relrad_data
 using RelDist: sort, edge_labels, isolate_and_get_time!, NewResult
 using RelDist: read_cost_functions
 using DataFrames: DataFrame, select, Not
@@ -15,13 +20,15 @@ network = Network(joinpath(@__DIR__, "intern.toml"))
 ####################################
 # Manually doing stuff for figures #
 ####################################
-plot = dot_plot(network; layout="neato")
+plot = dot_plot(network; layout = "neato")
 display(plot)
-parts = [NetworkPart(network, vertex) for vertex in labels(network) if is_supply(network[vertex])]
+parts = [
+    NetworkPart(network, vertex) for vertex in labels(network) if is_supply(network[vertex])
+]
 
 compressed_network = deepcopy(network)
 remove_switchless_branches!(compressed_network)
-plot = dot_plot(compressed_network; layout="neato")
+plot = dot_plot(compressed_network; layout = "neato")
 display(plot)
 # FileIO.save("test.svg", plot) # This is how to write it to a file
 
@@ -50,7 +57,9 @@ function print_relres(res::NewResult)
     kile_df = select(res.CENS, Not(:cut_edge))
     kile = sum(sum(eachcol(kile_df)))
 
-    println("No per year: $lambda, outage_time: $outage_time, r: $average_r h/interr, ENS: $ENS, kile: $kile\n")
+    println(
+        "No per year: $lambda, outage_time: $outage_time, r: $average_r h/interr, ENS: $ENS, kile: $kile\n",
+    )
 end
 
 t = compress_relrad(network)
@@ -59,7 +68,7 @@ print_relres(res)
 
 no_renewable = deepcopy(network)
 for node in labels(no_renewable)
-    for supply_idx in 1:length(no_renewable[node].supplies)
+    for supply_idx = 1:length(no_renewable[node].supplies)
         supply = no_renewable[node].supplies[supply_idx]
         if supply.is_battery
             no_renewable[node].supplies[supply_idx] = @set supply.power = 0

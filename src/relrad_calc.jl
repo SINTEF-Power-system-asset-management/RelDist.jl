@@ -575,4 +575,3 @@ function get_edge_pos(e, edge_pos, filtered_branches)
         end
     end
 end
-

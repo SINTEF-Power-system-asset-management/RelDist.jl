@@ -12,7 +12,7 @@ function test_kile_in_segmentation()
     network["load_1", "load_2"] = NewBranch()
 
     loss_fn = kile_loss(network)
-    optimal_split = segment_network(network; loss_function=loss_fn)
+    optimal_split = segment_network(network; loss_function = loss_fn)
     loss = loss_fn(optimal_split)
     display(optimal_split)
     @test loss == 4.0 * 2 + 1.0 * 0.5
