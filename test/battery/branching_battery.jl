@@ -3,6 +3,7 @@ using RelDist: Bus, NewBranch
 using RelDist.battery: Battery, prepare_battery
 using RelDist: t_supply, t_load, t_battery
 using RelDist: segment_network
+using Test
 
 # Y-shaped network
 network = empty_network()
@@ -32,8 +33,8 @@ network["battery", "load_5"] = NewBranch()
 batteries, _consumed_batteries = prepare_battery(network)
 @testset "Test battery preparation" begin
     @test length(batteries) == 1
-    @test batteries[1].rest_power["load_2"] == 0.0
-    @test batteries[1].rest_power["load_4"] == 0.0
+    @test batteries[1].prevs["load_2"] == "battery"
+    @test batteries[1].prevs["load_4"] == "battery"
 end
 
 optimal_split = segment_network(network)

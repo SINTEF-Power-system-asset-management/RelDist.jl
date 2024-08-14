@@ -19,7 +19,7 @@ network["load_2", "battery"] = NewBranch()
 batteries, _consumed_batteries = prepare_battery(network)
 @testset "Test battery preparation" begin
     @test length(batteries) == 1
-    @test batteries[1].rest_power["load_2"] == 0.0
+    @test batteries[1].prevs["load_2"] == "battery"
 end
 
 optimal_split = segment_network(network)
