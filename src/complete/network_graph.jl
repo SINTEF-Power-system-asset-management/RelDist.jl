@@ -3,7 +3,7 @@ module network_graph
 using Graphs: SimpleGraph, Graph
 import Graphs: connected_components
 using MetaGraphsNext: MetaGraphsNext, label_for
-import MetaGraphsNext: labels, edge_labels, neighbor_labels
+import MetaGraphsNext: labels, edge_labels, neighbor_labels, nv
 import MetaGraphsNext: haskey, setindex!, getindex, delete!
 using SintPowerCase: Case
 using DataFrames: outerjoin, keys
@@ -209,6 +209,7 @@ getindex(network::Network, key_a::KeyType, key_b::KeyType) =
 delete!(network::Network, key::KeyType) = delete!(network.network, key)
 delete!(network::Network, key_a::KeyType, key_b::KeyType) =
     delete!(network.network, key_a, key_b)
+nv(network::Network) = nv(network.network)
 
 # Forwarding methods to the bus
 get_supply_power(network::Network, node::KeyType) = get_supply_power(network[node])

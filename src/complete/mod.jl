@@ -10,7 +10,7 @@ include("network_graph.jl")
 @reexport using .network_graph: branches, buses
 
 include("network_part.jl")
-@reexport using .network_part: NetworkPart
+@reexport using .network_part: NetworkPart, all_loads_supplied
 using .network_part: visit!, unvisit!, is_leaf
 
 include("battery.jl")

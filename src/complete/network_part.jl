@@ -1,7 +1,7 @@
 module network_part
 
 using ..network_graph: Network, KeyType, get_supply_power, get_load_power, is_supply
-using ..network_graph: Bus, neighbor_labels
+using ..network_graph: Bus, neighbor_labels, nv
 
 """Representation of the subgraph of the network that is supplied by a given bus.
 Note: This is an implementation detail to `segment_network` and should not be used outside it."""
@@ -73,5 +73,21 @@ end
 function is_leaf(network::Network, part::NetworkPart, node_idx::KeyType)::Bool
     any(nbr_idx -> !(nbr_idx in part.subtree), neighbor_labels(network, node_idx))
 end
+
+"""
+    Check if a part supplies all loads in a network.
+"""
+function all_loads_supplied(network::Network, part::NetworkPart)
+    nv(network) == length(part.subtree)
+end
+
+
+"""
+    Return the labels that are in both part_a and part_b.
+"""
+function Base.intersect(part_a::NetworkPart, part_b::NetworkPart)
+    intersect(part_a.subtree, part_b.subtree)
+end
+
 
 end

@@ -42,3 +42,7 @@ end
 @testset "Test reliability analysis" begin
     include("reliability/runtests.jl")
 end
+
+@testset "Test NetworkPart" begin
+    include("test_network_part.jl")
+end

@@ -462,8 +462,19 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
     all_supplied = Vector{NetworkPart}()
     for part in parts
         supplied_by_this = traverse_classic(network, part)
-        push!(all_supplied, supplied_by_this)
+        if all_loads_supplied(network, supplied_by_this)
+            return [supplied_by_this]
+        else
+            if length(all_supplied) > 0
+                handle_overlap!(network, all_supplied, supplied_by_this)
+            end
+            push!(all_supplied, supplied_by_this)
+        end
     end
+
+
+
+
 
     # Handle overlaps
 
