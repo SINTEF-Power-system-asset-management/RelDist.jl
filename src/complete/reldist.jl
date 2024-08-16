@@ -19,6 +19,13 @@ using ..section: kile_loss, unsupplied_nfc_loss, segment_network, get_outage_tim
 using ..section: remove_switchless_branches, sort
 using ...RelDist: PieceWiseCost
 
+# Terrible names
+Edge = Tuple{KeyType,KeyType}
+Base = String
+Key = Union{Edge,Base}
+CaseDict = DefaultDict{Key,Dict{String,Float64}}
+TimeDict = DefaultDict{Edge,CaseDict}
+
 """Get the switch to cut off the given node from the given edge.
 Assumes the node is on the edge"""
 function get_cutoff_switch(network::Network, edge::Tuple{KeyType,KeyType}, node::KeyType)
@@ -99,7 +106,7 @@ function isolate_and_get_time!(network::Network, edge::Tuple{KeyType,KeyType})
     ]
     switching_times =
         [get_min_cutting_time(network[branch...]) for branch in branches_to_cut]
-    switching_time = maximum(switching_times; init = min_switching_time)
+    switching_time = maximum(switching_times; init=min_switching_time)
 
     [delete!(network, edge...) for edge in edges_to_rm]
     [delete!(network, node) for node in nodes_to_rm]
@@ -108,49 +115,68 @@ function isolate_and_get_time!(network::Network, edge::Tuple{KeyType,KeyType})
 end
 
 function relrad_calc_2(network::Network)
-    colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
-    ncols = length(colnames)
-    nrows = length(edge_labels(network))
-    vals = fill(1337.0, (nrows, ncols))
-    outage_times = DataFrame(vals, colnames)
-    outage_times[!, :cut_edge] = collect(map(sort, edge_labels(network)))
-    networks::Vector{Network} = []
+    # edge_fault => { base | other_edge_fault => { load => time } }
+    outage_times = TimeDict(CaseDict(Dict))
+    all_loads = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
 
-    for (edge_idx, edge) in enumerate(edge_labels(network))
+    for edge in edge_labels(network)
         # Shadow old network to not override by accident
-        let network = deepcopy(network)
-            repair_time = network[edge...].repair_time
-            [outage_times[edge_idx, colname] = repair_time for colname in colnames] # Worst case for this fault
-            (isolation_time, _cuts_to_make_irl) = isolate_and_get_time!(network, edge)
-            push!(networks, network)
+        _network = deepcopy(network)
+        repair_time = _network[edge...].repair_time
+        [outage_times[edge]["base"][load] = repair_time for load in all_loads] # Worst case for this fault
+        (isolation_time, _cuts_to_make_irl) = isolate_and_get_time!(_network, edge)
 
-            for subnet in connected_components(network, isolation_time, repair_time)
+        for subnet in connected_components(_network, isolation_time, repair_time)
+            kile_fn = kile_loss(subnet)
+            nfc_fn = unsupplied_nfc_loss(subnet)
+            optimal_split = segment_network(
+                subnet;
+                loss_function=parts -> (kile_fn(parts), nfc_fn(parts)),
+            )
+
+            for vertex in labels(subnet)
+                for load::LoadUnit in subnet[vertex].loads
+                    outage_times[edge]["base"][load.id] = get_outage_time(subnet, optimal_split, vertex)
+                end
+            end
+        end
+
+        # Switch malfunctions
+        for failing_switch in _cuts_to_make_irl
+            _network = deepcopy(network)
+            branch = _network[failing_switch...]
+            if length(branch.switches) > 1
+                # Short circuit and just copy the base case results
+                outage_times[edge][failing_switch] = outage_times[edge]["base"]
+                continue
+            end
+            _network[failing_switch...] = @set branch.switches = []
+            repair_time = _network[edge...].repair_time
+            [outage_times[edge][failing_switch][load] = repair_time for load in all_loads] # Worst case for this fault
+            (isolation_time, _cuts_to_make_irl) = isolate_and_get_time!(_network, edge)
+
+            for subnet in connected_components(_network, isolation_time, repair_time)
                 kile_fn = kile_loss(subnet)
                 nfc_fn = unsupplied_nfc_loss(subnet)
                 optimal_split = segment_network(
                     subnet;
-                    loss_function = parts -> (kile_fn(parts), nfc_fn(parts)),
+                    loss_function=parts -> (kile_fn(parts), nfc_fn(parts)),
                 )
 
                 for vertex in labels(subnet)
                     for load::LoadUnit in subnet[vertex].loads
-                        if load.is_nfc
-                            outage_times[edge_idx, load.id] =
-                                get_outage_time(subnet, optimal_split, vertex)
-                        else
-                            outage_times[edge_idx, load.id] =
-                                get_outage_time(subnet, optimal_split, vertex)
-                        end
+                        outage_times[edge][failing_switch][load.id] = get_outage_time(subnet, optimal_split, vertex)
                     end
                 end
             end
+
         end
     end
 
     for vertex in labels(network)
         for load::LoadUnit in network[vertex].loads
             if load.is_nfc
-                select!(outage_times, Not(load.id))
+                delete!(outage_times, load.id)
             end
         end
     end
@@ -161,18 +187,18 @@ end
 
 function compress_relrad(network::Network)
     compressed_network, edge_mapping = remove_switchless_branches(network)
-    res = relrad_calc_2(compressed_network)
-    mapped_res = empty(res)
+    times::TimeDict = relrad_calc_2(compressed_network)
+    mapped_times = empty(times)
 
-    for row in eachrow(res)
-        old_edges = edge_mapping[sort(row[:cut_edge])]
+    for (edge, row) in times
+        old_edges = edge_mapping[sort(edge)]
         for edge in old_edges
             mapped_row = copy(row)
             @reset mapped_row.cut_edge = edge
-            push!(mapped_res, mapped_row)
+            push!(mapped_times, mapped_row)
         end
     end
-    mapped_res
+    mapped_times
 end
 
 """Get power data on the same format as the times df."""
@@ -212,8 +238,8 @@ end
 function cens_matrix(
     network::Network,
     times::DataFrame,
-    cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
-    correction_factor = 1.0,
+    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor=1.0,
 )
     cens_df = copy(times)
     for row_idx = 1:nrow(cens_df)
@@ -244,9 +270,17 @@ end
 function transform_relrad_data(
     network::Network,
     times::DataFrame,
-    cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
-    correction_factor = 1.0,
+    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor=1.0,
 )
+    # Generate empty dataframe with proper shape
+    # colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
+    # ncols = length(colnames)
+    # nrows = length(edge_labels(network))
+    # vals = fill(1337.0, (nrows, ncols))
+    # outage_times = DataFrame(vals, colnames)
+    # outage_times[!, :cut_edge] = collect(map(sort, edge_labels(network)))
+
     # To get times, we should use the compressed network. For everything else we can use the original
     power = power_matrix(network, times)
     fault_rate = fault_rate_matrix(network, times)

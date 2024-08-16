@@ -80,9 +80,9 @@ loss_fn(optimal_split)
 """
 function kile_loss(
     network::Network,
-    repair_time::Float64 = 4.0,
-    cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
-    correction_factor = 1.0,
+    repair_time::Float64=4.0,
+    cost_functions=DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor=1.0,
 )
     # TODO: switching time should be the highest of all the switches needed to isolate this part of the grid
     switching_time = network.switching_time
@@ -128,6 +128,8 @@ function unsupplied_nfc_loss(network::Network)
 end
 
 function energy_not_served(parts::Vector{NetworkPart})::Float64
+    # DEPRECATED: Reimplement with respect to batteries
+    @warn "Deprecated. Does not handle batteries. Reimplement"
     sum([part.rest_power for part in parts])
 end
 
@@ -270,8 +272,8 @@ loss_fn(optimal_split)
 function segment_network(
     network::Network,
     parts::Vector{NetworkPart};
-    loss_function::Union{Function,Nothing} = nothing,
-    off_limits = Set{KeyType}(),
+    loss_function::Union{Function,Nothing}=nothing,
+    off_limits=Set{KeyType}(),
 )::Vector{NetworkPart}
     # prepare the clock
     start_time = now()
@@ -367,22 +369,22 @@ function segment_network(
     res[2]
 end
 
-function segment_network(network::Network; loss_function::Union{Function,Nothing} = nothing)
+function segment_network(network::Network; loss_function::Union{Function,Nothing}=nothing)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
-    segment_network(network, parts; loss_function = loss_function)
+    segment_network(network, parts; loss_function=loss_function)
 end
 
 """Traverse each part alone. This will leave overlaps."""
 function segment_network_ignore_overlap(
     network::Network;
-    loss_function::Union{Function,Nothing} = nothing,
+    loss_function::Union{Function,Nothing}=nothing,
 )
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
     result_parts = Vector{NetworkPart}()
     for part in parts
-        result_part = segment_network(network, [part]; loss_function = loss_function)
+        result_part = segment_network(network, [part]; loss_function=loss_function)
         push!(result_parts, result_part[1])
     end
     result_parts
@@ -393,7 +395,7 @@ from the `segment_network_classic` algorithm"""
 function get_start_guess(
     network::Network,
     old_parts::Vector{NetworkPart};
-    loss_function::Union{Function,Nothing} = nothing,
+    loss_function::Union{Function,Nothing}=nothing,
 )
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
@@ -403,8 +405,8 @@ function get_start_guess(
         supplied_by_this = segment_network(
             network,
             [part];
-            off_limits = off_limits,
-            loss_function = loss_function,
+            off_limits=off_limits,
+            loss_function=loss_function,
         )
         push!(all_supplied, supplied_by_this[1])
     end
@@ -427,18 +429,18 @@ end
 and then doing the segmentation from that starting point."""
 function segment_network_fast(
     network::Network;
-    loss_function::Union{Function,Nothing} = nothing,
+    loss_function::Union{Function,Nothing}=nothing,
 )
-    naive_parts = segment_network_ignore_overlap(network; loss_function = loss_function)
-    start_guess = get_start_guess(network, naive_parts; loss_function = loss_function)
-    segment_network(network, start_guess; loss_function = loss_function)
+    naive_parts = segment_network_ignore_overlap(network; loss_function=loss_function)
+    start_guess = get_start_guess(network, naive_parts; loss_function=loss_function)
+    segment_network(network, start_guess; loss_function=loss_function)
 end
 ## End of DFS in state space
 ## Beginning of classic reimpl
 
 """DFS over all buses from the start bus, gobbling up all nodes we can. 
 TODO: If we encounter overload on a branch with no switch we return nothing to backtrack."""
-function traverse_classic(network::Network, part::NetworkPart; off_limits = Set{KeyType}())
+function traverse_classic(network::Network, part::NetworkPart; off_limits=Set{KeyType}())
     part = deepcopy(part)
     visit = [part.subtree...]
 
