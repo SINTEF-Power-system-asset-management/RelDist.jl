@@ -27,6 +27,7 @@ struct LoadUnit
     type::String # e.g. residental/industry
     correction_factor::Real
     is_nfc::Bool
+    in_service::Bool
 end
 struct Bus
     loads::Vector{LoadUnit}
@@ -41,9 +42,9 @@ function Bus(id::String, type::BusKind, power::Float64)
     elseif type == t_battery
         Bus([], [SupplyUnit(id, power, true)])
     elseif type == t_load
-        Bus([LoadUnit(id, power, "residental", 1.0, false)], [])
+        Bus([LoadUnit(id, power, "residental", 1.0, false, true)], [])
     elseif type == t_nfc_load
-        Bus([LoadUnit(id, power, "residental", 1.0, true)], [])
+        Bus([LoadUnit(id, power, "residental", 1.0, true, true)], [])
     end
 end
 
@@ -86,7 +87,7 @@ is_battery(bus::Bus) = get_battery_supply_power(bus) > 0.0
 function get_load_power(bus::Bus)
     summy = 0.0
     for load::LoadUnit in bus.loads
-        if load.is_nfc
+        if load.is_nfc || !load.in_service
             continue
         end
         summy += load.power
@@ -107,6 +108,13 @@ function get_nfc_load_power(bus::Bus)
         summy += load.power
     end
     summy
+end
+
+"""
+    sheds a load.
+"""
+function shed_load(load::LoadUnit)
+    load.in_service = false
 end
 
 function get_kile(

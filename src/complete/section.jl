@@ -4,6 +4,7 @@ import Base
 import Graphs: connected_components
 import MetaGraphsNext: labels, edge_labels, neighbor_labels
 import MetaGraphsNext: haskey, setindex!, getindex, delete!
+import Combinatorics: combinations
 
 using Dates
 using Graphs: SimpleGraph, Graph
@@ -438,10 +439,13 @@ end
 
 """DFS over all buses from the start bus, gobbling up all nodes we can. 
 TODO: If we encounter overload on a branch with no switch we return nothing to backtrack."""
-function traverse_classic(network::Network, part::NetworkPart; off_limits = Set{KeyType}())
-    part = deepcopy(part)
-    visit = [part.subtree...]
-
+function traverse_classic!(
+    network::Network,
+    part::NetworkPart,
+    visit::Set{KeyType};
+    off_limits = Set{KeyType}(),
+    allow_shedding = false,
+)
     while !isempty(visit)
         v_src = pop!(visit)
 
@@ -449,43 +453,178 @@ function traverse_classic(network::Network, part::NetworkPart; off_limits = Set{
         setdiff!(to_visit, off_limits)
         for v_dst in to_visit
             if get_load_power(network[v_dst]) > part.rest_power
-                continue
+                if allow_shedding
+                    visit_and_shed!(network, part, visitation)
+                    push!(visit, v_dst)
+                else
+                    # In case we have to stop the search in one direction, we should
+                    # remember the location
+                    push!(part.leaf_nodes, v_dst)
+                    continue
+                end
             end
             visit!(network, part, v_dst)
             push!(visit, v_dst)
         end
     end
-    part
 end
 
-function segment_network_classic(network::Network, parts::Vector{NetworkPart})
-    all_supplied = Vector{NetworkPart}()
-    for part in parts
-        supplied_by_this = traverse_classic(network, part)
-        if all_loads_supplied(network, supplied_by_this)
-            return [supplied_by_this]
-        else
-            if length(all_supplied) > 0
-                handle_overlap!(network, all_supplied, supplied_by_this)
+function traverse_classic!(
+    network::Network,
+    part::NetworkPart,
+    v::KeyType;
+    off_limits = Set{KeyType}(),
+)
+    traverse_classic!(network, part, [v], off_limits)
+end
+
+
+"""
+    Check how much additional load can be suplied by a part after it has
+    been split from another part.
+"""
+function supply_after_split!(
+    network::Network,
+    part::NetworkPart,
+    island::Vector{KeyType},
+    off_limits::Set{KeyType},
+)
+    let part = deepcopy(part)
+        # Remove the vertices not in the island
+        for v in setdiff(part.subtree, island)
+            unvisit!(network, part, v)
+        end
+        # After the split  we traverse from all of the leaf nodes.
+        # Note that the order of the leaf nodes may change the results,
+        # but we will in any case do the search to the end later.
+        traverse_leaves!(network, part, off_limits)
+        return part
+    end
+end
+
+"""
+    Calls the traverse classic function from the leaves of a part, while not visiting
+    vertices in other parts.
+"""
+function traverse_leaves!(
+    network::Network,
+    part::NetworkPart,
+    off_limits::Set{KeyType};
+    allow_shedding = false,
+)
+    for v in part.off_limits
+        traverse_classic!(network, part, v, off_limits, allow_shedding)
+        # Remove the leaf node from the list after we have processed it.
+        delete!(part.leaf_nodes, v)
+        # Add the newly added vertices to the list of off limits vertices
+        off_limits = union(part.subtree, off_limits)
+    end
+end
+
+
+""" In case two parts overlap we have to find a switch to remove the overlap
+this method takes care of that."""
+function handle_overlap(
+    network::Network,
+    parts::Dict{Symbol,NetworkPart},
+    overlapping::Set{KeyType},
+    off_limits::Set{KeyType},
+)
+    best_p = Inf
+    best_parts = Vector{NetworkPart}()
+    island_idx = Dict(:old_part => Vector{KeyType}(), :part => Vector{KeyType}())
+    # Iterate over all the buses that are in both parts
+    for common in overlapping
+        # Itereate over all the edges that are going out of the
+        # common bus
+        for e in all_neighbors(network, common)
+            # Check if the edge is going between parts
+            if edge_between_parts(parts[:part], parts[:old_part], e)
+                # Create a copy of the network and remove the edge
+                let network = deepcopy(network)
+                    delete!(network, e)
+                    [delete!(network, node) for node in [src(e), dst(e)]]
+                    islands = connected_components(network)
+                    if length(islands) == 1
+                        # We have not added support for radial operation of
+                        # meshed networks yet.
+                        error("Meshed networks are not supported.")
+                    else
+                        # We assume the edge splits the graph correctly
+                        splits = true
+                        for (key, part) in parts
+                            island_idx[key] = supply_in_island.(part, islands)
+                            if island_idx[key] == 0
+                                # The edge did not split the graph correctly
+                                splits = false
+                            end
+                        end
+                        if splits
+                            temp_parts = [
+                                supply_after_split(
+                                    network,
+                                    part,
+                                    islands[island_idx[part]],
+                                    off_limits,
+                                ) for part in parts
+                            ]
+                            if sum(part.rest_power for part in temp_parts) < best_p
+                                best_parts = temp_parts
+                            end
+                        end
+                    end
+                end
             end
-            push!(all_supplied, supplied_by_this)
+        end
+    end
+    return parts[:old_part], parts[:part]
+end
+
+
+function segment_network_classic(network::Network, parts::Vector{NetworkPart})
+    # First we check what the different parts can supply. In this step, we grow the parts
+    # from the supplu. In case one of the partcan supply everything we stop the search.
+    for part in parts
+        traverse_classic(network, part.supply, part)
+        # If a part can supply all the loads we just return this part.
+        if all_loads_supplied(network, part)
+            return [part]
         end
     end
 
+    # In case there was only one part we don't have to check for overlap
+    if lenght(parts) == 1
+        return [part]
+    end
 
+    # Create a list of vertices we have analysed
+    off_limits = union(part.subtree for part in parts)
 
-
-
-    # Handle overlaps
-
-    all_supplied
+    # After we have grown all the parts we have to check if any of them are 
+    # overlapping.
+    for (part_a, part_b) in combinations(parts, 2)
+        overlap = intersect(part_a, part_b)
+        if length(overlap) > 0
+            # An old part is overlapping, we should handle this overlap.
+            old_part, part =
+                handle_overlap(network, part_a, part_b, overlapping, off_limits)
+        end
+    end
+    # We have handled the overlaps. Now we have to search all the way to the end
+    # of the graph to find any renewables. We start the search from the part with the
+    # highest capacity.
+    for part in parts[sortperm([part.rest_power for part in parts], rev = true)]
+        traverse_leaves!(network, part, off_limits, true)
+    end
+    parts
 end
 
 function segment_network_classic(network::Network)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
-    segment_network_classic(network, parts)
+    segment_network_classic!(network, parts)
 end
+
 ## End of classic reimpl
 
 end # module section
