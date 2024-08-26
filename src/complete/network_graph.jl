@@ -17,11 +17,12 @@ using ...RelDist: PieceWiseCost, calculate_kile
 @enum BusKind t_supply t_battery t_load t_nfc_load
 struct SupplyUnit
     id::String
-    power::Float64
+    power::Float64 # This is the rating. We can consider to rename it.
     is_battery::Bool
+    energy::Real
 end
 
-struct LoadUnit
+mutable struct LoadUnit
     id::String
     power::Float64
     type::String # e.g. residental/industry
@@ -84,7 +85,7 @@ end
 
 is_battery(bus::Bus) = get_battery_supply_power(bus) > 0.0
 
-function get_load_power(bus::Bus)
+function get_load_power(bus::Bus; consider_supply = true)
     summy = 0.0
     for load::LoadUnit in bus.loads
         if load.is_nfc || !load.in_service
@@ -92,12 +93,14 @@ function get_load_power(bus::Bus)
         end
         summy += load.power
     end
-
-    for supply::SupplyUnit in bus.supplies
-        summy -= supply.power
+    if consider_supply
+        for supply::SupplyUnit in bus.supplies
+            summy -= supply.power
+        end
     end
     max(summy, 0.0)
 end
+
 
 function get_nfc_load_power(bus::Bus)
     summy = 0.0
@@ -113,8 +116,17 @@ end
 """
     sheds a load.
 """
-function shed_load(load::LoadUnit)
+function shed_load!(load::LoadUnit)
     load.in_service = false
+end
+
+"""
+    Sheds all load on a bus.
+"""
+function shed_load!(bus::Bus)
+    for load in bus.loads
+        shed_load!(load)
+    end
 end
 
 function get_kile(
@@ -234,12 +246,23 @@ is_load(network::Network, node::KeyType) = is_load(network[node])
 branches(network) = map(edge -> network[edge...], edge_labels(network))
 buses(network) = map(node -> network[node], labels(network))
 
+"""
+    Returns the labels of the vertices in the conneceted components.
+"""
+function connected_components(network::Network)
+    labels = Vector{Vector{KeyType}}()
+    for subnet_indices in connected_components(network.network)
+        push!(labels, [label_for(network.network, idx) for idx in subnet_indices])
+    end
+    return labels
+end
+
 """Create Network instances for each of the connected_components in the network.
 Pass in the switching and repair times for convenience."""
 function connected_components(
     network::Network,
-    switching_time = 0.592,
-    repair_time = 4.0,
+    switching_time,
+    repair_time,
 )::Vector{Network}
     comps = []
     for subnet_indices in connected_components(network.network)

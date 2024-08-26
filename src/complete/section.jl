@@ -10,14 +10,16 @@ using Dates
 using Graphs: SimpleGraph, Graph
 using MetaGraphsNext: MetaGraphsNext, label_for
 using SintPowerCase: Case
-using DataFrames: outerjoin, keys
+using DataFrames: outerjoin, keys, DataFrameRow
 using DataStructures: DefaultDict, Queue
 using Accessors: @set
 
 using ..network_graph: Network, KeyType, is_supply
 using ..network_graph: Bus, is_switch, get_supply_power, get_load_power, get_nfc_load_power
-using ..network_graph: NewBranch, NewSwitch, get_kile
-using ..network_part: NetworkPart, visit!, unvisit!, is_leaf
+using ..network_graph: NewBranch, NewSwitch, get_kile, LoadUnit
+using ..network_part: NetworkPart, visit!, unvisit!, visit_and_shed!, is_leaf
+using ..network_part: edge_between_parts, supply_in_island, all_loads_supplied
+using ..network_part: get_loads_nfc_and_shed, get_part_der
 using ..battery: prepare_battery, visit_battery!, unvisit_battery!
 using ...RelDist: PieceWiseCost
 
@@ -60,6 +62,81 @@ end
 
 get_outage_time(network::Network, parts::Vector{NetworkPart}, vertex::KeyType) =
     is_served(parts, vertex) ? network.switching_time : network.repair_time
+
+"""
+    Return the indices of the loads that can be served given a list of loads
+    and a capacity.
+"""
+function can_be_served(loads::Vector{<:Real}, capacity::Real)
+    i = 0
+    # Drop loads that are larger than the capacity.
+    exceed_cap_idx = findfirst(>(capacity), loads)
+    last_idx = isempty(exceed_cap_idx) ? length(loads) : exceed_cap_idx
+
+    while i <= last_idx
+        P = sum(loads[1:last_idx-i])
+        if P < capacity
+            return 1:last_idx-i, last_idx-i:length(loads), P
+        end
+        i += 1
+    end
+    return [], 1:length(loads), 0
+end
+
+function set_outage_time!(loads::Vector{LoadUnit}, outage_times::DataFrameRow, time::Real)
+    for load in loads
+        outage_times[load.id] = time
+    end
+end
+
+function serve_and_delete!(
+    loads::Vector{LoadUnit},
+    part::NetworkPart,
+    outage_times::DataFrameRow,
+    time::Real,
+)
+    if !isempty(loads)
+        served_idx, not_served_idx, served =
+            can_be_served([load.power for load in loads], part.rest_power)
+        set_outage_time!(loads[served_idx], outage_times, time)
+        deleteat!(loads, served_idx)
+        part.rest_power -= served
+    end
+end
+
+"""
+    Determine which loads can be reconnected considering spare capacity and
+    batterie
+"""
+function power_and_energy_balance!(
+    network::Network,
+    parts::Vector{NetworkPart},
+    isolation_time::Real,
+    repair_time::Real,
+    outage_times::DataFrameRow,
+)
+    for part in parts
+        loads, nfc, shed = get_loads_nfc_and_shed(network, part)
+
+        # All loads that were served to begin with we set the outage time to
+        # the isolation_time.
+        set_outage_time!(loads, outage_times, isolation_time)
+        ders = get_part_der(network, part)
+        # Sort the lists
+        shed = shed[sortperm([load.power for load in shed])]
+        nfc = nfc[sortperm([load.power for load in nfc])]
+        ders = ders[sortperm([sup.power for sup in ders])]
+
+        # First we check if any loads can be supplied by the feeder.
+        serve_and_delete!(shed, part, outage_times, isolation_time)
+        serve_and_delete!(nfc, part, outage_times, isolation_time)
+
+        # Then we have to check if batteries can help to serve load
+
+    end
+end
+
+
 
 """
 Create a function that takes a list of parts given the captured network and repair time.
@@ -452,9 +529,9 @@ function traverse_classic!(
         to_visit = setdiff(neighbor_labels(network, v_src), part.subtree)
         setdiff!(to_visit, off_limits)
         for v_dst in to_visit
-            if get_load_power(network[v_dst]) > part.rest_power
+            if get_load_power(network[v_dst], consider_supply = false) > part.rest_power
                 if allow_shedding
-                    visit_and_shed!(network, part, visitation)
+                    visit_and_shed!(network, part, v_dst)
                     push!(visit, v_dst)
                 else
                     # In case we have to stop the search in one direction, we should
@@ -475,7 +552,11 @@ function traverse_classic!(
     v::KeyType;
     off_limits = Set{KeyType}(),
 )
-    traverse_classic!(network, part, [v], off_limits)
+    traverse_classic!(network, part, Set([v]); off_limits = off_limits)
+end
+
+function traverse_classic!(network::Network, part::NetworkPart)
+    traverse_classic!(network, part, part.supply)
 end
 
 
@@ -512,8 +593,14 @@ function traverse_leaves!(
     off_limits::Set{KeyType};
     allow_shedding = false,
 )
-    for v in part.off_limits
-        traverse_classic!(network, part, v, off_limits, allow_shedding)
+    for v in part.leaf_nodes
+        traverse_classic!(
+            network,
+            part,
+            Set([v]),
+            off_limits = off_limits,
+            allow_shedding = allow_shedding,
+        )
         # Remove the leaf node from the list after we have processed it.
         delete!(part.leaf_nodes, v)
         # Add the newly added vertices to the list of off limits vertices
@@ -526,24 +613,23 @@ end
 this method takes care of that."""
 function handle_overlap(
     network::Network,
-    parts::Dict{Symbol,NetworkPart},
+    parts::Vector{NetworkPart},
     overlapping::Set{KeyType},
     off_limits::Set{KeyType},
 )
     best_p = Inf
     best_parts = Vector{NetworkPart}()
-    island_idx = Dict(:old_part => Vector{KeyType}(), :part => Vector{KeyType}())
+    island_idx = [0, 0]
     # Iterate over all the buses that are in both parts
     for common in overlapping
         # Itereate over all the edges that are going out of the
         # common bus
-        for e in all_neighbors(network, common)
+        for neighbor in neighbor_labels(network, common)
             # Check if the edge is going between parts
-            if edge_between_parts(parts[:part], parts[:old_part], e)
+            if edge_between_parts(parts[1], parts[2], common, neighbor)
                 # Create a copy of the network and remove the edge
                 let network = deepcopy(network)
-                    delete!(network, e)
-                    [delete!(network, node) for node in [src(e), dst(e)]]
+                    delete!(network, common, neighbor)
                     islands = connected_components(network)
                     if length(islands) == 1
                         # We have not added support for radial operation of
@@ -552,21 +638,22 @@ function handle_overlap(
                     else
                         # We assume the edge splits the graph correctly
                         splits = true
-                        for (key, part) in parts
-                            island_idx[key] = supply_in_island.(part, islands)
-                            if island_idx[key] == 0
-                                # The edge did not split the graph correctly
-                                splits = false
-                            end
+                        for (part_id, part) in enumerate(parts)
+                            island_idx[part_id] =
+                                findall(map(x -> supply_in_island(part, x), islands))[1]
+                        end
+                        if island_idx[1] == island_idx[2]
+                            # The edge did not split the graph correctly
+                            splits = false
                         end
                         if splits
                             temp_parts = [
-                                supply_after_split(
+                                supply_after_split!(
                                     network,
                                     part,
-                                    islands[island_idx[part]],
+                                    islands[island_idx[part_id]],
                                     off_limits,
-                                ) for part in parts
+                                ) for (part_id, part) in enumerate(parts)
                             ]
                             if sum(part.rest_power for part in temp_parts) < best_p
                                 best_parts = temp_parts
@@ -577,15 +664,15 @@ function handle_overlap(
             end
         end
     end
-    return parts[:old_part], parts[:part]
+    return best_parts
 end
 
 
 function segment_network_classic(network::Network, parts::Vector{NetworkPart})
     # First we check what the different parts can supply. In this step, we grow the parts
-    # from the supplu. In case one of the partcan supply everything we stop the search.
+    # from the supply. In case one of the parts can supply everything we stop the search.
     for part in parts
-        traverse_classic(network, part.supply, part)
+        traverse_classic!(network, part)
         # If a part can supply all the loads we just return this part.
         if all_loads_supplied(network, part)
             return [part]
@@ -593,28 +680,27 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
     end
 
     # In case there was only one part we don't have to check for overlap
-    if lenght(parts) == 1
+    if length(parts) == 1
         return [part]
     end
 
     # Create a list of vertices we have analysed
-    off_limits = union(part.subtree for part in parts)
+    off_limits = union([part.subtree for part in parts]...)
 
     # After we have grown all the parts we have to check if any of them are 
     # overlapping.
-    for (part_a, part_b) in combinations(parts, 2)
-        overlap = intersect(part_a, part_b)
-        if length(overlap) > 0
+    for overlapping_parts in combinations(parts, 2)
+        overlapping = intersect(overlapping_parts[1], overlapping_parts[2])
+        if length(overlapping) > 0
             # An old part is overlapping, we should handle this overlap.
-            old_part, part =
-                handle_overlap(network, part_a, part_b, overlapping, off_limits)
+            handle_overlap(network, overlapping_parts, overlapping, off_limits)
         end
     end
     # We have handled the overlaps. Now we have to search all the way to the end
     # of the graph to find any renewables. We start the search from the part with the
     # highest capacity.
     for part in parts[sortperm([part.rest_power for part in parts], rev = true)]
-        traverse_leaves!(network, part, off_limits, true)
+        traverse_leaves!(network, part, off_limits, allow_shedding = true)
     end
     parts
 end
@@ -622,7 +708,7 @@ end
 function segment_network_classic(network::Network)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
-    segment_network_classic!(network, parts)
+    segment_network_classic(network, parts)
 end
 
 ## End of classic reimpl

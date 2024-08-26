@@ -1,9 +1,7 @@
 module network_part
 
-import Graphs: Edge
-
 using ..network_graph: Network, KeyType, get_supply_power, get_load_power, is_supply
-using ..network_graph: Bus, neighbor_labels, nv
+using ..network_graph: Bus, neighbor_labels, nv, NewBranch, shed_load!, LoadUnit
 
 """Representation of the subgraph of the network that is supplied by a given bus.
 Note: This is an implementation detail to `segment_network` and should not be used outside it."""
@@ -41,7 +39,7 @@ end
 """
 function visit_and_shed!(network::Network, part::NetworkPart, visitation::KeyType)
     bus::Bus = network[visitation]
-    shed_load(network[visitation])
+    shed_load!(network[visitation])
     push!(part.subtree, visitation)
     push!(part.leaf_nodes, visitation)
 end
@@ -102,6 +100,35 @@ function total_load(network::Network, part::NetworkPart)
     sum(get_load_power(network[bus]) for bus in part.subtree)
 end
 
+"""
+    Return all loads that have been shed in a part.
+"""
+function get_loads_nfc_and_shed(network::Network, part::NetworkPart)
+    loads = Vector{LoadUnit}()
+    nfc = Vector{LoadUnit}()
+    shed = Vector{LoadUnit}()
+    for v in part.subtree
+        for load in network[v].loads
+            if load.is_nfc
+                push!(nfc, load)
+            elseif load.in_service
+                push!(loads, load)
+            else
+                push!(shed, load)
+            end
+        end
+    end
+    return loads, nfc, shed
+end
+
+"""
+    Returns the DER in a part.
+"""
+function get_part_der(network::Network, part::NetworkPart)
+    reduce(vcat, [network[v].supplies for v in part.subtree])
+end
+
+
 # """
 # Returns the energy_not_served in a part.
 # """
@@ -140,8 +167,13 @@ end
 """
     Check if an edge is going between to parts.
 """
-function edge_between_parts(part_a::NetworkPart, part_b::NetworkPart, e::Edge)
-    (src(e) ∈ part && dst(e) ∈ part) || (src(e) ∈ old_part && dst(e) ∈ old_part)
+function edge_between_parts(
+    part_a::NetworkPart,
+    part_b::NetworkPart,
+    src::KeyType,
+    dst::KeyType,
+)
+    (src ∈ part_a && dst ∈ part_b) || (src ∈ part_b && dst ∈ part_a)
 end
 
 

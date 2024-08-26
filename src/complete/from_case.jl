@@ -33,8 +33,14 @@ function add_buses!(graphy::Network, case::Case)
         prev_id = KeyType != String ? parse(KeyType, bus[:ID]) : bus[:ID]
 
         if bus[:P_load] !== missing
-            loady =
-                LoadUnit(bus[:ID_load], bus[:P_load], bus[:type_load], 1.0, bus[:nfc_load])
+            loady = LoadUnit(
+                bus[:ID_load],
+                bus[:P_load],
+                bus[:type_load],
+                1.0,
+                bus[:nfc_load],
+                true,
+            )
             push!(loads, loady)
         end
         if bus[:Pmax_gen] !== missing

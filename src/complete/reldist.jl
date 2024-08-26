@@ -15,8 +15,9 @@ import Base
 using ..network_graph:
     Network, KeyType, LoadUnit, NewSwitch, NewBranch, time_to_cut, get_min_cutting_time
 using ..network_graph: is_switch, get_kile
-using ..section: kile_loss, unsupplied_nfc_loss, segment_network, get_outage_time
-using ..section: remove_switchless_branches, sort
+using ..section: kile_loss, unsupplied_nfc_loss, segment_network, segment_network_classic
+using ..section: remove_switchless_branches, sort, get_outage_time
+using ..section: power_and_energy_balance!
 using ...RelDist: PieceWiseCost
 
 """Get the switch to cut off the given node from the given edge.
@@ -107,14 +108,13 @@ function isolate_and_get_time!(network::Network, edge::Tuple{KeyType,KeyType})
     (switching_time, branches_to_cut)
 end
 
-function relrad_calc_2(network::Network)
+function relrad_calc_2(network::Network; segment_func::Function = segment_network_classic)
     colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
     ncols = length(colnames)
     nrows = length(edge_labels(network))
     vals = fill(1337.0, (nrows, ncols))
     outage_times = DataFrame(vals, colnames)
     outage_times[!, :cut_edge] = collect(map(sort, edge_labels(network)))
-    networks::Vector{Network} = []
 
     for (edge_idx, edge) in enumerate(edge_labels(network))
         # Shadow old network to not override by accident
@@ -122,24 +122,33 @@ function relrad_calc_2(network::Network)
             repair_time = network[edge...].repair_time
             [outage_times[edge_idx, colname] = repair_time for colname in colnames] # Worst case for this fault
             (isolation_time, _cuts_to_make_irl) = isolate_and_get_time!(network, edge)
-            push!(networks, network)
-
-            for subnet in connected_components(network, isolation_time, repair_time)
-                kile_fn = kile_loss(subnet)
-                nfc_fn = unsupplied_nfc_loss(subnet)
-                optimal_split = segment_network(
-                    subnet;
-                    loss_function = parts -> (kile_fn(parts), nfc_fn(parts)),
+            if segment_func == segment_network_classic
+                optimal_split = segment_network_classic(network)
+                power_and_energy_balance!(
+                    network,
+                    optimal_split,
+                    isolation_time,
+                    repair_time,
+                    outage_times[edge_idx, :],
                 )
+            else
+                for subnet in connected_components(network, isolation_time, repair_time)
+                    kile_fn = kile_loss(subnet)
+                    nfc_fn = unsupplied_nfc_loss(subnet)
+                    optimal_split = segment_func(
+                        subnet;
+                        loss_function = parts -> (kile_fn(parts), nfc_fn(parts)),
+                    )
 
-                for vertex in labels(subnet)
-                    for load::LoadUnit in subnet[vertex].loads
-                        if load.is_nfc
-                            outage_times[edge_idx, load.id] =
-                                get_outage_time(subnet, optimal_split, vertex)
-                        else
-                            outage_times[edge_idx, load.id] =
-                                get_outage_time(subnet, optimal_split, vertex)
+                    for vertex in labels(subnet)
+                        for load::LoadUnit in subnet[vertex].loads
+                            if load.is_nfc
+                                outage_times[edge_idx, load.id] =
+                                    get_outage_time(subnet, optimal_split, vertex)
+                            else
+                                outage_times[edge_idx, load.id] =
+                                    get_outage_time(subnet, optimal_split, vertex)
+                            end
                         end
                     end
                 end
