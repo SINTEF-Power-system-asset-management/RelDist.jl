@@ -16,7 +16,7 @@ using Accessors: @set
 
 using ..network_graph: Network, KeyType, is_supply
 using ..network_graph: Bus, is_switch, get_supply_power, get_load_power, get_nfc_load_power
-using ..network_graph: NewBranch, NewSwitch, get_kile, LoadUnit
+using ..network_graph: NewBranch, NewSwitch, get_kile, LoadUnit, SupplyUnit
 using ..network_part: NetworkPart, visit!, unvisit!, visit_and_shed!, is_leaf
 using ..network_part: edge_between_parts, supply_in_island, all_loads_supplied
 using ..network_part: get_loads_nfc_and_shed, get_part_der
@@ -68,15 +68,18 @@ get_outage_time(network::Network, parts::Vector{NetworkPart}, vertex::KeyType) =
     and a capacity.
 """
 function can_be_served(loads::Vector{<:Real}, capacity::Real)
-    i = 0
+    if isempty(loads)
+        return [], [], 0.0
+    end
+    i = 1
     # Drop loads that are larger than the capacity.
     exceed_cap_idx = findfirst(>(capacity), loads)
-    last_idx = isempty(exceed_cap_idx) ? length(loads) : exceed_cap_idx
+    last_idx = isnothing(exceed_cap_idx) ? length(loads) : exceed_cap_idx
 
     while i <= last_idx
         P = sum(loads[1:last_idx-i])
         if P < capacity
-            return 1:last_idx-i, last_idx-i:length(loads), P
+            return 1:last_idx-i, i:length(loads), P
         end
         i += 1
     end
@@ -90,19 +93,62 @@ function set_outage_time!(loads::Vector{LoadUnit}, outage_times::DataFrameRow, t
 end
 
 function serve_and_delete!(
-    loads::Vector{LoadUnit},
     part::NetworkPart,
+    loads::Vector{LoadUnit},
+    ders::Vector{SupplyUnit},
     outage_times::DataFrameRow,
-    time::Real,
+    repair_time::Real,
+    isolation_time::Real,
 )
-    if !isempty(loads)
-        served_idx, not_served_idx, served =
-            can_be_served([load.power for load in loads], part.rest_power)
-        set_outage_time!(loads[served_idx], outage_times, time)
-        deleteat!(loads, served_idx)
-        part.rest_power -= served
+    # First we check if any loads can be supplied by the feeder.
+    served_idx, unserved_idx, power =
+        can_be_served([load.power for load in loads], part.rest_power)
+    part.rest_power -= power
+    set_outage_time!(loads[served_idx], outage_times, isolation_time)
+    deleteat!(loads, served_idx)
+
+    serve_time = 0.0
+
+    # Then we have to check if batteries can help to serve load
+    while !isempty(loads)
+        ratings = [der.power for der in ders]
+        energies = [der.energy for der in ders]
+        capacity = part.rest_power + sum(ratings)
+        served_idx, unserved_idx, to_be_served =
+            can_be_served([load.power for load in loads], capacity)
+
+        # Calculate how much power each DER should deliver based on the rating
+        powers = (to_be_served - part.rest_power) / sum(ratings) .* ratings
+        # Calcualte how long the DER can suppy the power and find the index of the
+        # DER that will deplete first.
+        times = energies ./ powers
+        min_time_idx = sortperm(times)
+        # In case more than one battery has the same minimum time 
+        # (unlikely in a realistic case)
+        min_time_idx = min_time_idx[times.==times[min_time_idx[1]]]
+        min_time = times[min_time_idx[1]]
+
+        if min_time >= repair_time
+            min_time = repair_time
+        else
+            # Delete the battery that was empty
+            deleteat!(ders, min_time_idx)
+        end
+        # Deplete the energy storages with the amount of energy they will serve
+        # in this round
+        for (der_i, energy) in enumerate(powers .* min_time)
+            ders[der_i].energy -= energy
+        end
+        # Set the outage time for the loads we could not serve
+        set_outage_time!(loads[unserved_idx], outage_times, repair_time - serve_time)
+        if min_time == repair_time
+            return
+        end
+        serve_time += min_time
     end
+    return
 end
+
 
 """
     Determine which loads can be reconnected considering spare capacity and
@@ -127,12 +173,8 @@ function power_and_energy_balance!(
         nfc = nfc[sortperm([load.power for load in nfc])]
         ders = ders[sortperm([sup.power for sup in ders])]
 
-        # First we check if any loads can be supplied by the feeder.
-        serve_and_delete!(shed, part, outage_times, isolation_time)
-        serve_and_delete!(nfc, part, outage_times, isolation_time)
-
-        # Then we have to check if batteries can help to serve load
-
+        serve_and_delete!(part, shed, ders, outage_times, repair_time, isolation_time)
+        serve_and_delete!(part, nfc, ders, outage_times, repair_time, isolation_time)
     end
 end
 

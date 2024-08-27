@@ -15,7 +15,7 @@ using ...RelDist: PieceWiseCost, calculate_kile
 
 ### Bus
 @enum BusKind t_supply t_battery t_load t_nfc_load
-struct SupplyUnit
+mutable struct SupplyUnit
     id::String
     power::Float64 # This is the rating. We can consider to rename it.
     is_battery::Bool
@@ -39,9 +39,9 @@ end
 """Simple constructor to be compatible with previous versions of tests"""
 function Bus(id::String, type::BusKind, power::Float64)
     if type == t_supply
-        Bus([], [SupplyUnit(id, power, false)])
+        Bus([], [SupplyUnit(id, power, false, Inf)])
     elseif type == t_battery
-        Bus([], [SupplyUnit(id, power, true)])
+        Bus([], [SupplyUnit(id, power, true, 0)])
     elseif type == t_load
         Bus([LoadUnit(id, power, "residental", 1.0, false, true)], [])
     elseif type == t_nfc_load
