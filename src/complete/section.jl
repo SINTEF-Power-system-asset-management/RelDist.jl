@@ -18,8 +18,8 @@ using ..network_graph: Network, KeyType, is_supply
 using ..network_graph: Bus, is_switch, get_supply_power, get_load_power, get_nfc_load_power
 using ..network_graph: NewBranch, NewSwitch, get_kile, LoadUnit, SupplyUnit
 using ..network_part: NetworkPart, visit!, unvisit!, visit_and_shed!, is_leaf
-using ..network_part: edge_between_parts, supply_in_island, all_loads_supplied
-using ..network_part: get_loads_nfc_and_shed, get_part_der
+using ..network_part: supply_in_island, all_loads_supplied
+using ..network_part: get_loads_nfc_and_shed, get_part_der, visit_classic!, unvisit_classic!
 using ..battery: prepare_battery, visit_battery!, unvisit_battery!
 using ...RelDist: PieceWiseCost
 
@@ -108,6 +108,10 @@ function serve_and_delete!(
     deleteat!(loads, served_idx)
 
     serve_time = 0.0
+
+    if isempty(ders)
+        return
+    end
 
     # Then we have to check if batteries can help to serve load
     while !isempty(loads)
@@ -582,7 +586,7 @@ function traverse_classic!(
                     continue
                 end
             end
-            visit!(network, part, v_dst)
+            visit_classic!(network, part, v_dst)
             push!(visit, v_dst)
         end
     end
@@ -615,7 +619,7 @@ function supply_after_split!(
     let part = deepcopy(part)
         # Remove the vertices not in the island
         for v in setdiff(part.subtree, island)
-            unvisit!(network, part, v)
+            unvisit_classic!(network, part, v)
         end
         # After the split  we traverse from all of the leaf nodes.
         # Note that the order of the leaf nodes may change the results,
@@ -660,46 +664,45 @@ function handle_overlap(
     off_limits::Set{KeyType},
 )
     best_p = Inf
-    best_parts = Vector{NetworkPart}()
+    best_parts = deepcopy(parts)
     island_idx = [0, 0]
     # Iterate over all the buses that are in both parts
     for common in overlapping
         # Itereate over all the edges that are going out of the
         # common bus
         for neighbor in neighbor_labels(network, common)
-            # Check if the edge is going between parts
-            if edge_between_parts(parts[1], parts[2], common, neighbor)
-                # Create a copy of the network and remove the edge
-                let network = deepcopy(network)
-                    delete!(network, common, neighbor)
-                    islands = connected_components(network)
-                    if length(islands) == 1
-                        # We have not added support for radial operation of
-                        # meshed networks yet.
-                        error("Meshed networks are not supported.")
-                    else
-                        # We assume the edge splits the graph correctly
-                        splits = true
-                        for (part_id, part) in enumerate(parts)
-                            island_idx[part_id] =
-                                findall(map(x -> supply_in_island(part, x), islands))[1]
-                        end
-                        if island_idx[1] == island_idx[2]
-                            # The edge did not split the graph correctly
-                            splits = false
-                        end
-                        if splits
-                            temp_parts = [
-                                supply_after_split!(
-                                    network,
-                                    part,
-                                    islands[island_idx[part_id]],
-                                    off_limits,
-                                ) for (part_id, part) in enumerate(parts)
-                            ]
-                            if sum(part.rest_power for part in temp_parts) < best_p
-                                best_parts = temp_parts
-                            end
+            # Create a copy of the network and remove the edge
+            let network = deepcopy(network)
+                delete!(network, common, neighbor)
+                islands = connected_components(network)
+                if length(islands) == 1
+                    # We have not added support for radial operation of
+                    # meshed networks yet.
+                    error("Meshed networks are not supported.")
+                else
+                    # We assume the edge splits the graph correctly
+                    splits = true
+                    for (part_id, part) in enumerate(parts)
+                        island_idx[part_id] =
+                            findall(map(x -> supply_in_island(part, x), islands))[1]
+                    end
+                    if island_idx[1] == island_idx[2]
+                        # The edge did not split the graph correctly
+                        splits = false
+                    end
+                    if splits
+                        temp_parts = [
+                            supply_after_split!(
+                                network,
+                                part,
+                                islands[island_idx[part_id]],
+                                off_limits,
+                            ) for (part_id, part) in enumerate(parts)
+                        ]
+                        rest_power = sum(part.rest_power for part in temp_parts)
+                        if rest_power < best_p
+                            best_parts = temp_parts
+                            best_p = rest_power
                         end
                     end
                 end
@@ -731,11 +734,12 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
 
     # After we have grown all the parts we have to check if any of them are 
     # overlapping.
-    for overlapping_parts in combinations(parts, 2)
-        overlapping = intersect(overlapping_parts[1], overlapping_parts[2])
+    for comb_idx in combinations(1:length(parts), 2)
+        overlapping = intersect(parts[comb_idx[1]], parts[comb_idx[2]])
         if length(overlapping) > 0
             # An old part is overlapping, we should handle this overlap.
-            handle_overlap(network, overlapping_parts, overlapping, off_limits)
+            parts[comb_idx] =
+                handle_overlap(network, parts[comb_idx], overlapping, off_limits)
         end
     end
     # We have handled the overlaps. Now we have to search all the way to the end

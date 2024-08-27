@@ -34,6 +34,18 @@ function visit!(network::Network, part::NetworkPart, visitation::KeyType)
     push!(part.leaf_nodes, visitation)
 end
 
+function unvisit_classic!(network::Network, part::NetworkPart, visitation::KeyType)
+    bus::Bus = network[visitation]
+    part.rest_power += get_load_power(bus)
+    pop!(part.subtree, visitation)
+end
+
+function visit_classic!(network::Network, part::NetworkPart, visitation::KeyType)
+    bus::Bus = network[visitation]
+    part.rest_power -= get_load_power(bus)
+    push!(part.subtree, visitation)
+end
+
 """
     Visits a bus without changing the rest power of the part.
 """
@@ -125,7 +137,13 @@ end
     Returns the DER in a part.
 """
 function get_part_der(network::Network, part::NetworkPart)
-    reduce(vcat, [network[v].supplies for v in part.subtree])
+    reduce(
+        vcat,
+        [
+            network[v].supplies[map(x -> x.is_battery, network[v].supplies)] for
+            v in part.subtree
+        ],
+    )
 end
 
 
@@ -163,19 +181,6 @@ function part_island_idx(part, islands::Vector{Vector{KeyType}})
     end
     return idx
 end
-
-"""
-    Check if an edge is going between to parts.
-"""
-function edge_between_parts(
-    part_a::NetworkPart,
-    part_b::NetworkPart,
-    src::KeyType,
-    dst::KeyType,
-)
-    (src ∈ part_a && dst ∈ part_b) || (src ∈ part_b && dst ∈ part_a)
-end
-
 
 # End of module NetworkPart
 end

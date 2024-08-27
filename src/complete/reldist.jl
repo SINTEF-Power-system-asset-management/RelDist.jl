@@ -168,9 +168,9 @@ function relrad_calc_2(network::Network; segment_func::Function = segment_networ
 end
 
 
-function compress_relrad(network::Network)
+function compress_relrad(network::Network; segment_func::Function = segment_network_classic)
     compressed_network, edge_mapping = remove_switchless_branches(network)
-    res = relrad_calc_2(compressed_network)
+    res = relrad_calc_2(compressed_network, segment_func = segment_func)
     mapped_res = empty(res)
 
     for row in eachrow(res)
