@@ -582,7 +582,7 @@ function traverse_classic!(
                 else
                     # In case we have to stop the search in one direction, we should
                     # remember the location
-                    push!(part.leaf_nodes, v_dst)
+                    push!(part.leaf_nodes, v_src)
                     continue
                 end
             end
@@ -620,6 +620,9 @@ function supply_after_split!(
         # Remove the vertices not in the island
         for v in setdiff(part.subtree, island)
             unvisit_classic!(network, part, v)
+            if v ∈ part.leaf_nodes
+                pop!(part.leaf_nodes, v)
+            end
         end
         # After the split  we traverse from all of the leaf nodes.
         # Note that the order of the leaf nodes may change the results,
