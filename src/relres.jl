@@ -29,14 +29,16 @@ end
         n_branch: Number of branches.
 """
 function RelStruct(n_loads::Integer, n_branch::Integer, prob::Real)
-    RelStruct(zeros(n_loads, n_branch),
-              zeros(n_loads, n_branch),
-              zeros(n_loads, n_branch),
-              zeros(n_loads, n_branch),
-              zeros(n_loads, n_branch),
-              zeros(n_loads, n_branch),
-              zeros(n_loads, n_branch),
-              prob)
+    RelStruct(
+        zeros(n_loads, n_branch),
+        zeros(n_loads, n_branch),
+        zeros(n_loads, n_branch),
+        zeros(n_loads, n_branch),
+        zeros(n_loads, n_branch),
+        zeros(n_loads, n_branch),
+        zeros(n_loads, n_branch),
+        prob,
+    )
 end
 
 function RelStruct(n_loads::Integer, n_branch::Integer)
@@ -46,9 +48,18 @@ end
 """
     Set entries in the result matrix.
 """
-function set_res!(res::RelStruct, λ::Real, t::Real, P::Real, U::Real,
-        ENS::Real, IC::Real, CENS::Real,
-        load_pos::Integer, edge_pos::Integer)
+function set_res!(
+    res::RelStruct,
+    λ::Real,
+    t::Real,
+    P::Real,
+    U::Real,
+    ENS::Real,
+    IC::Real,
+    CENS::Real,
+    load_pos::Integer,
+    edge_pos::Integer,
+)
     res.t[load_pos, edge_pos] = t
     res.λ[load_pos, edge_pos] = λ
     res.P[load_pos, edge_pos] = P
@@ -79,51 +90,61 @@ mutable struct ResFrames
 end
 
 function ResFrames()
-	ResFrames(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(),
-              DataFrame())
+    ResFrames(
+        DataFrame(),
+        DataFrame(),
+        DataFrame(),
+        DataFrame(),
+        DataFrame(),
+        DataFrame(),
+        DataFrame(),
+    )
 end
 
-function ResFrames(res::Dict{String, RelStruct}, edge_pos::DataFrame,
-        L::Vector{RelDist.Load})
+function ResFrames(
+    res::Dict{String,RelStruct},
+    edge_pos::DataFrame,
+    L::Vector{RelDist.Load},
+)
     # Put everything into nice dataframes
     res_new = ResFrames()
 
     load_labels = [load.ID for load in L]
     nfc = [load.nfc == true for load in L]
-    branch_agg = DataFrame(ID=edge_pos.name)
-    load_agg = DataFrame(ID=load_labels)
+    branch_agg = DataFrame(ID = edge_pos.name)
+    load_agg = DataFrame(ID = load_labels)
 
     for field in [:U, :ENS, :CENS]
-        frame = DataFrame(zeros(length(L), size(edge_pos, 1)),
-                          edge_pos.name, makeunique=true)
+        frame =
+            DataFrame(zeros(length(L), size(edge_pos, 1)), edge_pos.name, makeunique = true)
         for key in keys(res)
-            frame .+= getfield(res[key], field)*res[key].prob
+            frame .+= getfield(res[key], field) * res[key].prob
         end
-        insertcols!(frame, 1, :L=>load_labels);
+        insertcols!(frame, 1, :L => load_labels)
         setfield!(res_new, field, frame)
-        
+
         if field == :CENS
             load_agg[!, field] .= 0.0
-            
+
             load_agg[!, :CENS_nfc] .= 0.0
 
             branch_agg[!, field] = sum.(eachcol(frame[.!nfc, 2:end]))
             load_agg[.!nfc, field] = sum.(eachrow(frame[.!nfc, 2:end]))
-            
+
             branch_agg[!, :CENS_nfc] = sum.(eachcol(frame[nfc, 2:end]))
             load_agg[nfc, :CENS_nfc] = sum.(eachrow(frame[nfc, 2:end]))
 
         else
-            branch_agg[!, field] = sum.(eachcol(frame[:,2:end]))
-            load_agg[!, field] = sum.(eachrow(frame[!,2:end]))
+            branch_agg[!, field] = sum.(eachcol(frame[:, 2:end]))
+            load_agg[!, field] = sum.(eachrow(frame[!, 2:end]))
         end
     end
     setfield!(res_new, :load_agg, load_agg)
     setfield!(res_new, :branch_agg, branch_agg)
-    setfield!(res_new,
-              :sys_agg,
-              DataFrame(sum.(eachcol(load_agg[:, 2:end]))',
-                        [:U, :ENS, :CENS, :CENS_nfc]))
+    setfield!(
+        res_new,
+        :sys_agg,
+        DataFrame(sum.(eachcol(load_agg[:, 2:end]))', [:U, :ENS, :CENS, :CENS_nfc]),
+    )
     return res_new
 end
-

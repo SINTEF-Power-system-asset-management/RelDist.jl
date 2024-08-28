@@ -16,17 +16,22 @@ end
 function get_load(g::MetaGraph, mpc::Case, v::Int)
     # Check if there is load on the vertex
     if get_prop(g, v, :load)
-        return Loadr(get_prop(g, v, :name),
-                     get_load_bus_power(mpc, get_prop(g, v, :name)),
-                     get_prop(g, v, :nfc), false)
+        return Loadr(
+            get_prop(g, v, :name),
+            get_load_bus_power(mpc, get_prop(g, v, :name)),
+            get_prop(g, v, :nfc),
+            false,
+        )
     else
         return Loadr(get_prop(g, v, :name), 0.0, false, false)
     end
 end
-    
+
 mutable struct Gen <: Source
     bus::String
     P::Real
+    Pmax::Real
+    E::Real
     external::Bool
     shed::Bool
 end
@@ -38,14 +43,21 @@ end
 function get_gen(g::MetaGraph, mpc::Case, v::Int)
     # Check if there is generation on the vertex
     if get_prop(g, v, :gen)
-        return Gen(get_prop(g, v, :name),
-                   get_gen_bus_power(mpc, get_prop(g, v, :name)),
-                   get_prop(g, v, :external), false)
+        bus_id = get_prop(g, v, :name)
+        row = mpc.gen[mpc.gen.bus.==bus_id, :][1, :] # This will be replaced soon
+        return Gen(
+            get_prop(g, v, :name),
+            get_gen_bus_power(mpc, bus_id),
+            row.Pmax, # Will be replaced soon
+            row.E,
+            get_prop(g, v, :external),
+            false,
+        )
     else
-        return Gen(get_prop(g, v, :name), 0.0, false, false)
+        return Gen(get_prop(g, v, :name), 0.0, 0.0, 0.0, false, false)
     end
 end
-    
+
 mutable struct Part
     capacity::Real
 
@@ -56,10 +68,10 @@ mutable struct Part
     tot_gen::Real
 
     shed_gen::Real
-    
-    loads::Dict{Int, Loadr}
-    
-    gens::Dict{Int, Gen}
+
+    loads::Dict{Int,Loadr}
+
+    gens::Dict{Int,Gen}
 
     vertices::Vector{Int}
 
@@ -67,37 +79,63 @@ mutable struct Part
 end
 
 function Part()
-    Part(0.0, 0.0, 0.0, 0.0, 0.0,
-         Dict{Int, Loadr}(), Dict{Int, Gen}(),
-         Vector{Int}(), Vector{Switch}())
+    Part(
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        Dict{Int,Loadr}(),
+        Dict{Int,Gen}(),
+        Vector{Int}(),
+        Vector{Switch}(),
+    )
 end
 
 function Part(capacity::Real, v_start::Integer)
-    Part(capacity, 0.0, 0.0, 0.0, 0.0,
-         Dict{Int, Loadr}(), Dict{Int, Gen}(),
-         Vector([v_start]), Vector{Switch}())
+    Part(
+        capacity,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        Dict{Int,Loadr}(),
+        Dict{Int,Gen}(),
+        Vector([v_start]),
+        Vector{Switch}(),
+    )
 end
 
 function Part(capacity::Real, load::Loadr, gen::Gen, v_start::Integer)
-    Part(capacity, 0.0, 0.0, 0.0, 0.0,
-         Dict(v_start => load), Dict(v_start => gen),
-         Vector([v_start]), Vector{Switch}())
+    Part(
+        capacity,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        Dict(v_start => load),
+        Dict(v_start => gen),
+        Vector([v_start]),
+        Vector{Switch}(),
+    )
 end
 
 """
     Returns the load in a set of vertices that are in a part.
 """
 function load_in_part_vertices(part::Part, vertices::Vector{Int})
-    sum(part.loads[v].P for v in vertices; init=0.0)
+    sum(part.loads[v].P for v in vertices; init = 0.0)
 end
 
 """
     Returns the total load in two parts.
 """
 function load_in_parts(part_a::Part, part_b::Part)
-    (load_in_part_vertices(part_a, setdiff(part_a.vertices, part_b.vertices))+
-     load_in_part_vertices(part_b, setdiff(part_b.vertices, part_a.vertices))+
-     load_in_part_vertices(part_a, intersect(part_a.vertices, part_b.vertices)))
+    (
+        load_in_part_vertices(part_a, setdiff(part_a.vertices, part_b.vertices)) +
+        load_in_part_vertices(part_b, setdiff(part_b.vertices, part_a.vertices)) +
+        load_in_part_vertices(part_a, intersect(part_a.vertices, part_b.vertices))
+    )
 end
 
 """
@@ -122,14 +160,14 @@ function update_part!(part::Part, gen::Gen, load::Loadr, v::Integer)
     part.gens[v] = gen
     part.tot_load += load.P
     part.tot_gen += gen.P
-    
+
     push!(part.vertices, v)
 end
 
 function remove_vertex!(part::Part, v::Integer)
     shed_load!(part, v)
     shed_gen!(part, v)
-    pop!(part.vertices)
+    deleteat!(part.vertices, part.vertices .== v)
     pop!(part.gens, v)
     pop!(part.loads, v)
 end
@@ -165,6 +203,13 @@ end
 function reserve_in_island(part::Part, island::Vector{Int})
     # The reserve is the first vertex
     part.vertices[1] ∈ island
+end
+
+"""
+    Check if a vertex is in a part.
+"""
+function Base.:∈(v::Int, part::Part)
+    v ∈ part.vertices
 end
 
 """
@@ -215,10 +260,145 @@ function shed_gen!(part::Part, v::Int)
 end
 
 """
+    Return the indices of the loads that can be served given a list of loads
+    and a capacity.
+"""
+function can_be_served(loads::Vector{Real}, capacity::Real)
+    i = 1
+    sorted_idx = sortperm(loads)
+    # Drop loads that are larger than the capacity.
+    exceed_cap_idx = findfirst(>(capacity), loads[sorted_idx])
+    last_idx = isempty(exceed_cap_idx) ? length(loads) : exceed_cap_idx
+
+    while i <= last_idx
+        P = sum(loads[sorted_idx[i:end]])
+        if P < capacity
+            return sorted_idx[i:end], sorted_idx[1:i-1], P
+        end
+        i += 1
+    end
+    return [], sorted_idx, 0
+end
+
+"""
     Returns the names of the loads that are in service.
 """
 function in_service_loads(part::Part)
-    [load.bus for load in values(part.loads) if !load.shed]
+    # If there is no distributed generation in the part, everything
+    # that is not shed can be supplied for the full duration of
+    # the fault repair.
+    if any_shed(part)
+        loads = Dict(v => load for (v, load) in part.loads if !load.shed)
+        if part.tot_load > part.capacity
+            # The partitioning algorithm concluded that some of the loads
+            # should be supplied by DER. I will now determing which loads that should
+            # always be fed by the reserve.
+            served_idx, not_served_idx, served =
+                can_be_served([load.P for load in values(loads)], part.capacity)
+            always_served = collect(keys(loads))[served_idx]
+        else
+            # The capacity of the feeder is larger than that of the unshed part.
+            always_served = [v for (v, load) in part.loads if !load.shed]
+            served = part.tot_load
+        end
+        serve_times = Dict(loads[served].bus => Inf for served in always_served)
+
+        ratings = [gen.Pmax for gen in values(part.gens) if !gen.external]
+        energies = [gen.E for gen in values(part.gens) if !gen.external]
+
+        if sum(ratings) == 0 || sum(energies) == 0
+            # We don't have any DER that can support the shed loads. Therefore, we
+            # don't need to bother adding buses to the list
+            return serve_times
+        end
+
+        # Slightly hackish, but the code below returns a list of the loads that has
+        # to be served by DER.
+        loads = getindex.(Ref(part.loads), setdiff(part.vertices, always_served))
+
+        # create a list of loads 
+        nfc = [load for load in loads if load.nfc]
+        loads = [load for load in loads if !load.nfc]
+
+        # In case the reserve has some capacity after feeding the loads that always should
+        # be served.
+        part_spare_cap = part.capacity - served
+        capacity = sum(ratings) + part_spare_cap
+        serve_time = 0
+
+        while length(loads) > 0
+            unserved = sum(load.P for load in loads)
+            unserved_nfc = sum(load for load in nfc)
+            # Check if we potentially can serve some NFC
+            if capacity > unserved + unserved_nfc
+                # We can serve all the loads for some time 
+                to_be_served = unserved + unserved_nfc
+            elseif capacity > unserved
+                # Check if we can serve some NFC loads
+                served_nfc_idx, unserved_nfc_idx, P =
+                    can_be_served([l.P for l in nfc], capacity)
+
+                # These loads could not be served in this round. Set the
+                # appropriate serving time.
+                merge!(
+                    serve_times,
+                    Dict(
+                        nfc[unserved_idx].bus => serve_time for
+                        unserved_idx in unserved_nfc_idx
+                    ),
+                )
+                # Calculate how much load we should serve in this round.
+                to_be_served = unserved + P
+                # Remove the loads we could not serve from the list
+                deleteat!(nfc, unserved_nfc_idx)
+            else
+                # We could not serve any NFC loads, and we cannot serve all
+                # loads. Delete all NFC loads
+                nfc = []
+                # Calculate how much load we should serve. 
+                served_load_idx, unserved_load_idx, P =
+                    can_be_served([l.P for l in loads], capacity)
+                to_be_served = P
+
+                # These loads could not be served in this round. Set the
+                # appropriate serving time.
+                merge!(
+                    serve_times,
+                    Dict(
+                        loads[unserved_idx].bus => serve_time for
+                        unserved_idx in unserved_load_idx
+                    ),
+                )
+
+                # Remove the loads we could not serve from the list
+                deleteat!(loads, unserved_nfc_idx)
+            end
+
+            # Calculate how much power each DER should deliver based on the rating
+            powers = to_be_served * capacity .* ratings
+            # Calcualte how long the DER can suppy the power and find the index of the
+            # DER that will deplete first.
+            times = energies ./ powers
+            min_time_idx = sortperm(times)
+            # In case more than one battery has the same minimum time 
+            # (unlikely in a realistic case)
+            min_time_idx = min_time_idx[times.==times[min_time_idx[1]]]
+            min_time = times[min_time_idx[1]]
+
+            serve_time += min_time
+
+            # Deplete the energy storages with the amount of energy they will serve
+            # in this round
+            energies -= powers .* min_time
+
+            # Delete the depleted DER from the list
+            capacity -= sum(ratings[min_time_idx])
+            deleteat!(energies, min_time_idx)
+            deleteat!(ratings, min_time_idx)
+        end
+    else
+        Dict(load.bus => Inf for load in values(part.loads))
+    end
 end
 
 """
@@ -248,92 +428,105 @@ end
     of consumption and production.
 """
 function loading(part::Part)
-    part.tot_load-part.tot_gen
+    part.tot_load - part.tot_gen
 end
 
 """ Calculate reachable vertices starting from a given edge"""
-function calc_R(network::RadialPowerGraph,
-                g::MetaGraph,
-                e::Branch)::Part
+function calc_R(network::RadialPowerGraph, g::MetaGraph, e::Branch)::Part
     v = get_node_number(network.G, e.dst)
     traverse(network, g, v, e.rateA)
 end
 
 """ Calculate reachable vertices starting from a given edge"""
-function calc_R(network::RadialPowerGraph,
-                g::MetaGraph,
-                b::Feeder)::Part
+function calc_R(network::RadialPowerGraph, g::MetaGraph, b::Feeder)::Part
     v = get_node_number(network.G, b.bus)
     traverse(network, g, v, b.rateA)
 end
 
-function traverse(network::RadialPowerGraph, g::MetaGraph, start::Int = 0,
-        feeder_cap::Real=Inf)
-    @assert start in vertices(g) "can't access $start in $(props(g, 1))"
-    
-    parents = Dict{Int, Int}()
+function traverse(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    start::Int = 0,
+    feeder_cap::Real = Inf,
+    seen = Vector{Int}(),
+)
+    part = Part(
+        feeder_cap,
+        get_load(g, network.mpc, start),
+        get_gen(g, network.mpc, start),
+        start,
+    )
+    traverse!(network, g, part, start, seen)
+    return part
+end
 
-    seen = Vector{Int}()
+function traverse!(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    part::Part,
+    start::Int = 0,
+    seen = Vector{Int}(),
+)
+    @assert start in vertices(g) "can't access $start in $(props(g, 1))"
+
+    parents = Dict{Int,Int}()
     visit = Vector{Int}([start])
-    
-    part = Part(feeder_cap,
-                get_load(g, network.mpc, start),
-                get_gen(g, network.mpc, start),
-                start)
 
     while !isempty(visit)
         v_src = pop!(visit)
-        if !(v_src in seen)
-            push!(seen, v_src)
-            for v_dst in setdiff(all_neighbors(g, v_src), seen)
-                e = Edge(v_src, v_dst)
-               
-                load = get_load(g, network.mpc, v_dst)
-                gen = get_gen(g, network.mpc, v_dst)
-                update_part!(part, gen, load, v_dst)
+        if (v_src in seen)
+            continue
+        end
+        push!(seen, v_src)
+        for v_dst in setdiff(all_neighbors(g, v_src), seen)
+            e = Edge(v_src, v_dst)
 
-                # Check if we have reached the capacity of the feeder connected to the part
-                overload = loading(part) - part.capacity
-                
-                if overload > 0
-                    for temp_load  in values(part.loads) # can probably overload something to make this cleaner
-                        # Shed nfc that has not been sked
-                        if temp_load.nfc && !temp_load.shed
-                            shed_load!(part, temp_load)
-                            if loading(part) - part.capacity < 0
-                                # We removed the overload stop shedding
-                                break
-                            end
-                        end
+            load = get_load(g, network.mpc, v_dst)
+            gen = get_gen(g, network.mpc, v_dst)
+            update_part!(part, gen, load, v_dst)
+
+            # Check if we have reached the capacity of the feeder connected to the part
+            overload = loading(part) - part.capacity
+
+            if overload <= 0
+                # There was no overload update the part and continue
+                # the search.
+                append!(visit, v_dst)
+                continue
+            end
+
+            for temp_load in values(part.loads) # can probably overload something to make this cleaner
+                # Shed nfc that has not been sked
+                if temp_load.nfc && !temp_load.shed
+                    shed_load!(part, temp_load)
+                    if loading(part) - part.capacity < 0
+                        # We removed the overload stop shedding
+                        break
                     end
-                    # Check if we managed to solve the overload by shedding ncf
-                    overload = loading(part) - part.capacity
-                
-                    if overload > 0
-                        if get_prop(g, e, :switch) == 1
-                            # This is a switch, we give up
-                            push!(part.switches, get_switch(network, e))
-                            remove_vertex!(part, v_dst)
-                        else
-                            # This is not a switch, we have to update the part,
-                            # shed the load and continue the search
-                            shed_load!(part, v_dst)
-                            append!(visit, v_dst)
-                        end
-                    else
-                        # There was no overload update the part and continue
-                        # the search.
-                        append!(visit, v_dst)
-                    end
-                else
-                    # There was no overload update the part and continue
-                    # the search.
-                    append!(visit, v_dst)
                 end
+            end
+            # Check if we managed to solve the overload by shedding ncf
+            overload = loading(part) - part.capacity
+
+            if overload <= 0
+                # There was no overload update the part and continue
+                # the search.
+                append!(visit, v_dst)
+                continue
+            end
+
+            if get_prop(g, e, :switch) == 1
+                # This is a switch, we give up
+                push!(part.switches, get_switch(network, e))
+                remove_vertex!(part, v_dst)
+            else
+                # This is not a switch, we have to update the part,
+                # shed the load and continue the search
+                shed_load!(part, v_dst)
+                append!(visit, v_dst)
             end
         end
     end
-    return part
 end
 
 mutable struct Overlapping
@@ -348,12 +541,21 @@ mutable struct Overlapping
     tot_load::Real
 end
 
-function Overlapping(network::RadialPowerGraph, g::MetaGraph, parts::Vector{Part}, part::Part)
+function Overlapping(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    parts::Vector{Part},
+    part::Part,
+)
     Overlapping(network, g, parts, part, Part(), 0, Vector{Int}(), true, 0)
 end
 
-function update_overlapping!(o::Overlapping, old_p::Part,
-        old_i::Int, overlapping::Vector{Int})
+function update_overlapping!(
+    o::Overlapping,
+    old_p::Part,
+    old_i::Int,
+    overlapping::Vector{Int},
+)
     o.old_p = old_p
     o.old_i = old_i
     o.overlapping = overlapping
@@ -361,7 +563,7 @@ function update_overlapping!(o::Overlapping, old_p::Part,
 end
 
 function vertices_equal(o::Overlapping)
-    o.old_p.vertices == o.part.vertices
+    Set(o.old_p.vertices) == Set(o.part.vertices)
 end
 
 function part_is_subset(o::Overlapping)
@@ -391,7 +593,7 @@ mutable struct Split
 end
 
 function Split()
-    Split(Vector{Vector}{Int}(), Dict{Int, Real}, 0)
+    Split(Vector{Vector}{Int}(), Dict{Int,Real}, 0)
 end
 
 """
@@ -418,15 +620,15 @@ function evaluate_split!(split::Split, part::Part)
         return
     end
     # This is probably not correct. Because none of this may solve the overload.
-    recon_P = sum(part.loads[v].P for v in v_diff if !part.loads[v].shed; init=0.0)
-    
+    recon_P = sum(part.loads[v].P for v in v_diff if !part.loads[v].shed; init = 0.0)
+
     # Iterate the vertices in the Part after the Split. Note that the split
     # May contain vertices that are not in the Part. We currently do, not
     # check if they can be readded.
     for v in intersect(split.vertices, part.vertices)
         power = part.loads[v].P
         # If the load was never shed, count it as being served
-        if !part.loads[v].shed 
+        if !part.loads[v].shed
             split.P += power
         else
             # If the load was shed, but its power is smaller
@@ -457,13 +659,17 @@ function parts_split(o::Overlapping, islands::Vector{Vector{Int}})
             reserves_found += 1
         end
     end
-        # If we sucessfully split the network we found two
-        # reserves
-        return reserves_found == 2 
- end
+    # If we sucessfully split the network we found two
+    # reserves
+    return reserves_found == 2
+end
 
-function check_overlap_and_fix!(network::RadialPowerGraph, g::MetaGraph,
-        parts::Vector{Part}, part::Part)
+function check_overlap_and_fix!(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    parts::Vector{Part},
+    part::Part,
+)
     o = Overlapping(network, g, parts, part)
     for (old_i, old_p) in enumerate(parts)
         overlapping = intersect(old_p, part)
@@ -484,7 +690,7 @@ function fix_overlap!(o::Overlapping)
     # First we check if there is a complete overlap.
     # Or if the new part is a subset of a part that has served all loads
     if vertices_equal(o)
-        return fix_parts_with_same_vertices!(o) 
+        return fix_parts_with_same_vertices!(o)
         # Here we check if one part is a subset of the other
         # I am not sure how realistic this is, but nice to
         # be certain.
@@ -502,12 +708,12 @@ function fix_overlap!(o::Overlapping)
 end
 
 function fix_parts_with_same_vertices!(o::Overlapping)
-   # The reserves cover the same vertices. We keep the one
-   # that has the largest capacity.
-   if new_part_has_better_cap(o)
-       # The new part has a better capacity.
-       # Kick out the old one
-       delete_old_part!(o)
+    # The reserves cover the same vertices. We keep the one
+    # that has the largest capacity.
+    if new_part_has_better_cap(o)
+        # The new part has a better capacity.
+        # Kick out the old one
+        delete_old_part!(o)
     else
         o.add_new_part = false
     end
@@ -516,25 +722,33 @@ end
 """
     Check if we found a split that solved all shedding in the parts.
 """
-function split_solved_overlap(o::Overlapping, splits_temp::Dict{Symbol, Split})
+function split_solved_overlap(o::Overlapping, splits_temp::Dict{Symbol,Split})
     return o.tot_load == splits_temp[:part].P + splits_temp[:old_p].P
 end
 
 function find_reconfiguration_switches!(o::Overlapping)
     # Variable to keep track of the best split
-    splits = Dict{Symbol, Split}()
-    splits_temp = Dict{Symbol, Split}()
+    splits = Dict{Symbol,Split}()
+    splits_temp = Dict{Symbol,Split}()
     solved = false
     best_P = 0
     islands = Vector{Vector{Int}}()
+    split_switch = Switch()
+    checked = Vector{Edge}()
     # We could reduce the running time by first considering the overlap of the
     # vertices that both parts can supply.
     for common in o.overlapping
+        # The way the code has been implemented I check a switch multiple times.
+        # I should fix this.
         for n in all_neighbors(o.g, common)
             # Previously I first checked the lines going between the parts first.
             # It seems that this was not a good strategy. Now I will just check
             # the lines connected to vertices that are common.
             e = Edge(n, common)
+            if e ∈ checked
+                break
+            end
+            push!(checked, e)
             if get_prop(o.g, e, :switch) == 1
                 # Check if opening the switch sucessfully split the netwok.
                 islands = islands_after_switching(o, e)
@@ -552,13 +766,19 @@ function find_reconfiguration_switches!(o::Overlapping)
 
                     if split_solved_overlap(o, splits_temp)
                         for (part, split) in splits_temp
-                            reconnect_load!(getfield(o, part), split.reconnect)
+                            update_part_after_split!(
+                                getfield(o, part),
+                                o.g,
+                                split,
+                                get_switch(o.network, e),
+                            )
                         end
                         return
                     end
                     if best_P < power
                         splits = splits_temp
                         best_P = power
+                        split_switch = get_switch(o.network, e)
                     end
                 end
             end
@@ -571,11 +791,22 @@ function find_reconfiguration_switches!(o::Overlapping)
         find_parts_splitting_switches(o)
     else
         for (part, split) in splits
-            reduce_part_after_reconf!(getfield(o, part), splits[part].vertices)
+            reduce_part_after_reconf!(getfield(o, part), o.g, splits[part].vertices)
             reconnect_load!(getfield(o, part), split.reconnect)
+            push!(getfield(o, part).switches, split_switch)
         end
-        return 
+        return
     end
+end
+
+"""
+    When we have found a switch that can split two parts we should update
+    each of the parts. This function updates one of the parts.
+"""
+function update_part_after_split!(part::Part, g::MetaGraph, split::Split, switch::Switch)
+    reduce_part_after_reconf!(part, g, split.vertices)
+    reconnect_load!(part, split.reconnect)
+    push!(part.switches, switch)
 end
 
 """
@@ -583,10 +814,21 @@ end
     in at least one part becoming smaller. This code will
     fix this.
 """
-function reduce_part_after_reconf!(part::Part, island::Vector{Int})
+function reduce_part_after_reconf!(part::Part, g::MetaGraph, island::Vector{Int})
     for v in setdiff(part.vertices, island)
         remove_vertex!(part, v)
     end
+    # After removing the vertices we may end up in a situation where one
+    # of the vertices splitting the part from the rest of the network no
+    # longer is in the part.
+    del_swithces = Vector{Int}()
+    for (idx, switch) in enumerate(part.switches)
+        if !any(in.([g[switch.src, :name], g[switch.dst, :name]], Ref(part.vertices)))
+            # The switch is not in the part, we should get rid of it.
+            append!(del_swithces, idx)
+        end
+    end
+    deleteat!(part.switches, del_swithces)
 end
 
 function islands_after_switching(o::Overlapping, e::Edge)
@@ -604,7 +846,7 @@ end
     in two.
 """
 function find_parts_splitting_switches(o::Overlapping)
-    switches = Dict{Part, Switch}()
+    switches = Dict{Part,Switch}()
     for part in [o.part, o.old_p]
         seen = copy(overlapping)
         visit = Vector{Int}([source(part)])
@@ -636,5 +878,36 @@ function find_parts_splitting_switches(o::Overlapping)
         end
         # Remove vertices we didn't see.
         shed_load!(part, part_vertices_not_in_vertices(part, seen))
+        push!(part.switches, switches[part])
+    end
+end
+
+"""
+    Evaluate the parts of the network we haven't investigated so far.
+"""
+function evaluate_unpartitioned_parts!(
+    network::RadialPowerGraph,
+    g::MetaGraph,
+    parts::Vector{Part},
+)
+    seen = vcat([part.vertices for part in parts]...)
+    for part in parts
+        for switch in part.switches
+            switch_v = [g[switch.src, :name], g[switch.dst, :name]]
+            # If the vertices of the switch edge is in more than one part
+            # this is a switch splitting parts and we should not search from it.
+            starts = setdiff(switch_v, part.vertices)
+            if isempty(starts)
+                starts =
+                    setdiff(vcat([all_neighbors(g, v) for v in switch_v]...), part.vertices)
+            end
+            # In case the splitting switch is right before an intersection we have
+            # will have more than one direction to evaluate.
+            for start in starts
+                if sum(any(switch_v' .∈ part.vertices) for part in parts) > 1
+                    traverse!(network, g, part, start, seen)
+                end
+            end
+        end
     end
 end

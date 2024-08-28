@@ -32,9 +32,9 @@ gen_new.external .= true
 
 # Make the loads
 load_new = DataFrame(case.load[1:10, :])
-load_new.ID = [string("L", i) for i in 1:10]
+load_new.ID = [string("L", i) for i = 1:10]
 load_new.bus = ["2", "4", "6", "7", "8", "10", "13", "14", "15", "16"]
-load_new.P = [1, 2, 3, 2, 1, 1, 3, 2, 2, 2,]
+load_new.P = [1, 2, 3, 2, 1, 1, 3, 2, 2, 2]
 
 loaddata_new = DataFrame(case.loaddata[1:10, :])
 loaddata_new.bus = load_new.bus
@@ -45,15 +45,33 @@ loaddata_new.P = load_new.P
 function merge_branches(df, branches)
     # Adding lines together like this is technically not correct,
     # but it is good enough for this purpose.
-    @combine(df[branches, :], $AsTable =
-             (br_r=sum(:br_r), br_x=sum(:br_x),
-              br_b=sum(:br_b), rateA=findmin(:rateA)[1]))[1, :]
+    @combine(
+        df[branches, :],
+        $AsTable = (
+            br_r = sum(:br_r),
+            br_x = sum(:br_x),
+            br_b = sum(:br_b),
+            rateA = findmin(:rateA)[1],
+        )
+    )[
+        1,
+        :,
+    ]
 end
 
 function merge_reldata(df, branches)
-         @combine(df[branches, :], $AsTable =
-             (lambda_perm=sum(:lambda_perm), lambda_temp=sum(:lambda_temp),
-              r_perm=findmax(:r_perm)[1], r_temp=findmax(:r_temp)[1]))[1, :]
+    @combine(
+        df[branches, :],
+        $AsTable = (
+            lambda_perm = sum(:lambda_perm),
+            lambda_temp = sum(:lambda_temp),
+            r_perm = findmax(:r_perm)[1],
+            r_temp = findmax(:r_temp)[1],
+        )
+    )[
+        1,
+        :,
+    ]
 end
 
 π_line = [:br_r, :br_x, :br_b, :rateA]
@@ -217,10 +235,9 @@ rename!(case_new.reldata, :r_temp => :temporaryFaultTime)
 rename!(case_new.reldata, :lambda_perm => :permanentFaultFrequency)
 rename!(case_new.reldata, :lambda_temp => :temporaryFaultFrequency)
 
-case_new.switch[!, :t_remote] .= 1/3600 # I set the remote switching time to 1 second
+case_new.switch[!, :t_remote] .= 1 / 3600 # I set the remote switching time to 1 second
 case_new.switch[!, :t_manual] .= 0.5 # I set the manual switching time to 30 minutes
 
 rename!(case.reldata, :sectioning_time => :sectioningTime)
 
 to_csv(case_new, "cineldi_simple")
-

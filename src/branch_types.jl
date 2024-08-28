@@ -4,7 +4,7 @@ using MetaGraphs
 import Base.==
 import Base.<
 
-struct Branch{T} <:AbstractEdge{T}
+struct Branch{T} <: AbstractEdge{T}
     src::T
     dst::T
     rateA::Real
@@ -56,8 +56,12 @@ function get_slack(network::RadialPowerGraph, consider_cap::Bool)::Array{Any}
             end
         end
         if isempty(F)
-            F = [Feeder(network.ref_bus,
-                        consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf)]
+            F = [
+                Feeder(
+                    network.ref_bus,
+                    consider_cap ? get_feeder_cap(network, network.ref_bus) : Inf,
+                ),
+            ]
         end
     end
     return F
@@ -81,16 +85,16 @@ end
     that supplies the network through a normally closed switch.
 """
 function slack_is_ref_bus(network::RadialPowerGraph, b::Branch)
-   ref = network.mpc.bus[network.mpc.ref_bus, :ID]
+    ref = network.mpc.bus[network.mpc.ref_bus, :ID]
     b.src == ref || b.dst == ref
 end
 
 function slack_is_ref_bus(network::RadialPowerGraph, f::Feeder)
-    any(network.mpc.bus[network.mpc.ref_bus, :ID].==f.bus)
+    any(network.mpc.bus[network.mpc.ref_bus, :ID] .== f.bus)
 end
 
 function create_slack_name(b::Branch)
-    b.src*"-"*b.dst
+    b.src * "-" * b.dst
 end
 
 function create_slack_name(f::Feeder)
@@ -111,10 +115,10 @@ end
 function edge2branch(g::AbstractMetaGraph, e::Graphs.SimpleGraphs.SimpleEdge{Int64})::Branch
     s = get_bus_name(g, src(e))
     d = get_bus_name(g, dst(e))
-    return Branch(s,d, get_prop(g, src(e), dst(e), :rateA))
+    return Branch(s, d, get_prop(g, src(e), dst(e), :rateA))
 end
 
-struct Switch 
+struct Switch
     src::String
     dst::String
     t_manual::Real
@@ -132,7 +136,8 @@ end
     Overloading of comparison operator for switches. If both switches have an equal remote swithcing
     time it compares the manual switching time, otherwise it compares the remote switching time.
 """
-(<)(s1::Switch, s2::Switch) = (s1.t_remote==s2.t_remote ? s1.t_manual<s2.t_manual : s1.t_remote<s2.t_remote)
+(<)(s1::Switch, s2::Switch) =
+    (s1.t_remote == s2.t_remote ? s1.t_manual < s2.t_manual : s1.t_remote < s2.t_remote)
 
 function get_minimum_switching_time(s::Switch)
     return s.t_remote < s.t_manual ? s.t_remote : s.t_manual

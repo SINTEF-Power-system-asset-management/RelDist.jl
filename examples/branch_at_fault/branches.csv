@@ -1,0 +1,5 @@
+ID;f_bus;t_bus;r;x;b;rateA;rateB;rateC;ratio;angle
+1;mf;load;0;0;0;0;0;0;0;0
+2;load;bf_1;0;0;0;0;0;0;0;0
+3;load;bf_2;0;0;0;0;0;0;0;0
+4;load;bf_3;0;0;0;0;0;0;0;0

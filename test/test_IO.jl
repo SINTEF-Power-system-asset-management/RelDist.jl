@@ -8,9 +8,8 @@ using Query
 end
 
 @testset "Test reading of correction factors." begin
-    corr_factors = read_correction_factors_from_csv(MONTH_FACTORS,
-                                                    DAY_FACTORS,
-                                                    HOUR_FACTORS)
+    corr_factors =
+        read_correction_factors_from_csv(MONTH_FACTORS, DAY_FACTORS, HOUR_FACTORS)
     q1 = @from corr in corr_factors.month begin
         @where corr.month == "August"
         @select corr.residential

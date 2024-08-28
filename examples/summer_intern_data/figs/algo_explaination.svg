@@ -1,0 +1,2084 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="924.39532pt"
+   height="592.08429pt"
+   viewBox="0 0 923.28981 592.12949"
+   version="1.1"
+   id="svg29"
+   sodipodi:docname="algo_explaination.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   inkscape:export-filename="algo_explaination.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs29">
+    <marker
+       style="overflow:visible"
+       id="Triangle"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Triangle-3"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135-8" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Triangle-3-4"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135-8-4" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="namedview29"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="pt"
+     inkscape:zoom="0.8228213"
+     inkscape:cx="567.55945"
+     inkscape:cy="337.25427"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg29" />
+  <g
+     id="graph0"
+     class="graph"
+     transform="translate(33.722502,257.08142)"
+     style="stroke-width:1.00008;stroke-dasharray:none">
+    <!-- bf_6 -->
+    <g
+       id="bf_6"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title1">bf_6</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="60,-75.57 0,-75.57 0,-21.57 60,-21.57 "
+         id="polygon1"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 12,-21.57 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="17.5"
+         y="-57.369999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text1"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_6</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 12,-26.57 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-26.57 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="17.5"
+         y="-33.369999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text3"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_6</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-21.57 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_3 -->
+    <g
+       id="load_3"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title4">load_3</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="207.45,-116 147.45,-116 147.45,-62 207.45,-62 "
+         id="polygon4"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 159.45,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="158.95"
+         y="-97.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text5"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_3</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 159.45,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 159.45,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path7"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="158.95"
+         y="-73.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text7"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_3</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 159.45,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_6&#45;&gt;load_3 -->
+    <g
+       id="bf_6-load_3"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title8">bf_6-&gt;load_3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 69.88,-59.5 c 24.38,-6.69 55.06,-15.1 77.42,-21.23"
+         id="path9"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="59.14,-60.7 61.25,-52.99 68.97,-55.1 66.85,-62.82 "
+         id="polygon9"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="67.91,-58.96 69.84,-59.49 "
+         id="polyline9"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_2 -->
+    <g
+       id="load_2"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title9">load_2</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="236.07,-192.02 176.07,-192.02 176.07,-138.02 236.07,-138.02 "
+         id="polygon10"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 188.07,-138.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path10"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="187.57001"
+         y="-173.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text10"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_2</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 188.07,-143.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path11"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 188.07,-143.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path12"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="187.57001"
+         y="-149.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text12"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_2</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 188.07,-138.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path13"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_3&#45;&gt;load_2 -->
+    <g
+       id="load_2-load_3"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title13">load_3-&gt;load_2</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 187.62,-116.01 c 1.5,-3.99 3.07,-8.15 4.63,-12.29"
+         id="path14"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="199.58,-136.42 192.09,-139.24 189.27,-131.76 196.76,-128.94 "
+         id="polygon14"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="193.02,-130.35 192.31,-128.47 "
+         id="polyline14"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_5 -->
+    <g
+       id="bf_5"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title14">bf_5</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="384.53,-231.5 324.53,-231.5 324.53,-177.5 384.53,-177.5 "
+         id="polygon15"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 336.53,-177.5 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path15"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="342.03"
+         y="-213.3"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text15"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_5</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 336.53,-182.5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path16"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 336.53,-182.5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path17"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="342.03"
+         y="-189.3"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text17"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_5</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 336.53,-177.5 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path18"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_5&#45;&gt;load_2 -->
+    <g
+       id="bf_5-load_2"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title18">bf_5-&gt;load_2</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 314.71,-193.91 c -24.64,6.55 -55.77,14.83 -78.39,20.85"
+         id="path19"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="325.51,-192.65 323.46,-200.38 315.72,-198.32 317.78,-190.59 "
+         id="polygon19"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="316.75,-194.46 314.82,-193.94 "
+         id="polyline19"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_1 -->
+    <g
+       id="load_1"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title19">load_1</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="123.84,-254.02 63.84,-254.02 63.84,-200.02 123.84,-200.02 "
+         id="polygon20"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 75.84,-200.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path20"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="75.339996"
+         y="-235.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text20"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_1</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 75.84,-205.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path21"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 75.84,-205.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path22"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="75.339996"
+         y="-211.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text22"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_1</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 75.84,-200.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path23"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_2&#45;&gt;load_1 -->
+    <g
+       id="load_1-load_2"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title23">load_2-&gt;load_1</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 175.99,-181.63 c -13.21,-7.3 -28.89,-15.96 -42.99,-23.76"
+         id="path24"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="125.93,-213.86 122.07,-206.86 129.07,-202.99 132.94,-209.99 "
+         id="polygon24"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="131,-206.49 132.75,-205.52 "
+         id="polyline24"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_4 -->
+    <g
+       id="load_4"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title24">load_4</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="321.41,-54 261.41,-54 261.41,0 321.41,0 "
+         id="polygon25"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 273.41,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path25"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="272.91"
+         y="-35.799999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text25"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_4</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 273.41,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path26"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 273.41,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path27"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="272.91"
+         y="-11.8"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text27"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_4</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 273.41,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path28"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_4&#45;&gt;load_3 -->
+    <g
+       id="load_3-load_4"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title28">load_4-&gt;load_3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 261.17,-43.45 c -13.65,-7.43 -29.95,-16.3 -44.52,-24.23"
+         id="path29"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="209.75,-75.98 205.92,-68.96 212.95,-65.13 216.77,-72.16 "
+         id="polygon29"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="214.86,-68.65 216.62,-67.69 "
+         id="polyline29"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+  </g>
+  <g
+     id="graph0-4"
+     class="graph"
+     transform="translate(483.75684,257.08142)"
+     style="stroke-width:1.00008;stroke-dasharray:none">
+    <!-- bf_6 -->
+    <g
+       id="bf_6-9"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title1-3">bf_6</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="0,-21.57 60,-21.57 60,-75.57 0,-75.57 "
+         id="polygon1-6"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 12,-21.57 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path1-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="17.5"
+         y="-57.369999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text1-6"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_6</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 12,-26.57 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path2-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-26.57 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path3-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="17.5"
+         y="-33.369999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text3-4"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_6</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-21.57 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path4-7"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_3 -->
+    <g
+       id="load_3-7"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title4-7">load_3</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="147.45,-62 207.45,-62 207.45,-116 147.45,-116 "
+         id="polygon4-2"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 159.45,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path5-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="158.95"
+         y="-97.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text5-3"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_3</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 159.45,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path6-7"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 159.45,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path7-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="158.95"
+         y="-73.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text7-3"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_3</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 159.45,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path8-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_6&#45;&gt;load_3 -->
+    <g
+       id="bf_6-load_3-7"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title8-5">bf_6-&gt;load_3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 69.88,-59.5 c 24.38,-6.69 55.06,-15.1 77.42,-21.23"
+         id="path9-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="68.97,-55.1 66.85,-62.82 59.14,-60.7 61.25,-52.99 "
+         id="polygon9-7"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="67.91,-58.96 69.84,-59.49 "
+         id="polyline9-7"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_2 -->
+    <g
+       id="load_2-9"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title9-6">load_2</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="176.07,-138.02 236.07,-138.02 236.07,-192.02 176.07,-192.02 "
+         id="polygon10-4"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 188.07,-138.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path10-9"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="187.57001"
+         y="-173.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text10-9"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_2</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 188.07,-143.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path11-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 188.07,-143.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path12-0"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="187.57001"
+         y="-149.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text12-3"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_2</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 188.07,-138.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path13-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_3&#45;&gt;load_2 -->
+    <g
+       id="load_2-load_3-1"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title13-4">load_3-&gt;load_2</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 187.62,-116.01 c 1.5,-3.99 3.07,-8.15 4.63,-12.29"
+         id="path14-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="189.27,-131.76 196.76,-128.94 199.58,-136.42 192.09,-139.24 "
+         id="polygon14-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="193.02,-130.35 192.31,-128.47 "
+         id="polyline14-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_5 -->
+    <g
+       id="bf_5-5"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title14-0">bf_5</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="324.53,-177.5 384.53,-177.5 384.53,-231.5 324.53,-231.5 "
+         id="polygon15-1"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 336.53,-177.5 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path15-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="342.03"
+         y="-213.3"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text15-5"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_5</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 336.53,-182.5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path16-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 336.53,-182.5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path17-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="342.03"
+         y="-189.3"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text17-3"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_5</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 336.53,-177.5 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path18-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_5&#45;&gt;load_2 -->
+    <g
+       id="bf_5-load_2-6"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title18-9">bf_5-&gt;load_2</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 314.71,-193.91 c -24.64,6.55 -55.77,14.83 -78.39,20.85"
+         id="path19-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="315.72,-198.32 317.78,-190.59 325.51,-192.65 323.46,-200.38 "
+         id="polygon19-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="316.75,-194.46 314.82,-193.94 "
+         id="polyline19-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_1 -->
+    <g
+       id="load_1-0"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title19-2">load_1</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="63.84,-200.02 123.84,-200.02 123.84,-254.02 63.84,-254.02 "
+         id="polygon20-3"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 75.84,-200.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path20-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="75.339996"
+         y="-235.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text20-4"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_1</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 75.84,-205.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path21-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 75.84,-205.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path22-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="75.339996"
+         y="-211.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text22-1"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_1</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 75.84,-200.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path23-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_2&#45;&gt;load_1 -->
+    <g
+       id="load_1-load_2-5"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title23-9">load_2-&gt;load_1</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 175.99,-181.63 c -13.21,-7.3 -28.89,-15.96 -42.99,-23.76"
+         id="path24-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="129.07,-202.99 132.94,-209.99 125.93,-213.86 122.07,-206.86 "
+         id="polygon24-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="131,-206.49 132.75,-205.52 "
+         id="polyline24-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_4 -->
+    <g
+       id="load_4-6"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title24-5">load_4</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="261.41,0 321.41,0 321.41,-54 261.41,-54 "
+         id="polygon25-9"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 273.41,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path25-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="272.91"
+         y="-35.799999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text25-1"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_4</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 273.41,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path26-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 273.41,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path27-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="272.91"
+         y="-11.8"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text27-6"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_4</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 273.41,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path28-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_4&#45;&gt;load_3 -->
+    <g
+       id="load_3-load_4-7"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title28-4">load_4-&gt;load_3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 261.17,-43.45 c -13.65,-7.43 -29.95,-16.3 -44.52,-24.23"
+         id="path29-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="212.95,-65.13 216.77,-72.16 209.75,-75.98 205.92,-68.96 "
+         id="polygon29-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="214.86,-68.65 216.62,-67.69 "
+         id="polyline29-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+  </g>
+  <g
+     id="graph0-1"
+     class="graph"
+     transform="translate(33.722504,557.10431)"
+     style="stroke-width:1.00008;stroke-dasharray:none">
+    <!-- bf_6 -->
+    <g
+       id="bf_6-3"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title1-8">bf_6</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="60,-75.57 0,-75.57 0,-21.57 60,-21.57 "
+         id="polygon1-5"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 12,-21.57 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path1-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="17.5"
+         y="-57.369999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text1-8"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_6</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 12,-26.57 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path2-7"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-26.57 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path3-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="17.5"
+         y="-33.369999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text3-40"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_6</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-21.57 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path4-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_3 -->
+    <g
+       id="load_3-5"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title4-1">load_3</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="207.45,-116 147.45,-116 147.45,-62 207.45,-62 "
+         id="polygon4-5"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 159.45,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path5-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="158.95"
+         y="-97.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text5-2"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_3</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 159.45,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path6-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 159.45,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path7-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="158.95"
+         y="-73.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text7-35"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_3</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 159.45,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path8-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_6&#45;&gt;load_3 -->
+    <g
+       id="bf_6-load_3-3"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title8-7">bf_6-&gt;load_3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 69.88,-59.5 c 24.38,-6.69 55.06,-15.1 77.42,-21.23"
+         id="path9-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="59.14,-60.7 61.25,-52.99 68.97,-55.1 66.85,-62.82 "
+         id="polygon9-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="67.91,-58.96 69.84,-59.49 "
+         id="polyline9-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_2 -->
+    <g
+       id="load_2-8"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title9-4">load_2</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="236.07,-192.02 176.07,-192.02 176.07,-138.02 236.07,-138.02 "
+         id="polygon10-2"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 188.07,-138.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path10-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="187.57001"
+         y="-173.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text10-1"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_2</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 188.07,-143.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path11-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 188.07,-143.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path12-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="187.57001"
+         y="-149.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text12-9"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_2</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 188.07,-138.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path13-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_3&#45;&gt;load_2 -->
+    <g
+       id="load_2-load_3-8"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title13-6">load_3-&gt;load_2</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 187.62,-116.01 c 1.5,-3.99 3.07,-8.15 4.63,-12.29"
+         id="path14-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="199.58,-136.42 192.09,-139.24 189.27,-131.76 196.76,-128.94 "
+         id="polygon14-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="193.02,-130.35 192.31,-128.47 "
+         id="polyline14-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_5 -->
+    <g
+       id="bf_5-6"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title14-7">bf_5</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="384.53,-231.5 324.53,-231.5 324.53,-177.5 384.53,-177.5 "
+         id="polygon15-13"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 336.53,-177.5 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path15-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="342.03"
+         y="-213.3"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text15-4"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_5</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 336.53,-182.5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path16-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 336.53,-182.5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path17-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="342.03"
+         y="-189.3"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text17-1"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_5</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 336.53,-177.5 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path18-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_5&#45;&gt;load_2 -->
+    <g
+       id="bf_5-load_2-9"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title18-0">bf_5-&gt;load_2</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 314.71,-193.91 c -24.64,6.55 -55.77,14.83 -78.39,20.85"
+         id="path19-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="325.51,-192.65 323.46,-200.38 315.72,-198.32 317.78,-190.59 "
+         id="polygon19-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="316.75,-194.46 314.82,-193.94 "
+         id="polyline19-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_1 -->
+    <g
+       id="load_1-1"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title19-0">load_1</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="123.84,-254.02 63.84,-254.02 63.84,-200.02 123.84,-200.02 "
+         id="polygon20-7"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 75.84,-200.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path20-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="75.339996"
+         y="-235.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text20-2"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_1</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 75.84,-205.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path21-63"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 75.84,-205.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path22-7"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="75.339996"
+         y="-211.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text22-9"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_1</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 75.84,-200.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path23-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_2&#45;&gt;load_1 -->
+    <g
+       id="load_1-load_2-0"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title23-96">load_2-&gt;load_1</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 175.99,-181.63 c -13.21,-7.3 -28.89,-15.96 -42.99,-23.76"
+         id="path24-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="125.93,-213.86 122.07,-206.86 129.07,-202.99 132.94,-209.99 "
+         id="polygon24-9"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="131,-206.49 132.75,-205.52 "
+         id="polyline24-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_4 -->
+    <g
+       id="load_4-8"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title24-0">load_4</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="321.41,-54 261.41,-54 261.41,0 321.41,0 "
+         id="polygon25-6"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 273.41,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path25-9"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="272.91"
+         y="-35.799999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text25-19"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_4</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 273.41,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path26-9"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 273.41,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path27-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="272.91"
+         y="-11.8"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text27-0"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_4</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 273.41,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path28-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_4&#45;&gt;load_3 -->
+    <g
+       id="load_3-load_4-6"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title28-3">load_4-&gt;load_3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 261.17,-43.45 c -13.65,-7.43 -29.95,-16.3 -44.52,-24.23"
+         id="path29-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="209.75,-75.98 205.92,-68.96 212.95,-65.13 216.77,-72.16 "
+         id="polygon29-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="214.86,-68.65 216.62,-67.69 "
+         id="polyline29-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+  </g>
+  <g
+     id="graph0-3"
+     class="graph"
+     transform="translate(483.75684,557.10431)"
+     style="stroke-width:1.00008;stroke-dasharray:none">
+    <!-- bf_6 -->
+    <g
+       id="bf_6-1"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title1-2">bf_6</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="60,-75.57 0,-75.57 0,-21.57 60,-21.57 "
+         id="polygon1-3"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 12,-21.57 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path1-80"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="17.5"
+         y="-57.369999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text1-67"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_6</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 12,-26.57 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path2-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-26.57 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path3-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="17.5"
+         y="-33.369999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text3-47"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_6</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 12,-21.57 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path4-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_3 -->
+    <g
+       id="load_3-3"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title4-6">load_3</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="207.45,-116 147.45,-116 147.45,-62 207.45,-62 "
+         id="polygon4-4"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 159.45,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path5-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="158.95"
+         y="-97.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text5-6"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_3</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 159.45,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path6-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 159.45,-67 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path7-7"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="158.95"
+         y="-73.800003"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text7-1"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_3</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 159.45,-62 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path8-0"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_6&#45;&gt;load_3 -->
+    <g
+       id="bf_6-load_3-8"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title8-0">bf_6-&gt;load_3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 69.88,-59.5 c 24.38,-6.69 55.06,-15.1 77.42,-21.23"
+         id="path9-63"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="59.14,-60.7 61.25,-52.99 68.97,-55.1 66.85,-62.82 "
+         id="polygon9-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="67.91,-58.96 69.84,-59.49 "
+         id="polyline9-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_2 -->
+    <g
+       id="load_2-2"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title9-9">load_2</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="236.07,-192.02 176.07,-192.02 176.07,-138.02 236.07,-138.02 "
+         id="polygon10-8"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 188.07,-138.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path10-99"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="187.57001"
+         y="-173.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text10-8"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_2</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 188.07,-143.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path11-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 188.07,-143.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path12-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="187.57001"
+         y="-149.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text12-0"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_2</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 188.07,-138.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path13-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_3&#45;&gt;load_2 -->
+    <g
+       id="load_2-load_3-86"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title13-1">load_3-&gt;load_2</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 187.62,-116.01 c 1.5,-3.99 3.07,-8.15 4.63,-12.29"
+         id="path14-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="199.58,-136.42 192.09,-139.24 189.27,-131.76 196.76,-128.94 "
+         id="polygon14-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="193.02,-130.35 192.31,-128.47 "
+         id="polyline14-3"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_5 -->
+    <g
+       id="bf_5-4"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title14-5">bf_5</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="384.53,-231.5 324.53,-231.5 324.53,-177.5 384.53,-177.5 "
+         id="polygon15-6"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 336.53,-177.5 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path15-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="342.03"
+         y="-213.3"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text15-6"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_5</text>
+      <path
+         fill="#6aa764"
+         stroke="transparent"
+         d="m 336.53,-182.5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path16-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 336.53,-182.5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path17-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="342.03"
+         y="-189.3"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text17-5"
+         style="stroke-width:1.00008;stroke-dasharray:none">bf_5</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 336.53,-177.5 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path18-2"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- bf_5&#45;&gt;load_2 -->
+    <g
+       id="bf_5-load_2-1"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title18-3">bf_5-&gt;load_2</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 314.71,-193.91 c -24.64,6.55 -55.77,14.83 -78.39,20.85"
+         id="path19-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="325.51,-192.65 323.46,-200.38 315.72,-198.32 317.78,-190.59 "
+         id="polygon19-0"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="316.75,-194.46 314.82,-193.94 "
+         id="polyline19-47"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_1 -->
+    <g
+       id="load_1-10"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title19-9">load_1</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="123.84,-254.02 63.84,-254.02 63.84,-200.02 123.84,-200.02 "
+         id="polygon20-78"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 75.84,-200.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path20-6"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="75.339996"
+         y="-235.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text20-3"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_1</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 75.84,-205.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path21-1"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 75.84,-205.02 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path22-75"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="75.339996"
+         y="-211.82001"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text22-18"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_1</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 75.84,-200.02 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path23-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_2&#45;&gt;load_1 -->
+    <g
+       id="load_1-load_2-8"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title23-6">load_2-&gt;load_1</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 175.99,-181.63 c -13.21,-7.3 -28.89,-15.96 -42.99,-23.76"
+         id="path24-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="125.93,-213.86 122.07,-206.86 129.07,-202.99 132.94,-209.99 "
+         id="polygon24-97"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="131,-206.49 132.75,-205.52 "
+         id="polyline24-9"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_4 -->
+    <g
+       id="load_4-3"
+       class="node"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title24-57">load_4</title>
+      <polygon
+         fill="transparent"
+         stroke="transparent"
+         points="321.41,-54 261.41,-54 261.41,0 321.41,0 "
+         id="polygon25-4"
+         style="fill:none;stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="#fef8f2"
+         stroke="transparent"
+         d="m 273.41,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path25-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="272.91"
+         y="-35.799999"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text25-5"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_4</text>
+      <path
+         fill="#4e89b7"
+         stroke="transparent"
+         d="m 273.41,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path26-14"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 273.41,-5 c 0,0 36,0 36,0 3.5,0 7,-3.5 7,-7 0,0 0,-7 0,-7 0,-3.5 -3.5,-7 -7,-7 0,0 -36,0 -36,0 -3.5,0 -7,3.5 -7,7 0,0 0,7 0,7 0,3.5 3.5,7 7,7"
+         id="path27-5"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <text
+         text-anchor="start"
+         x="272.91"
+         y="-11.8"
+         font-family="'Times New Roman', serif"
+         font-size="14px"
+         fill="#000000"
+         id="text27-9"
+         style="stroke-width:1.00008;stroke-dasharray:none">load_4</text>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 273.41,0 c 0,0 36,0 36,0 6,0 12,-6 12,-12 0,0 0,-30 0,-30 0,-6 -6,-12 -12,-12 0,0 -36,0 -36,0 -6,0 -12,6 -12,12 0,0 0,30 0,30 0,6 6,12 12,12"
+         id="path28-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+    <!-- load_4&#45;&gt;load_3 -->
+    <g
+       id="load_3-load_4-8"
+       class="edge"
+       style="stroke-width:1.00008;stroke-dasharray:none">
+      <title
+         id="title28-40">load_4-&gt;load_3</title>
+      <path
+         fill="none"
+         stroke="#000000"
+         d="m 261.17,-43.45 c -13.65,-7.43 -29.95,-16.3 -44.52,-24.23"
+         id="path29-42"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polygon
+         fill="none"
+         stroke="#000000"
+         points="209.75,-75.98 205.92,-68.96 212.95,-65.13 216.77,-72.16 "
+         id="polygon29-4"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+      <polyline
+         fill="none"
+         stroke="#000000"
+         points="214.86,-68.65 216.62,-67.69 "
+         id="polyline29-8"
+         style="stroke-width:1.00008;stroke-dasharray:none" />
+    </g>
+  </g>
+  <g
+     id="piler">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.30033;stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:none;marker-end:url(#Triangle-3-4)"
+       d="m 236.44505,222.17406 v 86.59892"
+       id="path30-0-6"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.30033;stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="M 365.39781,130.80525 H 521.27587"
+       id="path30" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.30033;stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:none;marker-end:url(#Triangle-3)"
+       d="M 365.39781,430.82814 H 521.27587"
+       id="path30-0" />
+  </g>
+  <g
+     id="blue"
+     style="display:none">
+    <path
+       style="display:inline;fill:none;stroke:#8dd3c7;stroke-width:4.30033;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 688.63957,327.07945 c 9.72022,-0.29218 19.41167,1.88741 29.17016,0.91156 9.89752,-0.98975 19.19584,-5.38395 28.25859,-9.11567 6.41939,-2.64328 12.67796,-5.67435 19.14292,-8.20412 3.57924,-1.40056 7.34711,-2.27799 10.93882,-3.64626 10.11906,-3.85489 19.74485,-9.53169 30.08169,-12.76195 7.9674,-2.48981 18.15948,-4.77974 26.43546,-5.4694 7.57018,-0.63085 15.19286,0 22.78922,0 14.57413,0 37.17426,0.0779 49.22468,9.11567 9.13172,6.84882 13.22156,17.64145 15.49663,28.2586 2.91562,13.60642 2.5775,26.90707 -1.82316,40.10897 -0.80159,2.4049 -2.22377,2.7797 -3.64626,4.55784 -1.79076,2.23842 -2.6135,5.18617 -4.55779,7.29254 -2.48179,2.68857 -5.61688,4.7053 -8.20413,7.29254 -1.37575,1.37577 -2.19212,3.26524 -3.64625,4.55784 -1.3243,1.17709 -3.10637,1.71866 -4.55788,2.7347 -7.49164,5.24414 -14.22513,11.30656 -21.87759,16.40822 -3.64633,2.43084 -7.22268,4.96994 -10.93883,7.29254 -6.33176,3.95735 -19.92813,7.80157 -27.34702,10.02724 -2.50811,0.75243 -5.69601,2.89384 -8.20412,3.64627 -1.77036,0.5311 -3.68623,0.42526 -5.46942,0.91157 -1.57865,0.43054 -2.97915,1.39259 -4.5578,1.82313 -3.56637,0.97263 -7.29258,1.21543 -10.93883,1.82314 -8.51428,1.41904 -16.9504,2.98676 -25.5239,3.64627 -7.79452,0.59958 -15.87799,0 -23.70076,0 -26.73851,0 -54.01098,-0.68388 -79.30638,-9.11567 -1.90679,-0.6356 -3.60184,-1.98769 -5.46941,-2.73471 -5.8518,-2.34072 -11.50073,-4.79866 -17.31978,-7.29254 -2.25169,-0.96501 -4.05693,-2.87159 -6.38098,-3.64627 -0.86478,-0.28827 -1.84083,0.17877 -2.7347,0 -2.61534,-0.52307 -4.9917,-2.49585 -7.29253,-3.64627 -3.85223,-1.92611 -7.97083,-3.52963 -11.85038,-5.46941 -5.36933,-2.68466 -9.62333,-6.81669 -14.58508,-10.02724 -5.96015,-3.85656 -12.24824,-7.19936 -18.23136,-10.93881 -2.93566,-0.85059 -4.05005,-3.91546 -6.38097,-5.4694 -0.7995,-0.533 -1.87527,-0.48186 -2.73471,-0.91157 -3.52724,-1.76363 -6.78666,-5.13216 -10.02724,-7.29255 -2.04664,-1.36442 -4.41914,-2.17488 -6.38097,-3.64626 -0.68755,-0.51567 -1.05443,-1.43879 -1.82314,-1.82314 -0.54355,-0.27177 -1.31749,0.3371 -1.82313,0 -0.56533,-0.37689 -0.36802,-1.41547 -0.91157,-1.82313 -2.31147,-1.73361 -8.84986,-3.46906 -11.85038,-5.46941 -3.02808,-2.01873 -6.20334,-4.19672 -9.11568,-6.38097 -0.68754,-0.51567 -1.21542,-1.21542 -1.82313,-1.82314 -0.60771,-0.60771 -1.13559,-1.30747 -1.82313,-1.82314 -2.59654,-1.9474 -6.43666,-4.34677 -8.20411,-7.29253 -2.27691,-3.79484 -3.17453,-7.70045 -4.55784,-11.85038 -0.18347,-0.55042 -1.95085,-12.3788 -1.82313,-12.76195 1.21542,-3.64627 0.30385,-0.30385 2.7347,-2.7347 0.77468,-0.77469 1.04845,-1.96002 1.82313,-2.73471 1.85447,-1.85447 4.15273,-4.89547 6.38097,-6.38097 0.25283,-0.16855 0.69671,0.21486 0.91158,0 0.48043,-0.48044 0.34623,-1.44625 0.91156,-1.82313 0.50565,-0.3371 1.31749,0.3371 1.82314,0 0.56532,-0.37689 0.53467,-1.25781 0.91156,-1.82314 0.53002,-0.79502 6.18383,-5.64183 7.29254,-6.38097 2.72656,-1.81771 5.12639,-2.62037 8.20411,-3.64627 2.78393,-0.92798 4.37731,-3.5861 7.29254,-4.55784 3.28292,-1.09431 6.73171,-1.63619 10.02724,-2.73471 1.28916,-0.42971 2.32796,-1.49355 3.64628,-1.82313 3.98462,-0.99615 9.55673,0 13.67351,0 3.90236,0 14.07622,-1.08118 17.31978,0 0.40767,0.13589 0.4902,0.82729 0.91157,0.91157 1.19183,0.23837 2.44306,-0.17189 3.64628,0 4.62408,0.66058 10.15747,2.43874 14.58508,3.64627 4.80818,1.31132 8.93907,4.01265 13.67351,5.46941 6.63317,2.04097 14.87752,3.63942 20.96605,7.29253 0.73696,0.44218 1.0332,1.48459 1.82314,1.82314 1.42409,0.61033 3.13374,0.30124 4.55784,0.91157 0.78994,0.33855 1.02517,1.50395 1.82313,1.82313 0.84637,0.33855 1.86992,-0.28826 2.7347,0 1.03935,0.34645 1.77701,1.29109 2.7347,1.82314 1.78182,0.98989 3.81076,1.54995 5.46941,2.7347 0.55288,0.39492 0.43113,1.3427 0.91157,1.82313 0.21486,0.21487 0.60771,0 0.91157,0 0.60771,0.60772 1.43878,1.05444 1.82313,1.82314 0.27178,0.54356 -0.19217,1.24661 0,1.82314 0.58537,1.75612 3.06089,3.71328 3.64628,5.4694 0.19217,0.57653 -0.19218,1.24661 0,1.82314 0.38411,1.15235 2.43925,4.87851 2.7347,5.46941 z"
+       id="path39" />
+    <path
+       style="display:inline;fill:none;stroke:#8dd3c7;stroke-width:4.30033;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 191.83523,74.575218 c 21.38303,-22.957461 45.80749,-46.67265 76.57168,-56.517191 9.01233,-2.883948 18.99737,-4.322924 28.25859,-6.380973 7.89258,-1.7539079 15.77986,-3.8852251 23.70076,-5.4694053 11.63115,-2.3262294 23.77837,-1.9989048 35.55113,-2.7347029 2.445,-0.1528121 4.84821,-0.7486116 7.29254,-0.9115675 13.80411,-0.9202738 28.11159,0 41.93211,0 10.78207,0 20.0252,-0.6636719 30.08174,3.6462704 8.73516,3.7436427 11.47899,13.5047003 15.49664,20.9660543 3.24075,6.018518 8.11235,12.119577 9.11568,19.14292 1.29519,9.066324 -0.004,23.40538 -3.64627,31.904865 -0.86313,2.013972 -2.78314,3.455432 -3.64627,5.469403 -0.49352,1.151533 -0.26699,2.571983 -0.91157,3.646275 -1.22099,2.034988 -3.10084,3.59612 -4.55783,5.469403 -0.67262,0.864793 -0.98151,2.033337 -1.82314,2.734701 -1.04393,0.869939 -2.5405,1.033301 -3.64627,1.823134 -2.54208,1.815769 -4.67565,4.636386 -7.29254,6.380976 -4.35072,2.90048 -2.7116,1.01686 -7.29254,2.7347 -8.56351,3.21132 1.77419,0.52806 -8.20412,3.64627 -10.75153,3.35986 -21.87672,6.38075 -32.81642,9.11568 -4.79874,1.19969 -9.77016,1.60178 -14.58508,2.7347 -1.87068,0.44017 -3.61538,1.31749 -5.46941,1.82314 -2.68858,0.73324 -7.42151,1.30199 -10.02725,1.82314 -6.91905,1.38381 -13.93435,3.77654 -20.96605,4.55783 -5.1504,0.57227 -10.38513,1.09292 -15.49665,1.82314 -0.95122,0.13588 -1.78125,0.79239 -2.73471,0.91156 -1.50754,0.18845 -3.04785,-0.16777 -4.55783,0 -5.46768,0.60753 -10.99385,2.8728 -16.40822,3.64628 -3.67918,0.52559 -7.22741,0.49918 -10.93881,0.91157 -2.49033,0.2767 -4.80623,1.51234 -7.29254,1.82313 -5.14341,0.64293 -10.33911,0.33851 -15.49665,0.91157 -11.52042,1.28005 5.36799,0.91156 -8.20411,0.91156 -12.34094,0 -26.0613,2.01022 -37.37427,-3.64626 -4.46862,-2.23432 -12.47267,-10.55312 -15.49665,-14.58509 -0.57652,-0.7687 -0.48185,-1.87526 -0.91157,-2.7347 -0.9799,-1.95981 -2.78314,-3.45543 -3.64626,-5.4694 -0.49352,-1.15154 -0.47168,-2.47321 -0.91157,-3.64627 -2.46995,-6.58653 -5.46941,-11.00715 -5.46941,-18.231361 0,-1.393727 -0.80661,-6.994186 0,-8.204111 0.37689,-0.565326 1.3427,-0.431126 1.82314,-0.911567 0.96088,-0.960876 1.21542,-2.430846 1.82313,-3.646268"
+       id="path34" />
+    <path
+       style="display:inline;fill:none;stroke:#8dd3c7;stroke-width:4.30033;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 868.21835,16.234892 c -19.43961,0.38336 -38.94192,-0.907031 -58.34027,0.911568 -10.33294,0.968713 -20.71614,3.08967 -30.99332,4.557837 -3.06759,0.438227 -6.03232,1.5148 -9.11568,1.823136 -6.73231,0.673231 -13.32992,1.512055 -20.05448,2.734703 -3.34242,0.607711 -6.73147,0.99919 -10.02725,1.823134 -1.86438,0.466094 -3.5738,1.507201 -5.46941,1.823136 -3.90789,0.651315 -7.93465,0.309148 -11.85038,0.911567 -8.41112,1.294019 -17.3499,2.105643 -25.52389,4.557838 -3.68141,1.104424 -7.23073,2.634977 -10.9388,3.646271 -5.50767,1.50209 -10.45746,2.949808 -15.49666,5.469405 -3.23321,1.616607 -7.01552,2.406609 -10.02724,4.557838 -1.04903,0.749304 -1.70338,1.961213 -2.73471,2.734703 -2.22184,2.394479 -5.65843,2.739499 -8.2041,4.557838 -2.09805,1.498608 -3.51181,3.791468 -5.46941,5.469406 -2.53809,2.175505 -11.21644,8.362976 -12.76194,10.93881 -0.49437,0.823946 -0.4172,1.910758 -0.91157,2.734704 -1.34482,2.241375 -3.21301,4.139597 -4.55784,6.380971 -1.66162,2.769376 -2.47701,6.514637 -4.55784,9.115678 -0.42444,0.530553 -1.47356,0.328952 -1.82313,0.911567 -0.64458,1.074292 -0.41806,2.494735 -0.91157,3.646268 -1.98682,4.63591 -5.20645,8.97981 -7.29254,13.67352 -1.6043,3.60967 -3.20791,7.2265 -4.55784,10.93881 -0.77884,2.14183 -0.79592,4.32654 -1.82313,6.38097 -1.57488,3.14976 -2.16189,2.03253 -2.73471,5.46941 -0.14986,0.89917 0.17877,1.84083 0,2.7347 -0.2665,1.3325 -1.49355,2.32796 -1.82313,3.64627 -0.79361,3.17444 -1.28137,6.77662 -1.82313,10.02725 -0.29973,1.79832 0.25782,3.66459 0,5.4694 -1.24451,8.71147 -1.44224,17.78203 0,26.43546 0.5947,3.56823 2.40511,6.71748 3.64626,10.02725 2.78443,7.42515 4.19872,15.13752 10.02725,20.96605 1.22093,1.22093 8.93029,1.48838 10.93881,1.82314 9.08166,1.5136 -4.92324,0.41011 6.38097,1.82313 2.11056,0.26382 4.28293,-0.34968 6.38098,0 2.32794,0.38799 4.50983,0.88757 6.38097,1.82314 2.4922,1.2461 12.6635,-0.62413 16.40821,0 7.53241,1.2554 15.10252,0.91156 22.78919,0.91156 2.84706,0 6.31149,0.46736 9.11568,0 4.0083,-0.66805 7.18703,-2.52073 10.93881,-3.64627 13.46438,-4.03931 -0.9053,1.51719 9.11567,-1.82313 6.20677,-2.06893 19.06507,-6.30312 23.70076,-10.93881 0.48044,-0.48044 0.60771,-1.21543 0.91157,-1.82314 1.82314,-1.21543 3.82041,-2.20339 5.46941,-3.64627 1.64899,-1.44287 2.27747,-3.75842 3.64627,-5.4694 2.87983,-3.59979 6.84323,-5.93167 10.02724,-9.11568 1.98477,-1.98477 3.42732,-5.25046 5.4694,-7.29254 2.75154,-2.75153 5.92784,-5.06106 9.11568,-7.29254 0.78718,-0.55103 1.93521,-0.37857 2.7347,-0.91157 1.07265,-0.7151 1.64151,-2.05145 2.73471,-2.7347 1.38759,-0.86725 3.12744,-1.02847 4.55784,-1.82314 2.65618,-1.47565 4.5748,-4.11052 7.29256,-5.46941 4.47139,-2.2357 9.92393,-3.52726 14.58508,-5.4694 7.15953,-2.98315 13.81808,-7.08397 20.96605,-10.02724 6.62939,-2.72977 5.67179,-0.79463 11.85038,-3.64627 6.49827,-2.99922 12.73545,-6.8235 19.14289,-10.02725 1.46359,-0.73178 3.13711,-1.01129 4.55787,-1.82313 0.74616,-0.4264 1.21539,-1.21542 1.82309,-1.82314 0.91162,-0.60771 1.75483,-1.33318 2.73471,-1.82314 0.85942,-0.42971 1.98443,-0.31131 2.73471,-0.91156 0.85551,-0.6844 1.04843,-1.96002 1.82316,-2.7347 7.17047,-7.17051 -1.9974,4.40233 5.46942,-4.55784 5.36126,-6.43352 8.93731,-13.197881 11.85038,-20.966058 0.95422,-2.544727 2.78684,-4.714237 3.64625,-7.292544 3.76619,-11.298697 4.5578,-22.8575 4.5578,-34.639565 0,-1.479148 0.46444,-4.076255 0,-5.469406 -0.13584,-0.407665 -0.6077,-0.607711 -0.91154,-0.911568 -0.30385,-0.607711 -0.74676,-1.163979 -0.91155,-1.823134 -1.03958,-4.158234 -2.57037,-7.875442 -4.55787,-11.850379 -0.38433,-0.768701 -1.55135,-1.007805 -1.82309,-1.823136 -0.64265,-1.927942 -0.54784,-3.556378 -1.82317,-5.469405 -0.6704,-1.005606 -2.19624,-1.657809 -2.7347,-2.734702 -0.13591,-0.271778 0.21489,-0.69671 0,-0.911568 -0.21482,-0.214859 -0.69673,0.214858 -0.91155,0 -0.21489,-0.214859 0.21482,-0.69671 0,-0.911568 -1.50401,-1.503991 -8.30591,-1.47886 -10.02729,-1.823135 z"
+       id="path35" />
+    <path
+       style="display:inline;fill:none;stroke:#8dd3c7;stroke-width:4.30033;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 229.20949,341.66453 c 11.55704,0.055 23.14427,0.0463 34.63958,-0.91157 3.08803,-0.25734 6.04808,-1.38491 9.11567,-1.82313 4.72662,-0.67524 9.99668,-1.20524 14.58508,-2.73471 1.28916,-0.42972 2.35713,-1.39342 3.64627,-1.82314 4.85281,-1.6176 10.48126,-1.82281 15.49666,-2.7347 7.04956,-1.28174 13.91399,-3.27565 20.96605,-4.55783 17.38981,-3.16179 -8.11347,1.00278 9.11567,-0.91157 3.06917,-0.34102 3.61531,-1.13172 6.38097,-1.82314 2.52888,-0.63222 8.57133,-1.79783 11.85038,-2.7347 2.68653,-0.76758 5.45168,-2.27597 8.20411,-2.7347 19.28011,-3.21336 38.63332,-9.66548 58.34033,-6.38098 3.24344,0.54057 7.76967,3.21183 10.02724,5.46941 0.48044,0.48043 0.43113,1.34269 0.91158,1.82313 0.48043,0.48044 1.34269,0.43113 1.82313,0.91157 1.07429,1.07429 1.95304,2.3435 2.7347,3.64627 2.98158,4.96931 5.12102,23.09698 3.64627,28.2586 -1.52755,5.34641 -4.99829,10.33459 -7.29254,15.49665 -0.96863,2.1794 -3.36225,8.43312 -4.55784,10.02724 -0.40766,0.54355 -1.34269,0.43113 -1.82313,0.91157 -2.40992,2.40991 -2.04816,6.60599 -4.55784,9.11567 -0.48044,0.48044 -1.3427,0.43113 -1.82313,0.91157 -0.48045,0.48044 -0.50391,1.27958 -0.91158,1.82314 -0.86995,1.15994 -6.00401,5.41458 -7.29254,6.38097 -5.3767,4.03252 -13.02996,6.3988 -19.14292,9.11567 -2.5303,1.12458 -4.72341,0.79549 -7.29253,1.82314 -1.2617,0.50467 -2.31378,1.55664 -3.64627,1.82313 -3.22813,0.64563 -6.77025,0.44629 -10.02725,0.91157 -0.95122,0.13589 -1.79248,0.72312 -2.7347,0.91157 -3.51414,0.70283 -7.38913,0.40447 -10.93881,0.91156 -2.48048,0.35436 -4.80221,1.54643 -7.29255,1.82315 -4.52928,0.50325 -9.13163,0.49866 -13.67351,0.91156 -14.19293,1.29027 2.37456,0.44515 -10.02724,1.82314 -5.09696,0.56632 -10.40623,0.34596 -15.49665,0.91156 -1.24517,0.13835 -2.43085,0.60772 -3.64627,0.91157 -2.7347,0.30386 -5.46069,0.70053 -8.20411,0.91157 -2.12073,0.16313 -4.29529,-0.41714 -6.38097,0 -0.66625,0.13325 -1.21543,0.60771 -1.82314,0.91157 -1.21542,0.30385 -2.40603,0.73438 -3.64627,0.91156 -1.50401,0.21486 -3.08392,-0.36848 -4.55783,0 -1.37936,0.34484 -3.17849,1.4783 -4.55785,1.82314 -1.14015,0.28503 -2.53023,-0.37201 -3.64627,0 -1.25653,0.41884 -2.08044,1.50997 -3.64626,1.82313 -1.48978,0.29796 -3.19896,-0.67944 -4.55785,0 -0.27177,0.13589 0.27179,0.77568 0,0.91157 -0.91156,0.45578 -1.82313,-0.22789 -2.7347,0 -2.24239,0.5606 -4.2265,1.28452 -6.38097,1.82314 -0.88435,0.22109 -1.91937,-0.40767 -2.7347,0 -1.19907,0.59953 -2.4135,1.41221 -3.64627,1.82313 -1.15305,0.38435 -2.46714,-0.29478 -3.64627,0 -3.32687,0.83172 -6.78511,1.65399 -10.02725,2.7347 -1.36734,0.45578 -3.19049,-0.45578 -4.55783,0 -0.40767,0.13589 -0.4902,0.82729 -0.91157,0.91157 -4.67471,0.93494 -9.91038,-0.93494 -14.58508,0 -5.06345,1.01269 -9.60273,1.24559 -14.58509,0 -3.37558,-0.8439 -7.48447,-0.33584 -10.9388,-0.91157 -1.89561,-0.31593 -3.57381,-1.5072 -5.46941,-1.82313 -4.4286,-0.7381 -11.34785,-1.98675 -15.49665,-3.64627 -1.64505,-0.65802 -2.93878,-2.01512 -4.55783,-2.73471 -1.14485,-0.50882 -2.43086,-0.60771 -3.64628,-0.91156 -1.51928,-0.60772 -3.06255,-1.15856 -4.55784,-1.82314 -4.13292,-1.83685 -7.91113,-4.1925 -11.85038,-6.38097 -2.37576,-1.31987 -5.081,-2.0666 -7.29254,-3.64627 -1.04902,-0.7493 -1.72804,-1.92938 -2.7347,-2.7347 -4.97159,-3.97728 -10.97448,-8.4543 -16.40822,-11.85038 -1.15233,-0.72021 -2.61452,-0.93879 -3.64627,-1.82314 -1.15352,-0.98873 -1.6604,-2.57197 -2.7347,-3.64627 -2.35251,-2.35251 -5.8516,-4.02846 -8.20411,-6.38097 -1.07429,-1.07429 -1.74597,-2.49275 -2.7347,-3.64627 -3.761939,-4.38893 -8.278729,-8.21621 -11.85038,-12.76195 -9.536644,-12.13754 -17.667879,-25.37487 -21.877622,-40.10897 -0.868955,-3.04134 -2.283301,-5.95587 -2.734703,-9.11568 -0.216156,-1.51309 -0.601322,-12.17021 0,-13.67351 1.736522,-4.34131 6.17155,-5.25999 9.115676,-8.20411 0.558402,-0.5584 0.776032,-2.38567 1.823135,-2.7347 0.576526,-0.19218 1.233568,0.14739 1.823135,0 0.301646,-0.0754 5.101387,-2.48936 5.469406,-2.7347 1.264116,-0.84275 2.571977,-1.66041 3.64627,-2.73471 0.480438,-0.48044 0.431129,-1.3427 0.911568,-1.82313 0.99553,-0.99554 14.730785,-4.22236 16.408215,-4.55784 1.60454,-0.32091 2.9533,-1.50223 4.55784,-1.82314 0.89386,-0.17877 1.84083,0.17878 2.7347,0 1.84656,-0.36931 3.63556,-1.36467 5.46941,-1.82313 6.39373,-1.59843 23.52397,-2.01777 30.08173,0 0.5818,0.17902 12.56287,2.53563 14.58508,4.55783 1.91645,1.91645 2.99002,4.72805 5.46941,6.38098 3.31776,2.21184 3.37933,0.85951 5.4694,3.64627 0.98641,1.31521 2.52934,3.4409 3.64627,4.55783 0.48044,0.48045 1.30118,0.47661 1.82314,0.91157 1.32047,1.1004 2.34121,2.52765 3.64627,3.64628 2.21521,1.89874 5.23487,3.41174 7.29254,5.4694 0.48044,0.48044 0.43113,1.3427 0.91157,1.82313 0.48043,0.48045 1.34269,0.43114 1.82313,0.91157 1.89623,1.89624 2.94803,5.14613 4.55784,7.29255 1.53312,2.04416 4.06554,2.45204 5.4694,4.55783 1.35048,2.02571 3.15265,5.2226 5.46941,6.38098 2.24515,1.12257 -0.8229,-2.64604 2.7347,0.91156 0.21486,0.21487 -0.21486,0.69671 0,0.91157 0.42972,0.42972 1.39342,-0.42971 1.82314,0 0.21486,0.21486 -0.13589,0.63979 0,0.91157 0.94831,1.89662 2.09585,1.30633 3.64627,1.82313 0.81533,0.27178 1.05443,1.43878 1.82314,1.82314 1.81253,0.90627 6.71579,0.33482 7.29253,0.91156 0.21486,0.21486 -0.21485,0.69672 0,0.91157 2.81272,2.81272 0.12242,-6.80288 2.7347,3.64628 z"
+       id="path37" />
+  </g>
+  <g
+     id="pink"
+     style="display:none">
+    <path
+       style="display:inline;fill:none;fill-opacity:1;stroke:#fccde5;stroke-width:4.30033;stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 460.74767,515.77393 c 1.0165,-9.97319 3.6526,-20.97872 8.2041,-30.08173 6.613,-13.22599 -0.8574,2.19768 5.46941,-7.29253 0.533,-0.7995 0.31131,-1.98439 0.91157,-2.73471 0.6844,-0.85549 1.87921,-1.13874 2.7347,-1.82314 0.67111,-0.53688 1.08618,-1.38096 1.82313,-1.82313 2.6743,-1.60457 6.23528,-2.68613 9.11568,-3.64627 12.08311,-4.0277 24.02306,-7.36161 36.46271,-10.02724 18.14531,-3.88828 36.09661,-6.38098 54.69405,-6.38098 4.25398,0 8.51451,0.23598 12.76195,0 5.40678,-0.30038 11.00868,-2.05975 16.40821,-2.7347 1.20604,-0.15076 2.47367,0.3198 3.64628,0 2.88718,-0.78741 5.30082,-2.92045 8.2041,-3.64627 1.81476,-0.45369 3.78993,-0.56353 5.46941,-1.82313 0.68755,-0.51567 1.02517,-1.50395 1.82313,-1.82314 0.84638,-0.33855 1.88118,0.32007 2.73471,0 1.65896,-0.62211 3.00903,-1.87426 4.55784,-2.73471 3.13995,-1.74441 6.7303,-3.14486 10.02724,-4.55783 10.13598,-4.344 27.51655,-4.7232 38.28583,-3.64627 6.46456,0.64645 12.80093,2.28727 19.14293,3.64627 7.21094,1.5452 14.65462,2.04116 21.87762,3.64627 5.5644,1.23653 10.90681,3.18249 16.40822,4.55784 5.41327,1.35331 11.02859,2.1791 16.40821,3.64627 1.57866,0.43054 2.99054,1.35294 4.55784,1.82313 5.92453,1.77736 12.21844,3.05461 18.23135,4.55784 12.29052,3.07262 24.46223,6.02707 36.46269,10.02724 5.55868,1.85288 11.384,3.36644 16.40825,6.38098 6.52513,3.9151 11.78798,11.33738 17.3198,16.40821 4.22582,3.87371 8.44894,8.07654 12.76192,11.85038 0.82447,0.72144 2.02171,0.99132 2.73471,1.82314 1.15307,1.34522 1.71861,3.10634 2.73471,4.55784 6.23598,8.90856 12.64769,17.91716 16.40818,28.25859 2.13219,5.86337 2.13459,13.22509 1.82316,19.14292 -0.78433,14.90275 -8.11907,22.20205 -21.87767,26.43546 -27.00003,6.75003 11.13805,-3.19576 -13.67347,4.55784 -9.65481,3.01711 -20.15718,4.05162 -30.08172,5.4694 -3.3631,0.48044 -6.64175,1.54102 -10.02729,1.82314 -6.9855,0.58212 -14.90003,0.38764 -21.87759,0 -13.68563,-0.76031 -26.03011,-4.76916 -39.19741,-8.20411 -6.16442,-1.6081 -18.2438,-3.6525 -23.70075,-6.38097 -0.76871,-0.38435 -1.05444,-1.43879 -1.82314,-1.82314 -1.12057,-0.56028 -2.43085,-0.60771 -3.64627,-0.91156 -1.21543,-0.60772 -2.45839,-1.16321 -3.64627,-1.82314 -5.21357,-2.89643 -9.56155,-6.88753 -14.58508,-10.02724 -1.15234,-0.72021 -2.54051,-1.0333 -3.64627,-1.82314 -1.04903,-0.7493 -1.68568,-1.9854 -2.73471,-2.7347 -2.61267,-1.86619 -10.76891,-7.04227 -13.67351,-8.20411 -9.26876,-3.7075 -18.36437,-7.82853 -28.2586,-10.02724 -17.04041,-3.78676 3.19955,0.84775 -9.11567,-0.91157 -0.95122,-0.13589 -1.78348,-0.77568 -2.73471,-0.91157 -1.2032,-0.17188 -2.45445,0.23837 -3.64626,0 -0.42138,-0.0843 -0.50391,-0.77568 -0.91157,-0.91157 -4.48261,-1.4942 -20.74255,0.76061 -25.52389,1.82314 -12.95096,2.87799 2.64068,-0.44404 -8.20411,0.91157 -4.36207,0.54526 -9.44353,2.49264 -13.67352,3.64627 -3.70807,1.01129 -7.39096,2.168 -10.93881,3.64627 -1.88153,0.78397 -3.52121,2.13525 -5.4694,2.7347 -2.05358,0.63187 -4.28741,0.42844 -6.38098,0.91157 -6.62469,1.52877 -13.21756,3.79817 -20.05448,4.55783 -8.8092,0.9788 -17.51632,0.91158 -26.43546,0.91158 -6.64624,0 -16.24064,1.09142 -22.78919,0 -6.29436,-1.04906 -12.93765,-2.09496 -19.14293,-3.64628 -2.74828,-0.68707 -6.37503,-3.18752 -9.11567,-4.55783 -1.04504,-0.52252 -1.268,-1.902 -1.82314,-2.7347 -0.71509,-1.07265 -1.96121,-1.70339 -2.7347,-2.73471 -2.10202,-2.8027 -2.82861,-6.7566 -3.64627,-10.02724 -2.30253,-9.21013 0.32917,0.65832 -1.82313,-3.64628 -2.22685,-4.45368 -1.92424,-6.1282 0,-10.93881 z"
+       id="path40" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#fccde5;stroke-width:4.30033;stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 11.344842,220.42603 c 0.570144,-2.61998 -0.525803,-5.57509 0,-8.2041 0.426394,-2.13198 2.308308,-4.249 2.734702,-6.38098 0.178773,-0.89386 -0.288262,-1.86991 0,-2.7347 0.644576,-1.93373 1.977687,-3.57686 2.734703,-5.46941 0.465289,-1.16322 0.47167,-2.47321 0.911568,-3.64627 5.677566,-15.14017 -1.643169,5.96105 3.64627,-6.38097 0.493514,-1.15153 0.311648,-2.54642 0.911567,-3.64627 6.085975,-11.15762 2.371353,-3.19208 6.380974,-8.2041 1.497136,-1.87143 2.904547,-4.72769 4.557838,-6.38098 1.252829,-1.25283 3.196727,-1.60044 4.557838,-2.7347 0.990353,-0.8253 1.629264,-2.07144 2.734702,-2.7347 0.401211,-0.24073 5.398141,-1.23344 6.380974,-1.82314 0.736958,-0.44218 1.02517,-1.50395 1.823135,-1.82314 0.846369,-0.33855 1.840837,0.17878 2.734702,0 1.074293,-0.21485 1.654041,-1.64302 2.734704,-1.82313 2.09805,-0.34967 4.295286,0.41713 6.380973,0 5.147189,-1.02944 11.070689,-1.50463 16.408217,-0.91157 4.335693,0.48175 8.433159,2.19361 12.761946,2.7347 2.581547,0.3227 5.755331,0.0953 8.204108,0.91157 0.407665,0.13589 0.503902,0.77568 0.911568,0.91157 2.160159,0.72006 1.486109,-0.72005 3.646269,0 6.27483,2.09161 17.45156,9.02561 22.78919,12.76195 4.56667,3.19667 7.88797,10.92038 10.93881,15.49665 5.68464,8.52695 8.48163,17.51829 10.93881,27.34702 0.50521,2.02084 1.67674,4.0855 0.91157,6.38097 -0.79643,2.38932 -2.63031,4.75266 -3.64627,7.29255 -0.2257,0.56424 0.2257,1.25888 0,1.82313 -1.22159,3.05399 -8.17046,10.54727 -10.93881,12.76195 -2.4149,1.93192 -4.75905,4.69198 -7.29254,6.38097 -5.69059,3.79372 -1.51928,0.30386 -6.38097,2.7347 -1.95981,0.97991 -3.5096,2.66637 -5.46941,3.64627 -4.72998,2.36499 -9.82765,3.43051 -14.585082,5.46941 -1.006986,0.43156 -1.70889,1.43845 -2.734703,1.82314 -1.553299,0.58248 -8.775802,1.48182 -10.027244,1.82313 -8.987034,2.45101 -17.995945,6.12365 -27.347027,7.29254 -2.412076,0.30151 -4.880465,-0.30151 -7.292541,0 -4.704153,0.58802 -15.795125,2.67501 -20.054487,1.82314 -1.604538,-0.32091 -3.025709,-1.24859 -4.557838,-1.82314 -2.166757,-0.81253 -4.744659,-1.09839 -6.380973,-2.7347 -1.248613,-1.24862 -5.93983,-6.66011 -6.380973,-8.20411 -0.333903,-1.16866 0.134221,-2.43828 0,-3.64627 -0.555152,-4.99637 -2.734703,-9.53943 -2.734703,-14.58508 0,-6.95402 0.407666,0.71909 -0.911567,-4.55784 -0.428974,-1.71589 0.428972,-3.75351 0,-5.46941 -0.570138,-2.28055 -3.8457941,-8.71662 -2.7347031,-10.9388 0.792359,-1.58472 1.8231351,-3.03857 2.7347031,-4.55785 z"
+       id="path33" />
+    <path
+       style="display:inline;fill:none;fill-opacity:1;stroke:#fccde5;stroke-width:4.30033;stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 451.63199,185.78646 c 2.7347,-3.03855 4.87035,-6.74978 8.20411,-9.11567 18.89864,-13.41194 42.94971,-18.44571 65.63287,-20.96606 10.52775,-1.16975 21.01064,2.10907 30.08172,7.29255 3.34582,1.91189 9.05311,6.94696 10.93882,8.2041 1.69599,1.13067 3.77341,1.60404 5.46941,2.73471 4.94067,3.29378 8.00379,7.19746 10.02723,12.76195 1.40185,3.85505 2.32619,9.58837 2.73471,13.67351 0.27211,2.72113 -0.3392,5.49052 0,8.2041 0.69667,5.57336 0.92451,8.12648 0,13.67352 -0.24977,1.4986 0.29796,3.06806 0,4.55784 -0.37689,1.88443 -1.55136,3.56696 -1.82314,5.4694 -0.37376,2.61637 -0.29045,4.8081 -0.91157,7.29255 -0.91056,3.64227 -0.91856,0.014 -2.7347,3.64626 -0.48185,0.96371 -0.40112,2.62538 -0.91156,3.64627 -2.31557,4.63114 -19.62917,12.59182 -24.61233,14.58508 -4.77912,1.91166 -9.60993,2.54069 -14.58508,3.64628 -3.92628,0.8725 -7.8384,2.28893 -11.85038,2.7347 -10.30404,1.14489 -24.09096,-0.10642 -33.728,-2.7347 -9.48783,-2.58759 -27.83749,-23.32589 -31.90486,-32.81644 -0.49352,-1.15153 -0.51539,-2.45773 -0.91157,-3.64627 -1.82114,-5.4634 0.23322,2.28958 -2.7347,-3.64626 -0.56029,-1.12057 -0.41806,-2.49475 -0.91158,-3.64628 -1.78944,-4.17537 -1.92953,-1.52697 -4.55783,-5.4694 -1.74294,-5.22882 0.26839,-0.55372 -2.7347,-4.55784 -1.41721,-1.88962 -0.15868,-2.14049 -0.91157,-3.64627 -2.41184,-4.82368 -1.82313,-10.83473 -1.82313,-16.40822 0,-1.25363 -0.99655,-8.11913 0,-9.11568 0.48043,-0.48043 1.34269,-0.43112 1.82313,-0.91156"
+       id="path36" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#fccde5;stroke-width:4.30033;stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 2.2291659,505.74669 c -0.785755,-15.43849 6.538307,-24.39254 14.5850811,-36.4627 3.766236,-5.64936 7.714804,-11.92143 13.673514,-15.49665 5.406247,-3.24375 15.925322,-7.13158 21.877622,-9.11568 6.981745,-2.32724 13.391457,-4.72835 20.966055,-3.64626 6.332694,0.90466 11.513214,4.9699 17.319784,7.29253 5.691727,2.2767 15.523978,5.5104 19.142918,10.93881 2.83041,4.24561 3.40166,9.53802 5.4694,13.67352 0.19218,0.38435 0.77568,0.5039 0.91158,0.91156 0.19217,0.57653 -0.19218,1.24661 0,1.82314 0.13589,0.40767 0.77568,0.5039 0.91156,0.91157 0.19218,0.57653 -0.19218,1.24661 0,1.82314 0.13589,0.40766 0.71939,0.52721 0.91157,0.91156 0.27178,0.54356 -0.27177,1.27958 0,1.82314 0.67763,1.35525 1.49189,2.9016 1.82314,4.55783 0.76075,3.80378 -0.63882,8.01749 0,11.85038 2.51969,15.11822 1.14717,36.78525 -4.55785,51.04779 -2.28866,5.72167 -7.79991,13.89096 -13.67351,16.40821 -1.15153,0.49352 -2.525702,0.35129 -3.646267,0.91157 -0.768702,0.38435 -1.054434,1.43879 -1.823135,1.82314 -2.241131,1.12056 -4.799316,1.57381 -7.292541,1.82313 -7.122914,0.7123 -14.710421,0 -21.877622,0 -7.400679,0 -14.610801,0.12655 -21.877623,-0.91156 -1.804812,-0.25783 -3.671075,0.29971 -5.469405,0 -1.895606,-0.31594 -3.605031,-1.35704 -5.469406,-1.82314 -1.503107,-0.37578 -3.024043,-0.69246 -4.557838,-0.91157 -0.601604,-0.0859 -1.317488,0.3371 -1.823135,0 -0.56533,-0.37688 -0.368014,-1.41546 -0.911567,-1.82314 -0.768702,-0.57652 -1.935206,-0.37856 -2.734703,-0.91156 -1.787731,-1.19182 -2.770107,-3.36602 -4.557838,-4.55784 -4.501065,-3.00071 -2.968346,-0.29205 -6.380973,-4.55783 -0.424444,-0.53056 -0.43113,-1.3427 -0.911568,-1.82314 -0.480438,-0.48044 -1.41547,-0.36801 -1.823135,-0.91157 -1.2536971,-1.67159 -3.1816031,-7.25701 -3.6462711,-9.11567 -0.56125,-2.24501 -2.00292,-4.18564 -2.734702,-6.38098 -0.171853,-0.51556 0.366121,-2.36858 0,-2.7347 -0.214859,-0.21486 -0.69671,0.21485 -0.911568,0 -0.911567,-0.91157 0.911568,-4.55784 0,-5.46941 -0.214858,-0.21485 -0.775679,0.27178 -0.911567,0 -0.271777,-0.54355 0,-1.21542 0,-1.82313 0,-1.87523 -0.739728,-12.19406 0,-13.67352 0.192175,-0.38435 0.719392,-0.52721 0.911567,-0.91156 0.826577,-1.65316 -0.549089,-3.65702 -0.911567,-5.46941 z"
+       id="path38" />
+  </g>
+  <g
+     id="pink_ellipsis">
+    <ellipse
+       style="fill:none;fill-opacity:1;stroke:#fccde5;stroke-width:4.30033;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       id="path43"
+       cx="520.55139"
+       cy="212.38768"
+       rx="68.647308"
+       ry="55.111217" />
+    <ellipse
+       style="display:inline;fill:none;fill-opacity:1;stroke:#fccde5;stroke-width:4.30033;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       id="path42"
+       cx="71.926735"
+       cy="210.45393"
+       rx="69.936455"
+       ry="58.978668" />
+  </g>
+  <path
+     d="m 663.48939,422.96709 c -21.65962,0.0552 -41.27911,11.73661 -50.15421,29.86165 -9.01624,-4.00553 -19.64231,-6.15033 -30.51942,-6.16014 -21.49808,0.0404 -40.9671,8.36851 -49.75722,21.28434 -6.29681,-2.61434 -13.09981,-3.96476 -19.9776,-3.96563 -27.43764,-3.2e-4 -49.68117,21.01865 -49.68104,46.94596 -1.3e-4,25.92731 22.2434,46.94628 49.68104,46.94597 25.31237,-0.15085 46.45811,-18.26233 49.09652,-42.05155 6.533,1.8236 13.5429,2.79289 20.6383,2.85373 15.10655,-0.0777 29.49207,-4.26554 39.74424,-11.57022 10.38642,10.75384 25.2677,16.94945 40.92939,17.04037 4.20644,-0.008 8.39816,-0.45802 12.49314,-1.34044 10.38481,12.16721 27.50744,19.47672 45.84725,19.57181 0.13288,-0.0118 0.2657,-0.024 0.39847,-0.0366 7.76253,20.68457 28.16814,34.53008 51.10497,34.67549 30.20646,3e-5 54.69384,-23.46679 54.69412,-52.41464 -2.8e-4,-28.94785 -24.48766,-52.41468 -54.69412,-52.41465 -1.51827,0.10255 -3.03143,0.26579 -4.5355,0.4893 -10.33044,-12.80173 -28.00237,-20.53172 -46.96794,-20.54454 -2.70413,0.0868 -5.39696,0.33114 -8.05725,0.73102 -8.88147,-18.17951 -28.56665,-29.88544 -50.28314,-29.90121 z"
+     style="fill:none;stroke:#fccdf1;stroke-width:4.30033;stroke-linecap:round"
+     id="path57" />
+  <ellipse
+     style="fill:none;fill-opacity:1;stroke:#fccdf1;stroke-width:4.30033;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+     id="path58"
+     cx="67.779541"
+     cy="509.56628"
+     rx="55.605625"
+     ry="54.694057" />
+  <path
+     d="m 390.93013,10.027621 c -19.67369,0.01924 -38.07168,6.991569 -49.18588,18.640094 -8.1869,-3.257774 -17.26334,-4.960864 -26.47468,-4.967664 -21.07796,0.08862 -40.42774,9.01182 -50.51313,23.294258 -6.75817,-2.729623 -14.08613,-4.144186 -21.49969,-4.150219 -28.94833,-4.81e-4 -52.41625,21.01833 -52.41611,46.945965 7.6e-4,25.927065 23.46842,46.944985 52.41611,46.944505 20.69933,-0.0433 39.43191,-10.99352 47.80882,-27.94696 7.57505,2.7495 15.83302,4.19847 24.204,4.2469 20.33027,-0.0676 39.12461,-8.36062 49.5111,-21.846877 8.12313,2.916504 17.06663,4.464706 26.14946,4.526712 32.97554,-1.93e-4 59.70751,-19.18225 59.70719,-42.84409 -8.1e-4,-23.661267 -26.73245,-42.842431 -59.70719,-42.842624 z"
+     style="fill:none;stroke:#8dd3c7;stroke-width:4.30033;stroke-linecap:round"
+     id="path72" />
+  <path
+     d="m 840.78831,3.6455478 c -22.82571,0.092231 -43.79328,9.4072882 -54.78495,24.3387712 -5.31606,-1.02072 -10.80344,-1.541475 -16.31667,-1.548458 -24.72595,0.02473 -47.06632,10.312016 -56.84467,26.175825 -6.03341,-1.628817 -12.39948,-2.466457 -18.81589,-2.475775 -30.71015,1.27e-4 -55.60603,18.570534 -55.60532,41.477287 0.11922,7.495876 2.95993,14.827762 8.21987,21.215482 -22.79716,7.71767 -38.14095,28.61562 -38.30126,52.1656 1.7e-4,30.70933 25.50765,55.60486 56.97212,55.60532 31.46504,3.3e-4 56.97341,-24.89543 56.97358,-55.60532 -0.009,-12.30133 -4.19807,-24.25281 -11.91008,-33.98257 14.94206,-3.40774 27.27288,-11.34772 33.97378,-21.87618 7.95766,2.53337 16.59288,3.8619 25.33787,3.89824 20.05892,-0.0408 38.84997,-6.85965 50.43109,-18.300216 6.6308,1.79297 13.61851,2.74084 20.67053,2.80392 34.73806,4.9e-4 62.8995,-21.018273 62.89933,-46.945961 1.7e-4,-25.927688 -28.16127,-46.9464468 -62.89933,-46.9459652 z"
+     style="fill:none;stroke:#8dd3c7;stroke-width:4.30033;stroke-linecap:round"
+     id="path73" />
+  <path
+     d="m 131.58905,288.96688 c -23.66193,-2.3e-4 -42.844423,18.97828 -42.844091,42.38848 4.85e-4,23.40964 19.182741,42.38725 42.844091,42.38703 8.0309,-0.0614 15.88305,-2.35486 22.65993,-6.61867 3.28012,24.01162 17.01751,41.21559 32.94539,41.25901 3.42314,-0.1021 6.81638,-1.0066 10.06278,-2.68234 6.34895,17.3015 23.90215,28.99187 43.72013,29.11746 23.3658,-0.185 42.95243,-16.32502 45.75495,-37.70356 7.95317,4.25449 17.84518,6.61797 28.08174,6.70949 18.4574,-0.11194 34.99053,-7.56032 41.87282,-18.86423 11.93729,7.89662 28.18379,12.38572 45.18216,12.48435 35.49322,2.3e-4 64.26679,-18.77419 64.26614,-41.93288 -5.9e-4,-23.15813 -28.7738,-41.93165 -64.26614,-41.93143 -31.07547,0.0884 -57.60266,14.67285 -63.00627,34.64034 -7.21485,-2.97052 -15.54513,-4.5497 -24.04871,-4.55894 -17.83234,0.10447 -33.93467,7.06345 -41.2092,17.80946 -8.69496,-7.90266 -20.41533,-12.33516 -32.62749,-12.33932 -6.99496,0.10179 -13.87505,1.65719 -20.12703,4.55016 -0.94572,-27.5773 -15.72987,-49.19753 -33.65588,-49.21812 -6.14974,0.11328 -12.16256,2.81497 -17.38756,7.81261 -7.27512,-14.2798 -22.05457,-23.29374 -38.21776,-23.3089 z"
+     style="fill:none;stroke:#8dd3c7;stroke-width:4.30033;stroke-linecap:round"
+     id="path71" />
+  <path
+     d="m 574.87751,287.78241 c -23.66193,-2.3e-4 -42.84442,18.97828 -42.84409,42.38848 4.8e-4,23.40964 19.18274,42.38725 42.84409,42.38703 8.0309,-0.0614 15.88305,-2.35486 22.65993,-6.61867 3.28012,24.01162 17.01751,41.21559 32.94539,41.25901 3.42314,-0.1021 6.81638,-1.0066 10.06278,-2.68234 6.34895,17.3015 23.90215,28.99187 43.72013,29.11746 23.3658,-0.185 42.95243,-16.32502 45.75495,-37.70356 7.95317,4.25449 17.84518,6.61797 28.08174,6.70949 18.4574,-0.11194 34.99053,-7.56032 41.87282,-18.86423 11.93729,7.89662 28.18379,12.38572 45.18216,12.48435 35.49322,2.3e-4 64.26679,-18.77419 64.26614,-41.93288 -5.9e-4,-23.15813 -28.7738,-41.93165 -64.26614,-41.93143 -31.07547,0.0884 -57.60266,14.67285 -63.00627,34.64034 -7.21485,-2.97052 -15.54513,-4.5497 -24.04871,-4.55894 -17.83234,0.10447 -33.93467,7.06345 -41.2092,17.80946 -8.69496,-7.90266 -20.41533,-12.33516 -32.62749,-12.33932 -6.99496,0.10179 -13.87505,1.65719 -20.12703,4.55016 -0.94572,-27.5773 -15.72987,-49.19753 -33.65588,-49.21812 -6.14974,0.11328 -12.16256,2.81497 -17.38756,7.81261 -7.27512,-14.2798 -22.05457,-23.29374 -38.21776,-23.3089 z"
+     style="fill:none;stroke:#8dd3c7;stroke-width:4.30033;stroke-linecap:round"
+     id="path71-7" />
+</svg>

@@ -13,6 +13,6 @@ end
 end
 
 @option "Configuration for running RelDist.j" struct RelDistConf
-    traverse::Traverse=Traverse()
-    failures::Failures=Failures()
+    traverse::Traverse = Traverse()
+    failures::Failures = Failures()
 end

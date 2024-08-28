@@ -1,0 +1,8 @@
+ID;f_bus;t_bus;breaker;closed;remote;t_manual;t_remote
+1;mf;failer;true;true;false;0.08333;0.01667
+2;failer;load_1;false;true;false;0.08333;0.01667
+3;bf;load_1;false;false;false;0.08333;0.01667
+4;load_1;load_2;false;true;false;0.08333;0.01667
+5;battery;load_2;false;true;false;0.08333;0.01667
+6;load_1;bf;true;false;false;0.08333;0.01667
+7;failer;mf;false;true;false;0.08333;0.01667
