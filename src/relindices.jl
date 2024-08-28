@@ -1,4 +1,4 @@
-using DataFrames
+using Dates: DateTime
 
 """Store information about a customer."""
 mutable struct Customer
@@ -80,36 +80,4 @@ function calculate_kile(
     duration = (interruption.end_time - interruption.start_time).value / 3600000
     cost_function = cost_functions[interruption.customer.consumer_type]
     return corr * f_piece(cost_function, duration) * interruption.customer.p_ref
-end
-
-"""
-    calculate_rel_indices calculates the unavailability and ENS.
-
-    The equations are as follows:
-    
-    U = λ⋅t
-    ENS = U⋅P
-"""
-function calculate_rel_indices(λ::Real, t::Real, P::Real)
-    U = λ * t
-    ENS = U * P
-
-    return U, ENS
-end
-
-function set_rel_res!(
-    res::RelStruct,
-    λ::Real,
-    t::Real,
-    P::Real,
-    corr::Real,
-    cost_function::PieceWiseCost,
-    l_pos::Integer,
-    edge_pos::Integer,
-)
-    U, ENS = calculate_rel_indices(λ, t, P)
-
-    IC = calculate_kile(P, t, cost_function, corr)
-    # IC*λ gices CENS/year
-    set_res!(res, λ, t, P, U, ENS, IC, IC * λ, l_pos, edge_pos)
 end

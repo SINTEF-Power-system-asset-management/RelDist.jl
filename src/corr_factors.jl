@@ -1,4 +1,5 @@
-using Dates
+using DataFrames: DataFrame
+using Dates: DateTime
 
 """Struct for correction factors."""
 mutable struct CorrFactor
