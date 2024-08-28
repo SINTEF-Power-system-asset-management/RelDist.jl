@@ -9,7 +9,7 @@ export calculate_kile, set_rel_res!, f_lin, f_piece
 include("relrad_io.jl")
 export read_cost_functions, read_correction_factors_from_csv, read_loadprofile
 
-include("complete/mod.jl")
+include("mod.jl")
 export empty_network, Network, Bus, BusKind, NetworkPart, segment_network
 
 end # module
