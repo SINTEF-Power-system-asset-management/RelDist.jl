@@ -44,8 +44,12 @@ function add_buses!(graphy::Network, case::Case)
             push!(loads, loady)
         end
         if bus[:Pmax_gen] !== missing
-            supplyy =
-                SupplyUnit(bus[:ID_gen], bus[:Pmax_gen], !bus[:external_gen], bus[:E_gen])
+            if "E_gen" ∉ names(bus)
+                E = Inf
+            else
+                E = bus[:E_gen]
+            end
+            supplyy = SupplyUnit(bus[:ID_gen], bus[:Pmax_gen], !bus[:external_gen], E)
             push!(gens, supplyy)
         end
     end
