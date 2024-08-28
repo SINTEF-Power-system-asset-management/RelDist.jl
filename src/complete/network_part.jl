@@ -36,13 +36,13 @@ end
 
 function unvisit_classic!(network::Network, part::NetworkPart, visitation::KeyType)
     bus::Bus = network[visitation]
-    part.rest_power += get_load_power(bus)
+    part.rest_power += get_load_power(bus, consider_supply = false)
     pop!(part.subtree, visitation)
 end
 
 function visit_classic!(network::Network, part::NetworkPart, visitation::KeyType)
     bus::Bus = network[visitation]
-    part.rest_power -= get_load_power(bus)
+    part.rest_power -= get_load_power(bus, consider_supply = false)
     push!(part.subtree, visitation)
 end
 

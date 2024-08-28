@@ -1,5 +1,5 @@
 include("../segmentation/setup.jl")
-using RelDist: relrad_calc_2, transform_relrad_data
+using RelDist: relrad_calc_2, transform_relrad_data, compress_relrad
 using RelDist: relrad_calc, RadialPowerGraph, PieceWiseCost
 using DataStructures: DefaultDict
 
@@ -21,7 +21,8 @@ cost_functions = Dict{String,PieceWiseCost}([
     key => PieceWiseCost() for key in network.mpc.load[!, :type]
 ])
 res, L, edge_pos = relrad_calc(cost_functions, network)
-t = relrad_calc_2(network_2)
+t = compress_relrad(network_2)
+result = transform_relrad_data(network_2, t, cost_functions)
 
 display(t)
 display(transpose(res["base"].t))

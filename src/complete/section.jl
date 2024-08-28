@@ -71,7 +71,7 @@ function can_be_served(loads::Vector{<:Real}, capacity::Real)
     if isempty(loads)
         return [], [], 0.0
     end
-    i = 1
+    i = 0
     # Drop loads that are larger than the capacity.
     exceed_cap_idx = findfirst(>(capacity), loads)
     last_idx = isnothing(exceed_cap_idx) ? length(loads) : exceed_cap_idx
@@ -79,7 +79,7 @@ function can_be_served(loads::Vector{<:Real}, capacity::Real)
     while i <= last_idx
         P = sum(loads[1:last_idx-i])
         if P < capacity
-            return 1:last_idx-i, i:length(loads), P
+            return 1:last_idx-i, i+1:length(loads), P
         end
         i += 1
     end
@@ -114,42 +114,50 @@ function serve_and_delete!(
     end
 
     # Then we have to check if batteries can help to serve load
-    while !isempty(loads)
+    while !isempty(loads) && !isempty(ders)
         ratings = [der.power for der in ders]
         energies = [der.energy for der in ders]
+        load_powers = [load.power for load in loads]
         capacity = part.rest_power + sum(ratings)
-        served_idx, unserved_idx, to_be_served =
-            can_be_served([load.power for load in loads], capacity)
+        served_idx, unserved_idx, to_be_served = can_be_served(load_powers, capacity)
 
         # Calculate how much power each DER should deliver based on the rating
         powers = (to_be_served - part.rest_power) / sum(ratings) .* ratings
         # Calcualte how long the DER can suppy the power and find the index of the
         # DER that will deplete first.
         times = energies ./ powers
-        min_time_idx = sortperm(times)
+        (min_time, min_time_idx) = findmin(times)
         # In case more than one battery has the same minimum time 
         # (unlikely in a realistic case)
-        min_time_idx = min_time_idx[times.==times[min_time_idx[1]]]
-        min_time = times[min_time_idx[1]]
+        min_time_idx = findall(times .== min_time)
 
         if min_time >= repair_time
             min_time = repair_time
-        else
-            # Delete the battery that was empty
-            deleteat!(ders, min_time_idx)
         end
+
         # Deplete the energy storages with the amount of energy they will serve
         # in this round
         for (der_i, energy) in enumerate(powers .* min_time)
             ders[der_i].energy -= energy
         end
+
         # Set the outage time for the loads we could not serve
-        set_outage_time!(loads[unserved_idx], outage_times, repair_time - serve_time)
-        if min_time == repair_time
+        if to_be_served < sum(load_powers)
+            set_outage_time!(loads[unserved_idx], outage_times, repair_time - serve_time)
+            # Delete the loads we could not serve
+            deleteat!(loads, unserved_idx)
+        end
+
+        serve_time += min_time
+        if serve_time >= repair_time
             return
         end
-        serve_time += min_time
+        if min_time < repair_time
+            # Delete the battery that was empty
+            deleteat!(ders, min_time_idx)
+        end
     end
+    set_outage_time!(loads, outage_times, repair_time - serve_time)
     return
 end
 
@@ -586,6 +594,7 @@ function traverse_classic!(
                     continue
                 end
             end
+
             visit_classic!(network, part, v_dst)
             push!(visit, v_dst)
         end
@@ -642,7 +651,12 @@ function traverse_leaves!(
     off_limits::Set{KeyType};
     allow_shedding = false,
 )
-    for v in part.leaf_nodes
+    # Not sure if this is needed, but the loop will change part.leaf_nodes and I am
+    # worried
+    leaf_nodes = deepcopy(part.leaf_nodes)
+    for v in leaf_nodes
+        # Remove the leaf node from the list befor we processes it.
+        delete!(part.leaf_nodes, v)
         traverse_classic!(
             network,
             part,
@@ -650,8 +664,6 @@ function traverse_leaves!(
             off_limits = off_limits,
             allow_shedding = allow_shedding,
         )
-        # Remove the leaf node from the list after we have processed it.
-        delete!(part.leaf_nodes, v)
         # Add the newly added vertices to the list of off limits vertices
         off_limits = union(part.subtree, off_limits)
     end

@@ -15,12 +15,12 @@ res = transform_relrad_data(network, t)
 cut = ("1", "2")
 cut_idx = findfirst(x -> x == cut, res.U.cut_edge)
 # Case 1 in the power point
-@test isapprox(sum(res.U[cut_idx, 1:end-1]), 3.2e-5, atol = 1e-7)
+@test isapprox(sum(res.U[cut_idx, 1:end-1]), 0.08256, atol = 1e-3)
 
 cut = ("2", "3")
 cut_idx = findfirst(x -> x == cut, res.U.cut_edge)
 # Case 1 in the power point
-@test isapprox(sum(res.U[cut_idx, 1:end-1]), 0.2377, atol = 1e-3)
+@test isapprox(sum(res.U[cut_idx, 1:end-1]), 0.28532, atol = 1e-3)
 
 cut = ("3", "4")
 cut_idx = findfirst(x -> x == cut, res.U.cut_edge)
