@@ -13,3 +13,8 @@ network = Network(case)
 
 t = compress_relrad(network)
 res = transform_relrad_data(network, t, cost_functions)
+
+# Add a battery on bus 25
+temp_gen = DataFrame(copy(case.gen[end, :]))
+temp_gen.bus = 25
+# temp_gen.ID = 
