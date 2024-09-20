@@ -116,7 +116,7 @@ function relrad_calc_2(network::Network; segment_func::Function = segment_networ
     outage_times = DataFrame(vals, colnames)
     outage_times[!, :cut_edge] = collect(map(sort, edge_labels(network)))
 
-    for (edge_idx, edge) in enumerate(edge_labels(network))
+    for (edge_idx, edge) in enumerate(outage_times[:, :cut_edge])
         # Shadow old network to not override by accident
         let network = deepcopy(network)
             repair_time = network[edge...].repair_time

@@ -324,7 +324,7 @@ function remove_switchless_branches!(network::Network)
     did_change = true
     while did_change
         did_change = false
-        for edge in edge_labels(network)
+        for edge in sort!(collect(edge_labels(network)))
             branch::NewBranch = network[edge...]
             if is_switch(branch) || edge[1] == edge[2]
                 # We keep self-edges (for now)
@@ -351,12 +351,14 @@ function remove_switchless_branches!(network::Network)
                 fix_moved_switches!(network, new_edge, node_b, node_a)
             end
 
-            if haskey(network, node_b, node_b)
-                old_edge = sort((node_b, node_b))
-                new_edge = sort((node_a, node_a))
-                move_edge!(network, old_edge, new_edge)
-                update_edge_mapping!(edge_mapping, old_edge, new_edge)
-            end
+            # It seemed to me that this code would not be necessary. I therefore
+            # removed it.
+            # if haskey(network, node_b, node_b)
+            # old_edge = sort((node_b, node_b))
+            # new_edge = sort((node_a, node_a))
+            # move_edge!(network, old_edge, new_edge)
+            # update_edge_mapping!(edge_mapping, old_edge, new_edge)
+            # end
 
             delete!(network, node_b)
 
@@ -580,7 +582,7 @@ function traverse_classic!(
     while !isempty(visit)
         v_src = pop!(visit)
 
-        to_visit = setdiff(neighbor_labels(network, v_src), part.subtree)
+        to_visit = sort!(setdiff(neighbor_labels(network, v_src), part.subtree))
         setdiff!(to_visit, off_limits)
         for v_dst in to_visit
             if get_load_power(network[v_dst], consider_supply = false) > part.rest_power
@@ -655,7 +657,7 @@ function traverse_leaves!(
     # worried
     leaf_nodes = deepcopy(part.leaf_nodes)
     for v in leaf_nodes
-        # Remove the leaf node from the list befor we processes it.
+        # Remove the leaf node from the list before we processes it.
         delete!(part.leaf_nodes, v)
         traverse_classic!(
             network,
