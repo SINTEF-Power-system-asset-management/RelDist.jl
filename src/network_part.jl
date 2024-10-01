@@ -134,6 +134,16 @@ function get_loads_nfc_and_shed(network::Network, part::NetworkPart)
 end
 
 """
+    Helper function to get the total load supplied by two parts.
+"""
+function tot_load_in_parts(network::Network, part_a::NetworkPart, part_b::NetworkPart)
+    sum(
+        get_load_power(network[v], consider_supply = false) for
+        v in union(part_a.subtree, part_b.subtree)
+    )
+end
+
+"""
     Returns the DER in a part.
 """
 function get_part_der(network::Network, part::NetworkPart)

@@ -20,6 +20,7 @@ using ..network_graph: NewBranch, NewSwitch, get_kile, LoadUnit, SupplyUnit
 using ..network_part: NetworkPart, visit!, unvisit!, visit_and_shed!, is_leaf
 using ..network_part: supply_in_island, all_loads_supplied
 using ..network_part: get_loads_nfc_and_shed, get_part_der, visit_classic!, unvisit_classic!
+using ..network_part: tot_load_in_parts
 using ..battery: prepare_battery, visit_battery!, unvisit_battery!
 using ...RelDist: PieceWiseCost
 
@@ -575,9 +576,10 @@ TODO: If we encounter overload on a branch with no switch we return nothing to b
 function traverse_classic!(
     network::Network,
     part::NetworkPart,
-    visit::Set{KeyType};
+    visit::Vector{KeyType};
     off_limits = Set{KeyType}(),
     allow_shedding = false,
+    dfs = true,
 )
     while !isempty(visit)
         v_src = pop!(visit)
@@ -588,7 +590,11 @@ function traverse_classic!(
             if get_load_power(network[v_dst], consider_supply = false) > part.rest_power
                 if allow_shedding
                     visit_and_shed!(network, part, v_dst)
-                    push!(visit, v_dst)
+                    if dfs
+                        push!(visit, v_dst)
+                    else
+                        insert!(visit, 1, v_dst)
+                    end
                 else
                     # In case we have to stop the search in one direction, we should
                     # remember the location
@@ -597,8 +603,12 @@ function traverse_classic!(
                 end
             end
 
+            if dfs
+                push!(visit, v_dst)
+            else
+                insert!(visit, 1, v_dst)
+            end
             visit_classic!(network, part, v_dst)
-            push!(visit, v_dst)
         end
     end
 end
@@ -608,12 +618,21 @@ function traverse_classic!(
     part::NetworkPart,
     v::KeyType;
     off_limits = Set{KeyType}(),
+    allow_shedding = false,
+    dfs = true,
 )
-    traverse_classic!(network, part, Set([v]); off_limits = off_limits)
+    traverse_classic!(
+        network,
+        part,
+        [v];
+        off_limits = off_limits,
+        allow_shedding = allow_shedding,
+        dfs = dfs,
+    )
 end
 
-function traverse_classic!(network::Network, part::NetworkPart)
-    traverse_classic!(network, part, part.supply)
+function traverse_classic!(network::Network, part::NetworkPart; dfs = true)
+    traverse_classic!(network, part, [part.supply], dfs = dfs)
 end
 
 
@@ -638,7 +657,7 @@ function supply_after_split!(
         # After the split  we traverse from all of the leaf nodes.
         # Note that the order of the leaf nodes may change the results,
         # but we will in any case do the search to the end later.
-        traverse_leaves!(network, part, off_limits)
+        traverse_leaves!(network, part, off_limits;)
         return part
     end
 end
@@ -662,7 +681,7 @@ function traverse_leaves!(
         traverse_classic!(
             network,
             part,
-            Set([v]),
+            [v],
             off_limits = off_limits,
             allow_shedding = allow_shedding,
         )
@@ -680,14 +699,20 @@ function handle_overlap(
     overlapping::Set{KeyType},
     off_limits::Set{KeyType},
 )
-    best_p = Inf
     best_parts = deepcopy(parts)
     island_idx = [0, 0]
+    seen = Set{Tuple{String,String}}()
+    best_p = Inf
+    leaves_rest_w = 0.0
     # Iterate over all the buses that are in both parts
     for common in overlapping
         # Itereate over all the edges that are going out of the
         # common bus
         for neighbor in neighbor_labels(network, common)
+            edge = sort((neighbor, common))
+            if edge ∈ seen
+                continue
+            end
             # Create a copy of the network and remove the edge
             let network = deepcopy(network)
                 delete!(network, common, neighbor)
@@ -716,16 +741,30 @@ function handle_overlap(
                                 off_limits,
                             ) for (part_id, part) in enumerate(parts)
                         ]
-                        rest_power = sum(part.rest_power for part in temp_parts)
-                        if rest_power < best_p
+                        temp_p = sum(part.rest_power for part in temp_parts)
+                        if temp_p <= best_p
+                            max_res, max_res_idx =
+                                findmax([part.rest_power for part in temp_parts])
+                            temp_leaves_rest_w =
+                                length(temp_parts[max_res_idx].leaf_nodes) * max_res
+                            if temp_p == best_p
+                                if temp_leaves_rest_w < leaves_rest_w
+                                    continue
+                                end
+                            end
+                            leaves_rest_w = temp_leaves_rest_w
                             best_parts = temp_parts
-                            best_p = rest_power
+                            best_p = temp_p
                         end
                     end
                 end
             end
         end
     end
+    if best_parts == parts
+        throw("Could not split network")
+    end
+    off_limits = union(off_limits, union([part.subtree for part in best_parts]...))
     return best_parts
 end
 
@@ -734,7 +773,7 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
     # First we check what the different parts can supply. In this step, we grow the parts
     # from the supply. In case one of the parts can supply everything we stop the search.
     for part in parts
-        traverse_classic!(network, part)
+        traverse_classic!(network, part, dfs = true)
         # If a part can supply all the loads we just return this part.
         if all_loads_supplied(network, part)
             return [part]
