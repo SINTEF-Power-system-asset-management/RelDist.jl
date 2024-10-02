@@ -267,9 +267,11 @@ function transform_relrad_data(
     interruption_duration = lambda .* outage_time
     energy_not_supplied = interruption_duration .* p
     cost_of_ens = cens_matrix(network, times, cost_functions, correction_factor)
+    cost_of_ens2 = select(cost_of_ens, Not(:cut_edge))
+    cost_of_ens_year = cost_of_ens2 .* lambda
     interruption_duration[!, :cut_edge] = times[:, :cut_edge]
     energy_not_supplied[!, :cut_edge] = times[:, :cut_edge]
-    cost_of_ens[!, :cut_edge] = times[:, :cut_edge]
+    cost_of_ens_year[!, :cut_edge] = times[:, :cut_edge]
 
     NewResult(
         times,
@@ -277,7 +279,7 @@ function transform_relrad_data(
         fault_rate,
         interruption_duration,
         energy_not_supplied,
-        cost_of_ens,
+        cost_of_ens_year,
     )
 end
 
