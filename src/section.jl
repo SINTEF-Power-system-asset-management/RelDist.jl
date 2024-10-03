@@ -80,7 +80,7 @@ function can_be_served(loads::Vector{<:Real}, capacity::Real)
     while i <= last_idx
         P = sum(loads[1:last_idx-i])
         if P < capacity
-            return 1:last_idx-i, i+1:length(loads), P
+            return 1:last_idx-i, last_idx-i+1:length(loads), P
         end
         i += 1
     end
@@ -134,6 +134,12 @@ function serve_and_delete!(
 
         if min_time >= repair_time
             min_time = repair_time
+            # If min time is larger than the repair time, it means that the loads in
+            # this round can be served for the whole duration
+            set_outage_time!(loads[served_idx], outage_times, isolation_time)
+            # Delete the loads we could not serve
+            deleteat!(loads, served_idx)
+            unserved_idx = unserved_idx .- served_idx[end]
         end
 
         # Deplete the energy storages with the amount of energy they will serve
