@@ -85,7 +85,7 @@ add_switches(case, switches, true)
 
 s = case.switch
 for switch in remote_switches
-    s[s.f_bus.==switch[1] .&& s.t_bus.==switch[2], :t_remote] .= 1/3600
+    s[s.f_bus.==switch[1] .&& s.t_bus.==switch[2], :t_remote] .= 0.5
 end
 
 #case.switch[!, :t_remote] .= 1/3600
@@ -94,30 +94,39 @@ end
 
 #tune number and capacity of reserves  
 #case.gen[[1,2,3,4], :external] .= true
-case.gen[[4], :external] .= false
-case.gen[[2,3,4], :Pmax] .= 3
+case.gen[[2, 4], :external] .= false
+case.gen[[2,3,4], :Pmax] .= 1
 
 #tune load amount and type
 #show(case.load, allrows=true) 
 
 # use nfc loads at bus 10, 44 and 73
-case.load[case.load.bus.=="10", :nfc] .= true
-case.load[case.load.bus.=="44", :nfc] .= true
-case.load[case.load.bus.=="73", :nfc] .= true
+#case.load[case.load.bus.=="10", :nfc] .= true
+#case.load[case.load.bus.=="44", :nfc] .= true
+#case.load[case.load.bus.=="73", :nfc] .= true
 
-#case.load[:, :P] *=0.7803748480170235
+case.load[:, :P] *=0.7803748480170235
 
-# Add a battery on bus 25
+# Add a battery on bus 70
+
 case.gen.E .= Inf
 temp_gen = DataFrame(case.gen[end, :])
-temp_gen.bus .= "70"
+temp_gen.bus .= "9"
 temp_gen.ID .= "B1"
 temp_gen.external .= false
 temp_gen.E .= 100
-temp_gen.Pmax .= 10
+temp_gen.Pmax .= 2
+#case.gen = vcat(case.gen, temp_gen)
 
 
-case.gen = vcat(case.gen, temp_gen)
+#add a second battery at bus 40
+temp_gen2 = DataFrame(case.gen[end, :])
+temp_gen2.bus .= "40"
+temp_gen2.ID .= "B2"
+temp_gen2.external .= false
+temp_gen2.E .= 100
+temp_gen2.Pmax .= 2
+#case.gen = vcat(case.gen, temp_gen2)
 
 network = Network(case)
 
