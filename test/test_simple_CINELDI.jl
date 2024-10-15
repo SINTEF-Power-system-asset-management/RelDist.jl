@@ -1,4 +1,3 @@
-using SintPowerGraphs
 using DataFrames
 using Test
 
