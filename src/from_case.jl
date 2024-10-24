@@ -85,7 +85,7 @@ function add_branches!(graphy::Network, case::Case)
             end
             # If we dont use string key we need to parse the key
             f_bus = KeyType != String ? parse(KeyType, switch[:f_bus]) : switch[:f_bus]
-            switchy = NewSwitch(f_bus, switch[:closed], t_remote)
+            switchy = NewSwitch(f_bus, switch[:closed], switch[:breaker], t_remote)
             push!(switches, switchy)
         end
 
@@ -96,6 +96,11 @@ function add_branches!(graphy::Network, case::Case)
         else
             branch[:r_perm] # Cineldi compat
         end
+        if "indicators" ∈ names(branch)
+            indicators = branch.indicators
+        else
+            indicators = Vector{KeyType}()
+        end
 
         permanent_fault_frequency = if :permanentFaultFrequency in propertynames(branch)
             branch[:permanentFaultFrequency]
@@ -103,7 +108,13 @@ function add_branches!(graphy::Network, case::Case)
             branch[:lambda_perm] # Cineldi compat
         end
 
-        branchy = NewBranch(repair_time, permanent_fault_frequency, switches)
+        if length(indicators) < 1
+            indicators = [""]
+        elseif length(indicators) == 1
+            indicators = [indicators]
+        end
+
+        branchy = NewBranch(repair_time, permanent_fault_frequency, switches, indicators)
         # If we dont use string key we need to parse the key
         f_bus = KeyType != String ? parse(KeyType, branch[:f_bus]) : branch[:f_bus]
         t_bus = KeyType != String ? parse(KeyType, branch[:t_bus]) : branch[:t_bus]

@@ -2,6 +2,7 @@ module isolating
 
 using ..network_graph: Network, KeyType, ne, is_supply, is_main_supply, neighbor_labels
 using ..network_graph: label_for, nv, labels, NewSwitch, find_main_supply
+using ..network_graph: find_supply_breaker_time
 using ..section: sort
 using Combinatorics: combinations, permutations
 using MetaGraphsNext: edge_labels
@@ -81,18 +82,18 @@ function find_fault_indicators(network::Network, start::KeyType)
     visit = [(start, dst) for dst in neighbor_labels(network, start)]
     while !isempty(visit)
         (src, dst) = pop!(visit)
-        visit = vcat(
-            visit,
-            [
-                (dst, new_dst) for
-                new_dst in sort!(setdiff(collect(neighbor_labels(network, dst)), seen))
-            ],
-        )
-
-        if is_supply(network[dst])
-            if is_main_supply(network, dst)
-                push!(indicators, (src, dst))
-            end
+        indcs = network[src, dst].indicators
+        if indcs != [""]
+            push!(indicators, (src, dst))
+        else
+            # If we found an indicator we should stop the search
+            visit = vcat(
+                visit,
+                [
+                    (dst, new_dst) for new_dst in
+                    sort!(setdiff(collect(neighbor_labels(network, dst)), seen))
+                ],
+            )
         end
         push!(seen, dst)
     end
@@ -150,6 +151,38 @@ function find_edge(network::Network, edge::Tuple{KeyType,KeyType}, start::KeyTyp
     find_vertices(network, collect(edge), start)
 end
 
+"""
+This function checks if the the edge is between the feeder and the red_edge
+if it is the feeder is updated. It also deletes one of the vertices in the
+red_edge from the graph. This is used to reduce the search area after
+operating a switch or due to fault indicators.
+"""
+function reduce_search_area!(
+    network::Network,
+    edge::Tuple{KeyType,KeyType},
+    red_edge::Tuple{KeyType,KeyType},
+    feeder::KeyType,
+)
+    for (dir, ignore) in permutations(collect(red_edge), 2)
+        seen = dfs(network, dir, [ignore])
+        if issubset(edge, seen[2:end])
+            # We found the direction of the fault.
+            # Now we have to check if the feeder is in this direction.
+            if feeder ∉ seen[2:end]
+                # The feeder and the fault are not in the same direction.
+                # We cleared the fault and can update what we use as the
+                # feeder
+                feeder = dir
+            end
+            # We know the direction of the fault and can delete vertices
+            # that are in the oposite direction.
+            delete!(network, ignore)
+            return feeder
+        end
+    end
+    return feeder
+end
+
 
 """
     Find the time needed to isolate a fault using binary search.
@@ -158,18 +191,51 @@ function binary_fault_search(
     network::Network,
     edge::Tuple{KeyType,KeyType},
     feeder::KeyType,
+    t_f::Real,
 )
     tₛ = 0
     attempts = 0
     n_edges = ne(network)
     let network = deepcopy(network)
-        # indicators = find_fault_indicators(network, edge[1])
-        # # We know that the fault will be between the indicators so we remove the
-        # # indicators from the graph
-        # [delete!(network, dst) for (_, dst) in indicators]
+        indicator_edges = find_fault_indicators(network, edge[1])
+        # We know that the fault will be between the indicators so we remove the
+        # indicators from the graph
+        for inditcator_edge in indicator_edges
+            indicators = network[inditcator_edge...]
+            if Set(indicators) == Set(edge)
+                # There are indicators on both sides of the edge where the fault is
+                # we are done
+                return (tₛ, attempts)
+            end
+            # Check if there is one indicator on the faulted edge
+            indicator_handled = false
+            for i_bus in indicators
+                if i_bus ∈ edge
+                    indicator_handled = true
+                    # One of the buses are on the faulted edge
+                    # Delete all outgoing buses.
+                    for nbr in neighbor_labels(network, i_bus)
+                        if nbr ∉ edge
+                            delete!(network, i_bus, nbr)
+                            # Now we need to check if we should change the feeder bus
+                            found, _ = find_vertices(network, [feeder], i_bus, [nbr])
+                            if found
+                                feeder = i_bus
+                            end
+                        end
+                    end
+                end
+            end
+            if !indicator_handled
+                feeder = reduce_search_area!(network, edge, inditcator_edge, feeder)
+            end
+        end
 
         switch = deepcopy(edge)
         while ne(network) > 1 || attempts < n_edges
+            # Increase the isolation time with the time needed to operate the
+            # circuit breaker of the feeder. 
+            tₛ += t_f
             attempts += 1
             s_bus = find_tree_center(network, feeder)
 
@@ -182,9 +248,8 @@ function binary_fault_search(
                 nbrs = vcat(nbrs, nbr)
             end
 
-
             if length(unique(nbrs)) <= 2
-                return (tₛ, attempts)
+                return (tₛ, attempts - 1)
             end
 
             # Now we have to choose the switch to operate.
@@ -252,23 +317,7 @@ function binary_fault_search(
                 end
             else
                 # Now we have to check if the fault is upstream or downstream of the switch
-                for (dir, ignore) in permutations(collect(switch), 2)
-                    seen = dfs(network, dir, [ignore])
-                    if issubset(edge, seen[2:end])
-                        # We found the direction of the fault.
-                        # Now we have to check if the feeder is in this direction.
-                        if feeder ∉ seen[2:end]
-                            # The feeder and the fault are not in the same direction.
-                            # We cleared the fault and can update what we use as the
-                            # feeder
-                            feeder = dir
-                        end
-                        # We know the direction of the fault and can delete vertices
-                        # that are in the oposite direction.
-                        delete!(network, ignore)
-                        break
-                    end
-                end
+                feeder = reduce_search_area!(network, edge, switch, feeder)
             end
 
         end
@@ -281,7 +330,12 @@ function calculate_all_isolating_times(network::Network)
     times = []
     operations = []
     for edge in edge_labels(network)
-        time, attempts = binary_fault_search(network, sort(edge), feeder)
+        time, attempts = binary_fault_search(
+            network,
+            sort(edge),
+            feeder,
+            find_supply_breaker_time(network, feeder),
+        )
         push!(times, time)
         push!(operations, attempts)
     end

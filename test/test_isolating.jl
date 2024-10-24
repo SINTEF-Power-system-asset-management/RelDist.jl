@@ -1,8 +1,12 @@
 using Test
+using SintPowerCase
+using RelDist
 network_filename = joinpath(@__DIR__, "../examples/simplified_cineldi/cineldi_simple.toml")
 cost_filename = joinpath(@__DIR__, "../databases/cost_functions.json")
 
-network = Network(network_filename)
+case = Case(network_filename)
+
+network = Network(case)
 
 dfs_edges_res = [
     ("1", "2"),
@@ -24,5 +28,10 @@ dfs_edges_res = [
 ]
 @test dfs_edges(network, "1") == dfs_edges_res
 
-@test find_edge(network, ("3", "5"), "8", "9")
-@test find_edge(network, ("3", "5"), "9", "8") == false
+case.reldata[!, :indicators] .= [""]
+
+case.reldata[case.reldata.f_bus.=="3".&&case.reldata.t_bus.=="5", :indicators] .= ["3"]
+
+network = Network(case)
+
+@test find_fault_indicators(network, "1")[1] == ("3", "5")

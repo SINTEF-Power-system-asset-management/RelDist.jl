@@ -14,10 +14,11 @@ import Base
 
 using ..network_graph:
     Network, KeyType, LoadUnit, NewSwitch, NewBranch, time_to_cut, get_min_cutting_time
-using ..network_graph: is_switch, get_kile
+using ..network_graph: is_switch, get_kile, find_main_supply, find_supply_breaker_time
 using ..section: kile_loss, unsupplied_nfc_loss, segment_network, segment_network_classic
 using ..section: remove_switchless_branches, sort, get_outage_time
 using ..section: power_and_energy_balance!
+using ..isolating: binary_fault_search
 using ...RelDist: PieceWiseCost
 
 """Get the switch to cut off the given node from the given edge.
@@ -116,14 +117,19 @@ function relrad_calc_2(network::Network; segment_func::Function = segment_networ
     outage_times = DataFrame(vals, colnames)
     outage_times[!, :cut_edge] = collect(map(sort, edge_labels(network)))
 
-    visit = Vector{KeyType}
+    feeder = find_main_supply(network)
+    feeder_time = find_supply_breaker_time(network, feeder)
 
     for (edge_idx, edge) in enumerate(outage_times[:, :cut_edge])
         # Shadow old network to not override by accident
         let network = deepcopy(network)
+            isolation_time, _ =
+                binary_fault_search(network, sort(edge), feeder, feeder_time)
+
             repair_time = network[edge...].repair_time
             [outage_times[edge_idx, colname] = repair_time for colname in colnames] # Worst case for this fault
-            (isolation_time, _cuts_to_make_irl) = isolate_and_get_time!(network, edge)
+            (_, _cuts_to_make_irl) = isolate_and_get_time!(network, edge)
+
             if segment_func == segment_network_classic
                 optimal_split = segment_network_classic(network)
                 power_and_energy_balance!(

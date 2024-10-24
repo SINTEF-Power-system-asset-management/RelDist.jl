@@ -152,15 +152,15 @@ const KeyType = String
 struct NewSwitch
     bus::KeyType
     is_closed::Bool
-    breaker::Bool
+    is_breaker::Bool
     switching_time::Float64
 
     NewSwitch(
         bus::String = "you should have a key here if you're not testing code",
         is_closed::Bool = false,
-        breaker::Bool = false,
+        is_breaker::Bool = false,
         switching_time::Float64 = 0.2,
-    ) = new(bus, is_closed, switching_time)
+    ) = new(bus, is_closed, is_breaker, switching_time)
 end
 
 function time_to_cut(switch::NewSwitch)
@@ -175,11 +175,12 @@ struct NewBranch
     repair_time::Float64 # h
     permanent_fault_frequency::Float64
     switches::Vector{NewSwitch}
+    indicators::Vector{KeyType}
 end
 
 """Creates a branch with a single switch"""
 NewBranch(bus = "you should have a key here too if you're not testing code") =
-    NewBranch(0.512, 0.123, [NewSwitch(bus)])
+    NewBranch(0.512, 0.123, [NewSwitch(bus)], Vector{KeyType}())
 NewBranch()
 
 function is_switch(branch::NewBranch)
@@ -312,6 +313,22 @@ function find_main_supply(network::Network)
     end
 end
 
+"""
+    Returns the circuit breaker of a supply.
+"""
+function find_supply_breaker(network::Network, supply::KeyType)
+    for nbr in neighbor_labels(network, supply)
+        for switch in network[supply, nbr].switches
+            if switch.is_breaker
+                return switch
+            end
+        end
+    end
+end
+
+function find_supply_breaker_time(network::Network, supply::KeyType)
+    find_supply_breaker(network, supply).switching_time
+end
 
 
 """Create a super simple network to use in doctests
