@@ -1,6 +1,7 @@
 module section
 
 import Base
+import Base: sort!
 import Graphs: connected_components
 import MetaGraphsNext: labels, edge_labels, neighbor_labels
 import MetaGraphsNext: haskey, setindex!, getindex, delete!
@@ -14,7 +15,7 @@ using DataFrames: outerjoin, keys, DataFrameRow
 using DataStructures: DefaultDict, Queue
 using Accessors: @set
 
-using ..network_graph: Network, KeyType, is_supply
+using ..network_graph: Network, KeyType, is_supply, ne
 using ..network_graph: Bus, is_switch, get_supply_power, get_load_power, get_nfc_load_power
 using ..network_graph: NewBranch, NewSwitch, get_kile, LoadUnit, SupplyUnit
 using ..network_part: NetworkPart, visit!, unvisit!, visit_and_shed!, is_leaf
@@ -574,8 +575,11 @@ function segment_network_fast(
     start_guess = get_start_guess(network, naive_parts; loss_function = loss_function)
     segment_network(network, start_guess; loss_function = loss_function)
 end
-## End of DFS in state space
+## End of DFS in state 
 ## Beginning of classic reimpl
+#
+
+
 
 """DFS over all buses from the start bus, gobbling up all nodes we can. 
 TODO: If we encounter overload on a branch with no switch we return nothing to backtrack."""

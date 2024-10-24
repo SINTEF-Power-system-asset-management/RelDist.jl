@@ -1,9 +1,9 @@
 module network_graph
 
 using Graphs: SimpleGraph, Graph
-import Graphs: connected_components
-using MetaGraphsNext: MetaGraphsNext, label_for
-import MetaGraphsNext: labels, edge_labels, neighbor_labels, nv
+import Graphs: connected_components, center
+using MetaGraphsNext: MetaGraphsNext
+import MetaGraphsNext: labels, edge_labels, neighbor_labels, nv, ne, label_for
 import MetaGraphsNext: haskey, setindex!, getindex, delete!
 using SintPowerCase: Case
 using DataFrames: outerjoin, keys
@@ -152,11 +152,13 @@ const KeyType = String
 struct NewSwitch
     bus::KeyType
     is_closed::Bool
+    breaker::Bool
     switching_time::Float64
 
     NewSwitch(
         bus::String = "you should have a key here if you're not testing code",
         is_closed::Bool = false,
+        breaker::Bool = false,
         switching_time::Float64 = 0.2,
     ) = new(bus, is_closed, switching_time)
 end
@@ -214,6 +216,7 @@ end
 empty_network() = Network()
 # Forwarding methods to the inner network
 labels(network::Network) = labels(network.network)
+label_for(network::Network, v::Integer) = label_for(network.network, v)
 edge_labels(network::Network) = edge_labels(network.network)
 neighbor_labels(network::Network, key::KeyType) = neighbor_labels(network.network, key)
 haskey(network::Network, key::KeyType) = haskey(network.network, key)
@@ -230,6 +233,7 @@ delete!(network::Network, key::KeyType) = delete!(network.network, key)
 delete!(network::Network, key_a::KeyType, key_b::KeyType) =
     delete!(network.network, key_a, key_b)
 nv(network::Network) = nv(network.network)
+ne(network::Network) = ne(network.network)
 
 # Forwarding methods to the bus
 get_supply_power(network::Network, node::KeyType) = get_supply_power(network[node])
@@ -280,6 +284,35 @@ function connected_components(
     end
     comps
 end
+
+"""
+Function that check if a supply is the main supply of the network. It assumes that only
+the main supply of the supplies have a closed switch.
+"""
+function is_main_supply(network::Network, supply::KeyType)
+    for neighbor in neighbor_labels(network, supply)
+        for switch in network[supply, neighbor].switches
+            if !switch.is_closed
+                return false
+            end
+        end
+    end
+    return true
+end
+
+"""
+Function that finds the main supply of the network. It assumes that only the main supply
+of the supplies have a closed switch.
+"""
+function find_main_supply(network::Network)
+    for supply in [vertex for vertex in labels(network) if is_supply(network[vertex])]
+        if is_main_supply(network, supply)
+            return supply
+        end
+    end
+end
+
+
 
 """Create a super simple network to use in doctests
 # Examples

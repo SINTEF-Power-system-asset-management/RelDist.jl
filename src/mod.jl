@@ -7,7 +7,7 @@ include("network_graph.jl")
 @reexport using .network_graph: t_load, t_battery, t_supply, t_nfc_load
 @reexport using .network_graph: NewBranch, NewSwitch, is_switch
 @reexport using .network_graph: Bus, BusKind, is_supply, is_battery, is_nfc, is_load
-@reexport using .network_graph: branches, buses, LoadUnit
+@reexport using .network_graph: branches, buses, LoadUnit, find_main_supply
 
 include("network_part.jl")
 @reexport using .network_part: NetworkPart, all_loads_supplied
@@ -21,6 +21,12 @@ include("section.jl")
 @reexport using .section: remove_switchless_branches!, remove_switchless_branches
 @reexport using .section: kile_loss, energy_not_served
 @reexport using .section: sort, power_and_energy_balance!, get_loads_nfc_and_shed
+
+include("isolating.jl")
+@reexport using .isolating: dfs_edges, find_edge, binary_fault_search, find_fault_indicators
+@reexport using .isolating:
+    find_fault_indicators, dfs_edges, find_tree_center, find_vertices
+@reexport using .isolating: dfs, calculate_all_isolating_times
 
 include("from_case.jl")
 @reexport using .from_case: Network
