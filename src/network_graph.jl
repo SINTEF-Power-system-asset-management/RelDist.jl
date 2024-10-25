@@ -171,7 +171,7 @@ function time_to_cut(switch::NewSwitch)
     end
 end
 
-struct NewBranch
+mutable struct NewBranch
     repair_time::Float64 # h
     permanent_fault_frequency::Float64
     switches::Vector{NewSwitch}

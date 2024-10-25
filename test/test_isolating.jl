@@ -28,9 +28,10 @@ dfs_edges_res = [
 ]
 @test dfs_edges(network, "1") == dfs_edges_res
 
-case.reldata[!, :indicators] .= [""]
+case.reldata[!, :ind_f_bus] .= ""
+case.reldata[!, :ind_t_bus] .= ""
 
-case.reldata[case.reldata.f_bus.=="3".&&case.reldata.t_bus.=="5", :indicators] .= ["3"]
+case.reldata[case.reldata.f_bus.=="3".&&case.reldata.t_bus.=="5", :ind_f_bus] .= "3"
 
 network = Network(case)
 

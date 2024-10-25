@@ -280,7 +280,24 @@ function move_edge!(
     # Maybe todo: Handle the case where this edge already exists
     # Add the probabilities together, pick the max repair time
     # As long as we don't use them we don't really need this, we only need to keep the topology
+    old_branch = network[old_edge...]
+    indcs = old_branch.indicators
+    new_indcs = Vector{KeyType}()
+    nbr = intersect(new_edge, old_edge)[1]
+    if indcs != [""]
+        # The old edge has a fault indicator. Move it to the new edge.
+        for ind in indcs
+            if ind ∈ new_edge
+                push!(new_indcs, ind)
+            else
+                push!(new_indcs, nbr)
+            end
+        end
+    end
+    new_indcs = unique(new_indcs)
+
     network[new_edge...] = network[old_edge...]
+    network[new_edge...].indicators = new_indcs
     delete!(network, old_edge...)
 end
 
@@ -322,6 +339,11 @@ function fix_moved_switches!(network::Network, new_edge::Edge, from::KeyType, to
         end
     end
 end
+
+# function fix_moved_indicators!(network::Network, new_edge::Edge, from::KeyType, to::KeyType)
+# branch = network[new_edge...]
+# for indicator in branch.indicators
+
 
 
 """Transform the graph such that edges with no switches are removed and its vertices are combined.

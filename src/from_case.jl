@@ -96,22 +96,24 @@ function add_branches!(graphy::Network, case::Case)
         else
             branch[:r_perm] # Cineldi compat
         end
-        if "indicators" ∈ names(branch)
-            indicators = branch.indicators
+        if "ind_f_bus" ∈ names(branch)
+            ind_f_bus = branch.ind_f_bus
         else
-            indicators = Vector{KeyType}()
+            ind_f_bus = ""
         end
+
+        if "ind_t_bus" ∈ names(branch)
+            ind_t_bus = branch.ind_t_bus
+        else
+            ind_t_bus = ""
+        end
+
+        indicators = [ind_bus for ind_bus in [ind_f_bus, ind_t_bus] if !isempty(ind_bus)]
 
         permanent_fault_frequency = if :permanentFaultFrequency in propertynames(branch)
             branch[:permanentFaultFrequency]
         else
             branch[:lambda_perm] # Cineldi compat
-        end
-
-        if length(indicators) < 1
-            indicators = [""]
-        elseif length(indicators) == 1
-            indicators = [indicators]
         end
 
         branchy = NewBranch(repair_time, permanent_fault_frequency, switches, indicators)

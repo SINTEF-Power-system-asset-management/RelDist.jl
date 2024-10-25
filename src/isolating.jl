@@ -83,7 +83,7 @@ function find_fault_indicators(network::Network, start::KeyType)
     while !isempty(visit)
         (src, dst) = pop!(visit)
         indcs = network[src, dst].indicators
-        if indcs != [""]
+        if !isempty(indcs)
             push!(indicators, (src, dst))
         else
             # If we found an indicator we should stop the search
@@ -200,15 +200,15 @@ function binary_fault_search(
         indicator_edges = find_fault_indicators(network, edge[1])
         # We know that the fault will be between the indicators so we remove the
         # indicators from the graph
-        for inditcator_edge in indicator_edges
-            indicators = network[inditcator_edge...]
-            if Set(indicators) == Set(edge)
+        for indicator_edge in indicator_edges
+            if Set(indicator_edge) == Set(edge)
                 # There are indicators on both sides of the edge where the fault is
                 # we are done
                 return (tₛ, attempts)
             end
             # Check if there is one indicator on the faulted edge
             indicator_handled = false
+            indicators = network[indicator_edge...].indicators
             for i_bus in indicators
                 if i_bus ∈ edge
                     indicator_handled = true
@@ -227,7 +227,7 @@ function binary_fault_search(
                 end
             end
             if !indicator_handled
-                feeder = reduce_search_area!(network, edge, inditcator_edge, feeder)
+                feeder = reduce_search_area!(network, edge, indicator_edge, feeder)
             end
         end
 
@@ -305,7 +305,7 @@ function binary_fault_search(
                 for (dir, ignore) in permutations(collect(switch), 2)
                     seen = dfs(network, dir, [ignore])
                     if feeder ∈ seen
-                        # Delete the branches downstream of the switch.
+                        # Delete the branches upstream of the switch.
                         for v in neighbor_labels(network, dir)
                             if v != ignore && v != dir
                                 delete!(network, v)
