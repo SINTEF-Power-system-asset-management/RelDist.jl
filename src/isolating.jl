@@ -200,7 +200,7 @@ function binary_fault_search(
         indicator_edges = find_fault_indicators(network, edge[1])
         # We know that the fault will be between the indicators so we remove the
         # indicators from the graph
-        for indicator_edge in indicator_edges
+        for indicator_edge in unique(indicator_edges)
             if Set(indicator_edge) == Set(edge)
                 # There are indicators on both sides of the edge where the fault is
                 # we are done
@@ -208,6 +208,9 @@ function binary_fault_search(
             end
             # Check if there is one indicator on the faulted edge
             indicator_handled = false
+            if indicator_edge ∉ edge_labels(network)
+                continue
+            end
             indicators = network[indicator_edge...].indicators
             for i_bus in indicators
                 if i_bus ∈ edge

@@ -1,6 +1,7 @@
 using RelDist
 using SintPowerCase
 using DataFrames
+using DataFramesMeta
 
 network_filename = joinpath(@__DIR__, "CINELDI.toml")
 cost_filename = joinpath(@__DIR__, "../../databases/cost_functions.json")
@@ -8,10 +9,6 @@ cost_filename = joinpath(@__DIR__, "../../databases/cost_functions.json")
 cost_functions = read_cost_functions(cost_filename)
 
 case = Case(network_filename)
-
-# Remove the feeder at bus 36.
-# deleteat!(case.gen, case.gen.bus.=="36")
-
 
 # Remove the old/weird switches and add switches according to presentation
 deleteat!(case.switch, 4:53)
@@ -36,6 +33,41 @@ function add_switches(case::Case, switches::Vector{Tuple{String,String}}, closed
         ),
     )
 end
+
+function add_smart_substation(case::Case, bus::String, switching_time::Real)
+    bb = case.branch
+    ss = case.switch
+    # First check if the case has fault indicator and add if not.
+    for ind in ["ind_f_bus", "ind_t_bus"]
+        if ind ∉ names(bb)
+            bb[!, Symbol(ind)] .= ""
+        end
+    end
+
+    # Find all the branches going out of the smart substation
+    branches = bb[bb.t_bus.==bus.||bb.f_bus.==bus, :]
+    # Add fault indicators and switches to the smart substation
+    for branch in eachrow(branches)
+        if branch.f_bus == bus
+            t_bus = branch.t_bus
+        else
+            t_bus = branch.f_bus
+        end
+        switch = ss[ss.f_bus.==bus.&&ss.t_bus.==t_bus, :]
+        if isempty(switch)
+            push!(ss, deepcopy(ss[1, :]))
+            ss[1, :f_bus] = bus
+            ss[1, :t_bus] = t_bus
+            ss[1, :t_remote] = switching_time
+        else
+            switch.t_remote .= switching_time
+        end
+    end
+    bb[bb.f_bus.==bus, :ind_f_bus] .= bus
+    bb[bb.t_bus.==bus, :ind_t_bus] .= bus
+end
+
+
 
 # switches in the presentaiton
 remote_switches = [
@@ -157,8 +189,10 @@ temp_gen2.E .= 100
 temp_gen2.Pmax .= 2
 #case.gen = vcat(case.gen, temp_gen2)
 
-network = Network(case)
+add_smart_substation(case, "47", 1 / 3600)
+add_smart_substation(case, "12", 1 / 3600)
 
+network = Network(case)
 t = compress_relrad(network)
 res = transform_relrad_data(network, t, cost_functions)
 ENS_total = sum(sum(eachcol(res.ENS[:, 1:end-1])))
