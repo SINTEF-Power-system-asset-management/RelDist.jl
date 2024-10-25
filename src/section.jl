@@ -733,9 +733,10 @@ function handle_overlap(
 )
     best_parts = deepcopy(parts)
     island_idx = [0, 0]
-    seen = Set{Tuple{String,String}}()
+    seen = Set{Tuple{KeyType,KeyType}}()
     best_p = Inf
     leaves_rest_w = 0.0
+    best_edge = Tuple{KeyType,KeyType}
     # Iterate over all the buses that are in both parts
     for common in overlapping
         # Itereate over all the edges that are going out of the
@@ -787,6 +788,7 @@ function handle_overlap(
                             leaves_rest_w = temp_leaves_rest_w
                             best_parts = temp_parts
                             best_p = temp_p
+                            best_edge = (common, neighbor)
                         end
                     end
                 end
@@ -797,7 +799,7 @@ function handle_overlap(
         throw("Could not split network")
     end
     off_limits = union(off_limits, union([part.subtree for part in best_parts]...))
-    return best_parts
+    return best_parts, best_edge
 end
 
 
@@ -808,17 +810,18 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
         traverse_classic!(network, part, dfs = true)
         # If a part can supply all the loads we just return this part.
         if all_loads_supplied(network, part)
-            return [part]
+            return [part], 0.0
         end
     end
-
     # In case there was only one part we don't have to check for overlap
     if length(parts) == 1
-        return [part]
+        return [part], 0.0
     end
 
     # Create a list of vertices we have analysed
     off_limits = union([part.subtree for part in parts]...)
+
+    splitting_times = zeros(length(parts))
 
     # After we have grown all the parts we have to check if any of them are 
     # overlapping.
@@ -826,8 +829,10 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
         overlapping = intersect(parts[comb_idx[1]], parts[comb_idx[2]])
         if length(overlapping) > 0
             # An old part is overlapping, we should handle this overlap.
-            parts[comb_idx] =
+            parts[comb_idx], split_edge =
                 handle_overlap(network, parts[comb_idx], overlapping, off_limits)
+            splitting_times[comb_idx] .+=
+                findmin([s.switching_time for s in network[split_edge...].switches])[1]
         end
     end
     # We have handled the overlaps. Now we have to search all the way to the end
@@ -836,7 +841,7 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
     for part in parts[sortperm([part.rest_power for part in parts], rev = true)]
         traverse_leaves!(network, part, off_limits, allow_shedding = true)
     end
-    parts
+    parts, splitting_times
 end
 
 function segment_network_classic(network::Network)

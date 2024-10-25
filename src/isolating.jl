@@ -204,7 +204,9 @@ function binary_fault_search(
             if Set(indicator_edge) == Set(edge)
                 # There are indicators on both sides of the edge where the fault is
                 # we are done
-                return (tₛ, attempts)
+                tₛ += findmin([s.switching_time for s in network[edge...].switches])[1]
+
+                return (tₛ + t_f, attempts)
             end
             # Check if there is one indicator on the faulted edge
             indicator_handled = false

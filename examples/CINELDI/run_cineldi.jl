@@ -13,10 +13,22 @@ case = Case(network_filename)
 # Remove the old/weird switches and add switches according to presentation
 deleteat!(case.switch, 4:53)
 
+# The reserve connections need breakers
+push!(case.switch, deepcopy(case.switch[1, :]))
+case.switch[1, :f_bus] = "36"
+case.switch[1, :t_bus] = "35"
+case.switch[1, :closed] = false
+push!(case.switch, deepcopy(case.switch[1, :]))
+case.switch[1, :f_bus] = "62"
+case.switch[1, :t_bus] = "61"
+case.switch[1, :closed] = false
+push!(case.switch, deepcopy(case.switch[1, :]))
+case.switch[1, :f_bus] = "88"
+case.switch[1, :t_bus] = "87"
+case.switch[1, :closed] = false
 # Add switch data for the smart healing stuff
 case.switch[!, :t_remote] .= 0.5 #1/3600 # I set the remote switching time to 1 second
 case.switch[!, :t_manual] .= 0.5 # I set the manual switching time to 30 minutes
-
 function add_switches(case::Case, switches::Vector{Tuple{String,String}}, closed::Bool)
     f_buses = [s[1] for s in switches]
     t_buses = [s[2] for s in switches]
@@ -85,11 +97,6 @@ remote_switches = [
 ]
 
 add_switches(case, remote_switches, true)
-
-# Add open switches at the reserve connections
-switches = [("36", "35"), ("62", "61"), ("88", "87")]
-#switches = [("62", "61")]
-add_switches(case, switches, false)
 
 # Add additional switches
 
