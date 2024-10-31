@@ -72,7 +72,7 @@ function add_smart_substation(case::Case, bus::String, switching_time::Real)
             ss[1, :t_bus] = t_bus
             ss[1, :t_remote] = switching_time
         else
-            switch.t_remote .= switching_time
+            ss[ss.f_bus.==bus.&&ss.t_bus.==t_bus, :t_remote] .= switching_time
         end
     end
     bb[bb.f_bus.==bus, :ind_f_bus] .= bus
