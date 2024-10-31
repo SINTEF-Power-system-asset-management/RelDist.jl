@@ -115,6 +115,9 @@ function serve_and_delete!(
         return
     end
 
+    # Maximum time we may need a battery.
+    t_m = repair_time - isolation_time
+
     # Then we have to check if batteries can help to serve load
     while !isempty(loads) && !isempty(ders)
         ratings = [der.power for der in ders]
@@ -133,9 +136,9 @@ function serve_and_delete!(
         # (unlikely in a realistic case)
         min_time_idx = findall(times .== min_time)
 
-        if min_time >= repair_time
-            min_time = repair_time
-            # If min time is larger than the repair time, it means that the loads in
+        if min_time >= t_m
+            min_time = t_m
+            # If min time is larger than t_m, it means that the loads in
             # this round can be served for the whole duration
             set_outage_time!(loads[served_idx], outage_times, isolation_time)
             # Delete the loads we could not serve
@@ -157,10 +160,10 @@ function serve_and_delete!(
         end
 
         serve_time += min_time
-        if serve_time >= repair_time
+        if serve_time >= t_m
             return
         end
-        if min_time < repair_time
+        if min_time < t_m
             # Delete the battery that was empty
             deleteat!(ders, min_time_idx)
         end
