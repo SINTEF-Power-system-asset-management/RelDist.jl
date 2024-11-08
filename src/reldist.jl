@@ -123,8 +123,13 @@ function outage_times_with_reconf!(
     end
 end
 
-function relrad_calc_2(network::Network; segment_func::Function = segment_network_classic)
+function relrad_calc_2(
+    network::Network;
+    segment_func::Function = segment_network_classic,
+    γ::Real = 1.0,
+)
     colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
+    @show γ
     ncols = length(colnames)
     nrows = length(edge_labels(network))
     vals = fill(1337.0, (nrows, ncols))
@@ -148,7 +153,7 @@ function relrad_calc_2(network::Network; segment_func::Function = segment_networ
             (_, _cuts_to_make_irl) = isolate_and_get_time!(network, edge)
 
             if segment_func == segment_network_classic
-                optimal_split, splitting_times = segment_network_classic(network)
+                optimal_split, splitting_times = segment_network_classic(network, γ)
                 power_and_energy_balance!(
                     network,
                     optimal_split,
@@ -202,9 +207,13 @@ function relrad_calc_2(network::Network; segment_func::Function = segment_networ
 end
 
 
-function compress_relrad(network::Network; segment_func::Function = segment_network_classic)
+function compress_relrad(
+    network::Network;
+    segment_func::Function = segment_network_classic,
+    γ::Real = 1.0,
+)
     compressed_network, edge_mapping = remove_switchless_branches(network)
-    res = relrad_calc_2(compressed_network, segment_func = segment_func)
+    res = relrad_calc_2(compressed_network, segment_func = segment_func, γ = γ)
     mapped_res = empty(res)
 
     for row in eachrow(res)

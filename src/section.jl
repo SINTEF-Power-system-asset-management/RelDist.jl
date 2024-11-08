@@ -733,6 +733,7 @@ function handle_overlap(
     parts::Vector{NetworkPart},
     overlapping::Set{KeyType},
     off_limits::Set{KeyType},
+    γ::Real = 1.0,
 )
     best_parts = deepcopy(parts)
     island_idx = [0, 0]
@@ -777,18 +778,11 @@ function handle_overlap(
                                 off_limits,
                             ) for (part_id, part) in enumerate(parts)
                         ]
-                        temp_p = sum(part.rest_power for part in temp_parts)
+                        temp_p = sum(
+                            part.rest_power * (1 - γ * length(part.leaf_nodes)) for
+                            part in temp_parts
+                        )
                         if temp_p <= best_p
-                            max_res, max_res_idx =
-                                findmax([part.rest_power for part in temp_parts])
-                            temp_leaves_rest_w =
-                                length(temp_parts[max_res_idx].leaf_nodes) * max_res
-                            if temp_p == best_p
-                                if temp_leaves_rest_w < leaves_rest_w
-                                    continue
-                                end
-                            end
-                            leaves_rest_w = temp_leaves_rest_w
                             best_parts = temp_parts
                             best_p = temp_p
                             best_edge = (common, neighbor)
@@ -806,7 +800,11 @@ function handle_overlap(
 end
 
 
-function segment_network_classic(network::Network, parts::Vector{NetworkPart})
+function segment_network_classic(
+    network::Network,
+    parts::Vector{NetworkPart},
+    γ::Real = 1.0,
+)
     # First we check what the different parts can supply. In this step, we grow the parts
     # from the supply. In case one of the parts can supply everything we stop the search.
     for part in parts
@@ -833,7 +831,7 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
         if length(overlapping) > 0
             # An old part is overlapping, we should handle this overlap.
             parts[comb_idx], split_edge =
-                handle_overlap(network, parts[comb_idx], overlapping, off_limits)
+                handle_overlap(network, parts[comb_idx], overlapping, off_limits, γ)
             splitting_times[comb_idx] .+=
                 findmin([s.switching_time for s in network[split_edge...].switches])[1]
         end
@@ -847,10 +845,10 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
     parts, splitting_times
 end
 
-function segment_network_classic(network::Network)
+function segment_network_classic(network::Network, γ::Real = 1.0)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
-    segment_network_classic(network, parts)
+    segment_network_classic(network, parts, γ)
 end
 
 ## End of classic reimpl
