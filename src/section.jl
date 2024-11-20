@@ -747,11 +747,14 @@ function handle_overlap(
         # common bus
         for neighbor in neighbor_labels(network, common)
             edge = sort((neighbor, common))
-            if edge ∈ seen
+            if edge ∈ seen || neighbor == common
                 continue
             end
             # Create a copy of the network and remove the edge
             let network = deepcopy(network)
+                s_time = findmin([
+                    s.switching_time for s in network[edge...].switches, init in 0.0
+                ])[1]
                 delete!(network, common, neighbor)
                 islands = connected_components(network)
                 if length(islands) == 1
@@ -779,8 +782,7 @@ function handle_overlap(
                             ) for (part_id, part) in enumerate(parts)
                         ]
                         temp_p = sum(
-                            part.rest_power * (1 - γ * length(part.leaf_nodes)) for
-                            part in temp_parts
+                            part.rest_power * s_time * (1 - γ * length(part.leaf_nodes)) for part in temp_parts
                         )
                         if temp_p <= best_p
                             best_parts = temp_parts
