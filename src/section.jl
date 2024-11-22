@@ -782,8 +782,8 @@ function handle_overlap(
                         ]
                         temp_p = sum(
                             part.rest_power *
-                            ((part.conn_time + s_time) - γ * length(part.leaf_nodes))
-                            for part in temp_parts
+                            (part.conn_time + s_time) *
+                            (1 - γ * length(part.leaf_nodes)) for part in temp_parts
                         )
                         # temp_p = sum(
                         # part.rest_power + γ * length(part.leaf_nodes) for part in temp_parts
