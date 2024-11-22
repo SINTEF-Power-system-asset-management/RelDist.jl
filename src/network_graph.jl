@@ -327,7 +327,8 @@ function find_supply_breaker(network::Network, supply::KeyType)
 end
 
 function find_supply_breaker_time(network::Network, supply::KeyType)
-    find_supply_breaker(network, supply).switching_time
+    supply = find_supply_breaker(network, supply)
+    return isnothing(supply) ? Inf : supply.switching_time
 end
 
 

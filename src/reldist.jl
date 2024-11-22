@@ -137,7 +137,6 @@ function relrad_calc_2(
     outage_times[!, :cut_edge] = collect(map(sort, edge_labels(network)))
 
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
-    feeder_times = [find_supply_breaker_time(network, supply) for supply in supplies]
 
     feeder = find_main_supply(network)
     feeder_time = find_supply_breaker_time(network, feeder)
@@ -162,7 +161,7 @@ function relrad_calc_2(
                     outage_times[edge_idx, :],
                 )
                 for (part_i, part) in enumerate(optimal_split)
-                    reconf_time = splitting_times[part_i] + feeder_times[part_i]
+                    reconf_time = splitting_times[part_i] + part.conn_time
                     outage_times_with_reconf!(
                         network,
                         outage_times[edge_idx, :],

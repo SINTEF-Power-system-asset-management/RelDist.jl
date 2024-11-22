@@ -2,6 +2,7 @@ module network_part
 
 using ..network_graph: Network, KeyType, get_supply_power, get_load_power, is_supply
 using ..network_graph: Bus, neighbor_labels, nv, NewBranch, shed_load!, LoadUnit
+using ..network_graph: find_supply_breaker_time
 
 """Representation of the subgraph of the network that is supplied by a given bus.
 Note: This is an implementation detail to `segment_network` and should not be used outside it."""
@@ -10,16 +11,18 @@ mutable struct NetworkPart
     rest_power::Float64
     subtree::Set{KeyType}
     leaf_nodes::Set{KeyType}
+    conn_time::Real
 end
 
 function NetworkPart(network::Network, supply::KeyType)
     bus = network[supply]
+    conn_time = find_supply_breaker_time(network, supply)
     if !is_supply(bus)
         error("Parts should only be instantiated at power supplies")
     end
     subtree = Set([supply])
     leaf_nodes = Set([supply])
-    NetworkPart(supply, get_supply_power(bus), subtree, leaf_nodes)
+    NetworkPart(supply, get_supply_power(bus), subtree, leaf_nodes, conn_time)
 end
 
 Base.hash(party::NetworkPart, h::UInt) = hash(party.subtree, h)
