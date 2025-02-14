@@ -12,4 +12,6 @@ Modules = [RelDist]
 
 ```@autodocs
 Modules = [RelDist]
+Order = [:function]
 ```
+

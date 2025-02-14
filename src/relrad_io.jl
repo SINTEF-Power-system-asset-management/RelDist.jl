@@ -15,6 +15,11 @@ function parse_zulu(zulu::String)::ZonedDateTime
     end
 end
 
+function default_cost_functions()
+    read_cost_functions(joinpath(@__DIR__, "../databases/cost_functions.json"))
+end
+
+
 function read_cost_functions(fname::String)::Dict{String,PieceWiseCost}
     io = open(fname)
     piecewise_cost = read_cost_functions(io)

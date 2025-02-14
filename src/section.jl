@@ -822,7 +822,7 @@ function segment_network_classic(
     end
     # In case there was only one part we don't have to check for overlap
     if length(parts) == 1
-        return [part], 0.0
+        return [parts[1]], 0.0
     end
 
     # Create a list of vertices we have analysed

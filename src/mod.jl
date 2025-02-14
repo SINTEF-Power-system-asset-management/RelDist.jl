@@ -32,10 +32,6 @@ include("from_case.jl")
 @reexport using .from_case: Network
 using .from_case: filter
 
-include("reldist.jl")
-@reexport using .reldist:
-    relrad_calc_2, transform_relrad_data, compress_relrad, isolate_and_get_time!
-@reexport using .reldist: NewResult
 
 include("graphviz.jl")
 @reexport using .graphviz_mod: to_dot, dot_plot

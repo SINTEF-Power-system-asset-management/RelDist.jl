@@ -1,4 +1,3 @@
-module reldist
 
 using Graphs: SimpleGraph, Graph
 import Graphs: connected_components
@@ -129,14 +128,11 @@ function relrad_calc_2(
     γ::Real = 1.0,
 )
     colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
-    @show γ
     ncols = length(colnames)
     nrows = length(edge_labels(network))
     vals = fill(1337.0, (nrows, ncols))
     outage_times = DataFrame(vals, colnames)
     outage_times[!, :cut_edge] = collect(map(sort, edge_labels(network)))
-
-    supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
 
     feeder = find_main_supply(network)
     feeder_time = find_supply_breaker_time(network, feeder)
@@ -324,5 +320,3 @@ function transform_relrad_data(
         cost_of_ens_year,
     )
 end
-
-end # module reldist
