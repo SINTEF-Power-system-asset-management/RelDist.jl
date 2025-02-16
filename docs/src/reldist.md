@@ -2,14 +2,25 @@
 We will here explain how the method works on a simple example. 
 
 ## Graph compression
-We will demonstrate the method using the network depicted in the figure below. Since most of our algorithms work better if there are switches on all edges, we deploy a compression algorithm that merges lines without switches. An example of what the outcome of this algorithm is depicted below.
+We will demonstrate the method using the network depicted in the figure below. Since most of our algorithms work better if there are switches on all edges, we deploy a compression algorithm that merges lines without switches. An example of the outcome of this algorithm is depicted below.
 ![Example of compression algorithm](compression.png)
 
 ## Fault isolation
-Faults are isolated by switches upstream and downstream of the faulted line. The fault isolation algorithm uses a binary search to find the faulted line. In the search the network is split in two at the centre of the graph (topological centre, could consider line lengths later). 
+Faults are isolated by switches upstream and downstream of the faulted line. The fault isolation algorithm uses a binary search to find the faulted line. In the search the network is split in two at the centre of the graph (topological centre, could consider line lengths later). If the fault is upstream of the split we delete the downstream part of the graph, and if it is downstream we delete the part upstream. 
+![Fault up or downstream from split](fault_up_down.png)
+
+The algorithm for finding the centre iteratively deletes all leaves of the graph until only one or two vertices are left. An example is shown below:
+![Centre finding](find_centre.png)
+
+Fault indicators are considered by deleting the part of the graph where the fault indicator says that the fault is not. An example of this is depicted in:
+![Example of use of fault indicator](fault_indicator.png)
 
 ## Reconfiguration
-For the example depicted in Fig.~\ref{fig:isolation} it is obvious that the load on bus 8 cannot be served for any of the graphs in $RN$. Moreover, we see that in the case of $\mathcal{R}_u$ the loads on buses 10 and 13 will also not be served and that the loads 6 and 7 will not be served for $\mathcal{R}_d$.
+After we have isolated a fault due to fault on line 2-3, we check which loads the reserve connections $f_1$ and $f_2$ can serve. This is done using a DFS starting from each of the reserve connections, that continues until it has seen more load than the capacity of the feeder. After these two DFS we may end up in a situation as depicted below:
+![Initial split into parts](initial_parts.png)
+
+We require that the network is operated radially. Therefore, we need to find a switch that splits the network between the two reserve connections $f_1$ and $f_2$. We do this by opening all switches in the area covered by the two first inital DFS. After opening a switch, one or both of the reserve connections may be able to serve more load and we do a DFS from all their leaf nodes, to see if we can serve more load. An example of this and the final best split is show below.
+![Final split into parts](final_parts.png)
  
 ### Partitioning
 A potential end result of the partitioning algorithm is presented in Fig.~\ref{fig:reconfiguration} where $P(\mathcal{R}, f_1) = V_1 = (5, \{6, 7\}, \{8, 9\}, 10, 12, 13, 11)$ and $P(\mathcal{R}, f_2) = V_2 = (5, \{8,9\}, 10, 12, 13, \{14, 15, 16\}, 17)$. For a set of vertices $V$ we define the function $p_l(V)$ that returns the total load in the the partion $V$.
