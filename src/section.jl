@@ -806,11 +806,7 @@ function handle_overlap(
 end
 
 
-function segment_network_classic(
-    network::Network,
-    parts::Vector{NetworkPart},
-    γ::Real = 1.0,
-)
+function segment_network_classic(network::Network, parts::Vector{NetworkPart})
     # First we check what the different parts can supply. In this step, we grow the parts
     # from the supply. In case one of the parts can supply everything we stop the search.
     for part in parts
@@ -854,10 +850,10 @@ function segment_network_classic(
     parts, splitting_times
 end
 
-function segment_network_classic(network::Network, γ::Real = 1.0)
+function segment_network_classic(network::Network)
     supplies = [vertex for vertex in labels(network) if is_supply(network[vertex])]
     parts = [NetworkPart(network, supply) for supply in supplies]
-    segment_network_classic(network, parts, γ)
+    segment_network_classic(network, parts)
 end
 
 ## End of classic reimpl

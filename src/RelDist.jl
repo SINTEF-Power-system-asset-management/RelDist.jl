@@ -15,5 +15,6 @@ export empty_network, Network, Bus, BusKind, NetworkPart, segment_network
 
 include("reldist.jl")
 export compress_relrad, transform_relrad_data, relrad_calc_2, isolate_and_get_time!
+export relrad_calc_multiple_os, power_matrix
 
 end # module

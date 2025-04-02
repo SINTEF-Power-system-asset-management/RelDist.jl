@@ -6,7 +6,7 @@ using MetaGraphsNext: MetaGraphsNext
 import MetaGraphsNext: labels, edge_labels, neighbor_labels, nv, ne, label_for
 import MetaGraphsNext: haskey, setindex!, getindex, delete!
 using SintPowerCase: Case
-using DataFrames: outerjoin, keys
+using DataFrames: outerjoin, keys, DataFrameRow
 using DataStructures: DefaultDict, Queue
 
 import Base
@@ -329,6 +329,14 @@ end
 function find_supply_breaker_time(network::Network, supply::KeyType)
     supply = find_supply_breaker(network, supply)
     return isnothing(supply) ? Inf : supply.switching_time
+end
+
+function power_from_loaddatarow!(network::Network, row::DataFrameRow)
+    for v in labels(network)
+        for load in network[v].loads
+            load.power = row[load.id]
+        end
+    end
 end
 
 

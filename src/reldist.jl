@@ -11,7 +11,7 @@ using Accessors: @set, @reset
 
 import Base
 
-using ..network_graph: is_supply, Network, KeyType
+using ..network_graph: is_supply, Network, KeyType, ne, power_from_loaddatarow!
 using ..network_graph: LoadUnit, NewSwitch, NewBranch, time_to_cut, get_min_cutting_time
 using ..network_graph: is_switch, get_kile, find_main_supply, find_supply_breaker_time
 using ..section: kile_loss, unsupplied_nfc_loss, segment_network, segment_network_classic
@@ -122,10 +122,17 @@ function outage_times_with_reconf!(
     end
 end
 
+function relrad_calc_2(network::Network; segment_func::Function = segment_network_classic)
+    feeder = find_main_supply(network)
+    feeder_time = find_supply_breaker_time(network, feeder)
+    isolation_times = calculate_all_isolating_times(network, feeder, feeder_time)
+    relrad_calc_2(network, isolation_times, segment_func = segment_func)
+end
+
 function relrad_calc_2(
-    network::Network;
+    network::Network,
+    isolation_times::Dict{Tuple{String,String},Float64};
     segment_func::Function = segment_network_classic,
-    γ::Real = 1.0,
 )
     colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
     ncols = length(colnames)
@@ -134,21 +141,17 @@ function relrad_calc_2(
     outage_times = DataFrame(vals, colnames)
     outage_times[!, :cut_edge] = collect(map(sort, edge_labels(network)))
 
-    feeder = find_main_supply(network)
-    feeder_time = find_supply_breaker_time(network, feeder)
-
     for (edge_idx, edge) in enumerate(outage_times[:, :cut_edge])
         # Shadow old network to not override by accident
         let network = deepcopy(network)
-            isolation_time, _ =
-                binary_fault_search(network, sort(edge), feeder, feeder_time)
+            isolation_time = isolation_times[edge]
 
             repair_time = network[edge...].repair_time
             [outage_times[edge_idx, colname] = repair_time for colname in colnames] # Worst case for this fault
             (_, _cuts_to_make_irl) = isolate_and_get_time!(network, edge)
 
             if segment_func == segment_network_classic
-                optimal_split, splitting_times = segment_network_classic(network, γ)
+                optimal_split, splitting_times = segment_network_classic(network)
                 power_and_energy_balance!(
                     network,
                     optimal_split,
@@ -189,7 +192,6 @@ function relrad_calc_2(
             end
         end
     end
-
     for vertex in labels(network)
         for load::LoadUnit in network[vertex].loads
             if load.is_nfc
@@ -197,18 +199,46 @@ function relrad_calc_2(
             end
         end
     end
-
     outage_times
 end
 
 
-function compress_relrad(
-    network::Network;
+"""
+  Runs the relrad algorithm for several years.
+
+  Args:
+  - network: Graph containing the network.
+  - loaddata: DataFrame with the loads per time step.
+"""
+function relrad_calc_multiple_os(
+    network_full::Network,
+    loaddata::DataFrame;
     segment_func::Function = segment_network_classic,
-    γ::Real = 1.0,
 )
-    compressed_network, edge_mapping = remove_switchless_branches(network)
-    res = relrad_calc_2(compressed_network, segment_func = segment_func, γ = γ)
+    network, edge_mapping = remove_switchless_branches(network_full)
+
+    colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
+    outage_times =
+        DataFrame(zeros(ne(network_full) * size(loaddata)[1], size(loaddata)[2]), colnames)
+    outage_times[:, :cut_edge] = [("", "") for i = 1:size(outage_times)[1]]
+    outage_times[:, :os_idx] .= repeat(1:size(loaddata)[1], inner = length(colnames))
+
+    feeder = find_main_supply(network)
+    feeder_time = find_supply_breaker_time(network, feeder)
+    isolation_times = calculate_all_isolating_times(network, feeder, feeder_time)
+
+    for (idx, row) in enumerate(eachrow(loaddata))
+        power_from_loaddatarow!(network, row)
+        res = relrad_calc_2(network, isolation_times, segment_func = segment_func)
+        outage_times[outage_times.os_idx.==idx, 1:end-1] = map_res(res, edge_mapping)
+    end
+    return outage_times
+end
+
+function map_res(
+    res::DataFrame,
+    edge_mapping::Dict{Tuple{KeyType,KeyType},Vector{Tuple{KeyType,KeyType}}},
+)
     mapped_res = empty(res)
 
     for row in eachrow(res)
@@ -220,6 +250,12 @@ function compress_relrad(
         end
     end
     mapped_res
+end
+
+function compress_relrad(network::Network; segment_func::Function = segment_network_classic)
+    compressed_network, edge_mapping = remove_switchless_branches(network)
+    res = relrad_calc_2(compressed_network, segment_func = segment_func)
+    map_res(res, edge_mapping)
 end
 
 """Get power data on the same format as the times df."""
@@ -236,6 +272,7 @@ function power_matrix(network::Network, times::DataFrame)
     end
     power_df
 end
+
 
 """Get fault_rate data on the same format as the times df."""
 function fault_rate_matrix(network::Network, times::DataFrame)
@@ -291,13 +328,49 @@ end
 function transform_relrad_data(
     network::Network,
     times::DataFrame,
+    loadata::DataFrame,
     cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
     correction_factor = 1.0,
 )
-    # To get times, we should use the compressed network. For everything else we can use the original
-    power = power_matrix(network, times)
-    fault_rate = fault_rate_matrix(network, times)
+    res = NewResult(
+        copy(times),
+        copy(times),
+        copy(times),
+        copy(times),
+        copy(times),
+        copy(times),
+    )
 
+    for (os_idx, row) in enumerate(eachrow(loadata))
+        power_from_loaddatarow!(network, row)
+        power = power_matrix(network, times[times.os_idx.==os_idx, :])
+        fault_rate = fault_rate_matrix(network, times[times.os_idx.==os_idx, :])
+        temp_res = transform_relrad_data(
+            network,
+            select(times[times.os_idx.==os_idx, :], Not(:os_idx)),
+            select(power, Not(:os_idx)),
+            select(fault_rate, Not(:os_idx)),
+            cost_functions,
+            correction_factor,
+        )
+        # Update res
+        res.power[res.power.os_idx.==os_idx, :] = power
+        res.lambda[res.lambda.os_idx.==os_idx, :] = fault_rate
+        res.U[res.U.os_idx.==os_idx, 1:end-1] = temp_res.U
+        res.ENS[res.ENS.os_idx.==os_idx, 1:end-1] = temp_res.ENS
+        res.CENS[res.CENS.os_idx.==os_idx, 1:end-1] = temp_res.CENS
+    end
+    return res
+end
+
+function transform_relrad_data(
+    network::Network,
+    times::DataFrame,
+    power::DataFrame,
+    fault_rate::DataFrame,
+    cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor::Real = 1.0,
+)
     p = select(power, Not(:cut_edge))
     lambda = select(fault_rate, Not(:cut_edge))
     outage_time = select(times, Not(:cut_edge))
@@ -318,5 +391,24 @@ function transform_relrad_data(
         interruption_duration,
         energy_not_supplied,
         cost_of_ens_year,
+    )
+end
+
+function transform_relrad_data(
+    network::Network,
+    times::DataFrame,
+    cost_functions = DefaultDict{String,PieceWiseCost}(PieceWiseCost()),
+    correction_factor::Real = 1.0,
+)
+    # To get times, we should use the compressed network. For everything else we can use the original
+    power = power_matrix(network, times)
+    fault_rate = fault_rate_matrix(network, times)
+    transform_relrad_data(
+        network,
+        times,
+        power,
+        fault_rate,
+        cost_functions,
+        correction_factor,
     )
 end

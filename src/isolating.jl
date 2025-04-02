@@ -332,19 +332,16 @@ end
 
 function calculate_all_isolating_times(network::Network)
     feeder = find_main_supply(network)
-    times = []
-    operations = []
-    for edge in edge_labels(network)
-        time, attempts = binary_fault_search(
-            network,
-            sort(edge),
-            feeder,
-            find_supply_breaker_time(network, feeder),
-        )
-        push!(times, time)
-        push!(operations, attempts)
-    end
-    return times, operations
+    feeder_time = find_supply_breaker_time(network, feeder)
+    calculate_all_isolating_times(network, feeder, feeder_time)
+end
+
+function calculate_all_isolating_times(network::Network, feeder::KeyType, feeder_time::Real)
+    times = Dict(
+        sort(edge) => binary_fault_search(network, sort(edge), feeder, feeder_time)[1]
+        for edge in edge_labels(network)
+    )
+    return times
 end
 
 # End of module
