@@ -7,6 +7,15 @@ using ..section: sort
 using Combinatorics: combinations, permutations
 using MetaGraphsNext: edge_labels
 
+"""Helper function to delete edges adjacent to edge, except the edge itself"""
+function delete_adjacent!(network::Network, src::KeyType, dst::KeyType)
+    for v in neighbor_labels(network, src)
+        if v != dst
+            delete!(network, src, v)
+        end
+    end
+end
+
 """
    Returns the edges of the network in a DFS order.
 """
@@ -183,6 +192,25 @@ function reduce_search_area!(
     return feeder
 end
 
+function reduce_search_area!(
+    network::Network,
+    edge::Tuple{KeyType,KeyType},
+    bus::KeyType,
+    feeder::KeyType,
+)
+    for nbr in neighbor_labels(network, bus)
+        if nbr ∉ edge
+            # Now we need to check if we should change the feeder bus
+            found, _ = find_vertices(network, [feeder], bus, [nbr])
+            delete!(network, bus, nbr)
+            if found
+                feeder = bus
+            end
+        end
+    end
+    return feeder
+end
+
 
 """
     Find the time needed to isolate a fault using binary search.
@@ -221,16 +249,7 @@ function binary_fault_search(
                     indicator_handled = true
                     # One of the buses are on the faulted edge
                     # Delete all outgoing buses.
-                    for nbr in neighbor_labels(network, i_bus)
-                        if nbr ∉ edge
-                            # Now we need to check if we should change the feeder bus
-                            found, _ = find_vertices(network, [feeder], i_bus, [nbr])
-                            delete!(network, i_bus, nbr)
-                            if found
-                                feeder = i_bus
-                            end
-                        end
-                    end
+                    feeder = reduce_search_area!(network, edge, i_bus, feeder)
                 end
             end
             if !indicator_handled
@@ -239,7 +258,7 @@ function binary_fault_search(
         end
 
         switch = deepcopy(edge)
-        while ne(network) > 1 || attempts < n_edges
+        while ne(network) > 1 && attempts < n_edges
             # Increase the isolation time with the time needed to operate the
             # circuit breaker of the feeder. 
             tₛ += t_f
@@ -261,9 +280,17 @@ function binary_fault_search(
 
             # Now we have to choose the switch to operate.
             s_times = Vector{Real}(undef, length(switches))
+            s_buses = Vector{String}(undef, length(switches))
             for (i, temp_s) in enumerate(switches)
-                tmp = [s.switching_time for s in network[temp_s...].switches]
-                s_times[i] = isempty(tmp) ? Inf : findmin(tmp)[1]
+                temp_switches = network[temp_s...].switches
+                tmp_times = [s.switching_time for s in temp_switches]
+                if isempty(tmp_times)
+                    s_times[i] = Inf
+                    s_buses[i] = ""
+                else
+                    s_times[i], j = findmin(tmp_times)
+                    s_buses[i] = temp_switches[j].bus
+                end
             end
 
             # I consider switches that have a switching time of 1 minute close
@@ -275,6 +302,7 @@ function binary_fault_search(
             if length(min_times) == 1
                 switch = switches[min_times[1]]
                 tₛ += s_times[min_times[1]]
+                s_bus = s_buses[min_times[1]]
             else
                 # More than one switch was the fastest. We choose the one closest
                 # to the feeder.
@@ -291,6 +319,7 @@ function binary_fault_search(
                     if found
                         switch = s
                         tₛ += s_times[min_times[i]]
+                        s_bus = s_buses[min_times[i]]
                         break
                     end
                 end
@@ -299,35 +328,21 @@ function binary_fault_search(
                     # None of the fastest switches were closest to the feeder.
                     # Choose the one that saw the most
                     switch = switches[l_i]
+                    s_bus = s_buses[l_i]
                 end
-
             end
 
-            # If we by chance chose the faulted edge as the switch to open
-            # we will assume that the fault is downstream of our switch.
-            if sort(switch) == edge
-                # Opening this switch will clear the fault. This means that the fault
-                # is downstream from our switch.
-                # Now we need to find the direction that is downstream
-                for (dir, ignore) in permutations(collect(switch), 2)
-                    seen = dfs(network, dir, [ignore])
-                    if feeder ∈ seen
-                        # Delete the branches upstream of the switch.
-                        for v in neighbor_labels(network, dir)
-                            if v != ignore && v != dir
-                                delete!(network, v)
-                            end
-                        end
-                        feeder = dir
-                        break
-                    end
-                end
+            # In case the switch is on the faulted edge
+            if s_bus ∈ edge
+                feeder = reduce_search_area!(network, edge, s_bus, feeder)
             else
-                # Now we have to check if the fault is upstream or downstream of the switch
                 feeder = reduce_search_area!(network, edge, switch, feeder)
             end
 
         end
+    end
+    if attempts == n_edges
+        @warn(string("Did not find fault on ", edge))
     end
     return (tₛ, attempts)
 end
