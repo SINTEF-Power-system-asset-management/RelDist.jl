@@ -212,6 +212,8 @@ function binary_fault_search(
             # Check if there is one indicator on the faulted edge
             indicator_handled = false
             if indicator_edge ∉ edge_labels(network)
+                # In case the edge we are investigating is not in the network we continue.
+                # This can happen since we delete edges
                 continue
             end
             for i_bus in indicators
@@ -221,9 +223,9 @@ function binary_fault_search(
                     # Delete all outgoing buses.
                     for nbr in neighbor_labels(network, i_bus)
                         if nbr ∉ edge
-                            delete!(network, i_bus, nbr)
                             # Now we need to check if we should change the feeder bus
                             found, _ = find_vertices(network, [feeder], i_bus, [nbr])
+                            delete!(network, i_bus, nbr)
                             if found
                                 feeder = i_bus
                             end
