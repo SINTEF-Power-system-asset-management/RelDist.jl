@@ -734,7 +734,6 @@ function handle_overlap(
     parts::Vector{NetworkPart},
     overlapping::Set{KeyType},
     off_limits::Set{KeyType},
-    γ::Real = 1.0,
 )
     best_parts = deepcopy(parts)
     island_idx = [0, 0]
@@ -781,13 +780,9 @@ function handle_overlap(
                             ) for (part_id, part) in enumerate(parts)
                         ]
                         temp_p = sum(
-                            part.rest_power *
-                            (part.conn_time + s_time) *
-                            (1 - γ * length(part.leaf_nodes)) for part in temp_parts
+                            part.rest_power * (part.conn_time + s_time) for
+                            part in temp_parts
                         )
-                        # temp_p = sum(
-                        # part.rest_power + γ * length(part.leaf_nodes) for part in temp_parts
-                        # )
                         if temp_p <= best_p
                             best_parts = temp_parts
                             best_p = temp_p
@@ -833,7 +828,7 @@ function segment_network_classic(network::Network, parts::Vector{NetworkPart})
         if length(overlapping) > 0
             # An old part is overlapping, we should handle this overlap.
             parts[comb_idx], split_edge =
-                handle_overlap(network, parts[comb_idx], overlapping, off_limits, γ)
+                handle_overlap(network, parts[comb_idx], overlapping, off_limits)
             cut_time = get_min_cutting_time(network[split_edge...])
             for time_idx in comb_idx
                 splitting_times[time_idx] =
