@@ -201,7 +201,8 @@ function binary_fault_search(
         # We know that the fault will be between the indicators so we remove the
         # indicators from the graph
         for indicator_edge in unique(indicator_edges)
-            if Set(indicator_edge) == Set(edge)
+            indicators = network[indicator_edge...].indicators
+            if Set(indicators) == Set(edge)
                 # There are indicators on both sides of the edge where the fault is
                 # we are done
                 tₛ += findmin([s.switching_time for s in network[edge...].switches])[1]
@@ -213,7 +214,6 @@ function binary_fault_search(
             if indicator_edge ∉ edge_labels(network)
                 continue
             end
-            indicators = network[indicator_edge...].indicators
             for i_bus in indicators
                 if i_bus ∈ edge
                     indicator_handled = true
