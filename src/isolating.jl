@@ -1,7 +1,7 @@
 module isolating
 
 using ..network_graph: Network, KeyType, ne, is_supply, is_main_supply, neighbor_labels
-using ..network_graph: label_for, nv, labels, NewSwitch, find_main_supply
+using ..network_graph: label_for, labels, NewSwitch, find_main_supply
 using ..network_graph: find_supply_breaker_time
 using ..section: sort
 using Combinatorics: combinations, permutations
@@ -172,6 +172,7 @@ function reduce_search_area!(
     red_edge::Tuple{KeyType,KeyType},
     feeder::KeyType,
 )
+    nv = Inf
     for (dir, ignore) in permutations(collect(red_edge), 2)
         seen = dfs(network, dir, [ignore])
         if issubset(edge, seen[2:end])
@@ -182,33 +183,46 @@ function reduce_search_area!(
                 # We cleared the fault and can update what we use as the
                 # feeder
                 feeder = dir
+                nv = length(unique(seen))
             end
             # We know the direction of the fault and can delete vertices
             # that are in the oposite direction.
             delete!(network, ignore)
-            return feeder
+            return feeder, nv
         end
     end
-    return feeder
+    return feeder, nv
 end
 
+"""
+  This function reduces the search area if the fault is located at 
+  the center.
+"""
 function reduce_search_area!(
     network::Network,
     edge::Tuple{KeyType,KeyType},
     bus::KeyType,
     feeder::KeyType,
 )
+    nv = Inf
     for nbr in neighbor_labels(network, bus)
         if nbr ∉ edge
             # Now we need to check if we should change the feeder bus
-            found, _ = find_vertices(network, [feeder], bus, [nbr])
-            delete!(network, bus, nbr)
-            if found
-                feeder = bus
+            seen = dfs(network, nbr, [bus])
+            if feeder ∈ seen
+              nv = length(unique(seen))
+              feeder = bus
             end
+            
+            if nbr == feeder
+              # In case the the neighbor vertex is the feeder, we are done
+              nv = 1
+              feeder = bus
+            end
+            delete!(network, bus, nbr)
         end
     end
-    return feeder
+    return feeder, nv
 end
 
 
@@ -258,7 +272,9 @@ function binary_fault_search(
         end
 
         switch = deepcopy(edge)
-        while ne(network) > 1 && attempts < n_edges
+        nv = Inf
+        while nv > 2 && attempts < n_edges
+        seen = dfs(network, feeder, [""])
             # Increase the isolation time with the time needed to operate the
             # circuit breaker of the feeder. 
             tₛ += t_f
@@ -274,7 +290,8 @@ function binary_fault_search(
                 nbrs = vcat(nbrs, nbr)
             end
 
-            if length(unique(nbrs)) <= 2
+            if length(unique(nbrs)) < 2
+                println("HURRA 1")
                 return (tₛ, attempts - 1)
             end
 
@@ -334,16 +351,23 @@ function binary_fault_search(
 
             # In case the switch is on the faulted edge
             if s_bus ∈ edge
-                feeder = reduce_search_area!(network, edge, s_bus, feeder)
+                feeder, nv = reduce_search_area!(network, edge, s_bus, feeder)
             else
-                feeder = reduce_search_area!(network, edge, switch, feeder)
+                feeder, nv = reduce_search_area!(network, edge, switch, feeder)
             end
+
+      if nv == Inf
+        seen = dfs(network, feeder, [""])
+        nv = length(unique(seen))-1 # -1 to remove ""
+      end
+
 
         end
     end
     if attempts == n_edges
         @warn(string("Did not find fault on ", edge))
     end
+      println("HURRA 2")
     return (tₛ, attempts)
 end
 
