@@ -131,7 +131,7 @@ end
 
 function relrad_calc_2(
     network::Network,
-    isolation_times::Dict{Tuple{String,String},Float64};
+    isolation_times::Dict{Tuple{String,String},Real};
     segment_func::Function = segment_network_classic,
 )
     colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
