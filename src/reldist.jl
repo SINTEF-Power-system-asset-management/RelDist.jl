@@ -131,7 +131,7 @@ end
 
 function relrad_calc_2(
     network::Network,
-    isolation_times::Dict{Tuple{String,String},Real};
+    isolation_times::Dict{Tuple{String,String},<:Real};
     segment_func::Function = segment_network_classic,
 )
     colnames = [load.id for lab in labels(network) for load::LoadUnit in network[lab].loads]
@@ -147,7 +147,7 @@ function relrad_calc_2(
             isolation_time = isolation_times[edge]
 
             repair_time = network[edge...].repair_time
-            [outage_times[edge_idx, colname] = repair_time for colname in colnames] # Worst case for this fault
+            [outage_times[edge_idx, colname] in repair_time for colname in colnames] # Worst case for this fault
             (_, _cuts_to_make_irl) = isolate_and_get_time!(network, edge)
 
             if segment_func == segment_network_classic
@@ -230,7 +230,7 @@ function relrad_calc_multiple_os(
     for (idx, row) in enumerate(eachrow(loaddata))
         power_from_loaddatarow!(network, row)
         res = relrad_calc_2(network, isolation_times, segment_func = segment_func)
-        outage_times[outage_times.os_idx.==idx, 1:end-1] = map_res(res, edge_mapping)
+        outage_times[outage_times.os_idx .== idx, 1:(end-1)] = map_res(res, edge_mapping)
     end
     return outage_times
 end
@@ -343,22 +343,22 @@ function transform_relrad_data(
 
     for (os_idx, row) in enumerate(eachrow(loadata))
         power_from_loaddatarow!(network, row)
-        power = power_matrix(network, times[times.os_idx.==os_idx, :])
-        fault_rate = fault_rate_matrix(network, times[times.os_idx.==os_idx, :])
+        power = power_matrix(network, times[times.os_idx .== os_idx, :])
+        fault_rate = fault_rate_matrix(network, times[times.os_idx .== os_idx, :])
         temp_res = transform_relrad_data(
             network,
-            select(times[times.os_idx.==os_idx, :], Not(:os_idx)),
+            select(times[times.os_idx .== os_idx, :], Not(:os_idx)),
             select(power, Not(:os_idx)),
             select(fault_rate, Not(:os_idx)),
             cost_functions,
             correction_factor,
         )
         # Update res
-        res.power[res.power.os_idx.==os_idx, :] = power
-        res.lambda[res.lambda.os_idx.==os_idx, :] = fault_rate
-        res.U[res.U.os_idx.==os_idx, 1:end-1] = temp_res.U
-        res.ENS[res.ENS.os_idx.==os_idx, 1:end-1] = temp_res.ENS
-        res.CENS[res.CENS.os_idx.==os_idx, 1:end-1] = temp_res.CENS
+        res.power[res.power.os_idx .== os_idx, :] = power
+        res.lambda[res.lambda.os_idx .== os_idx, :] = fault_rate
+        res.U[res.U.os_idx .== os_idx, 1:(end-1)] = temp_res.U
+        res.ENS[res.ENS.os_idx .== os_idx, 1:(end-1)] = temp_res.ENS
+        res.CENS[res.CENS.os_idx .== os_idx, 1:(end-1)] = temp_res.CENS
     end
     return res
 end

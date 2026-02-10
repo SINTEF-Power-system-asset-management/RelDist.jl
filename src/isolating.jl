@@ -262,7 +262,7 @@ function binary_fault_search(
         end
 
         switch = deepcopy(edge)
-        while nv > 3 && attempts < n_edges
+        while nv > 2 && attempts < n_edges
             # Increase the isolation time with the time needed to operate the
             # circuit breaker of the feeder. 
             tₛ += t_f
