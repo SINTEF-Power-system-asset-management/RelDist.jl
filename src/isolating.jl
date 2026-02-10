@@ -182,35 +182,35 @@ function reduce_search_area!(
 
     # Find the direction of the feeder
     feeder_dir = feeder ∈ v_sees ? v : nbr
+    fault_dir = issubset(edge, v_sees) ? v : nbr
+    fault_is_downstream = feeder_dir != fault_dir
 
-    if sort((v, nbr)) == sort(edge) || issubset(edge, nbr_sees)
-        # If the fault is on the edge or the same side as the neighbor we delete the branches going
-        # out from v. 
-        for v_dst in neighbor_labels(network, v)
-            if v_dst != nbr
-                delete!(network, v, v_dst)
-            end
+    nv_add = sort((v, nbr)) == sort(edge) ? 1 : 0
+
+    if sort((v, nbr)) == sort(edge)
+        # If the fault is on the edge we delete the vertices going out from v
+        del_vs = [k for k in neighbor_labels(network, v) if k ∉ edge]
+        for del_v in del_vs
+            delete!(network, del_v)
         end
-        if feeder_dir == v
-            # The feeder is in the same direcition as v, we move the feeder to v.
-            feeder = v
-            nv = length(nbr_sees) + 1 # Keep v in nv length
-        else
-            nv = length(v_sees) + 1 # Keep 
-        end
+        # After we have used a switch we should delete it from the network so we 
+        # cannot use it again
+        network[v, nbr].switches =
+            [switch for switch in network[v, nbr].switches if switch.bus != v]
     else
         # If the fault is on the same side as v we just delete the edge (v, nbr)
         delete!(network, v, nbr)
-        if feeder_dir == v
-            # If v is in the direction of the feeder we keep the old feeder
-            nv = length(v_sees) # Calculate new lenght of graph without nbr
-        else
-            # We have to update what we use as the feeder
-            feeder = v
-            nv = length(nbr_sees) # New length of graph without v
-        end
     end
-    return feeder, nv
+    if fault_dir == v
+        nv = length(v_sees)
+    else
+        nv = length(nbr_sees)
+    end
+    if fault_is_downstream
+        feeder = fault_dir
+    end
+
+    return feeder, nv+nv_add
 end
 
 """
@@ -262,7 +262,7 @@ function binary_fault_search(
         end
 
         switch = deepcopy(edge)
-        while nv > 2 && attempts < n_edges
+        while nv > 3 && attempts < n_edges
             # Increase the isolation time with the time needed to operate the
             # circuit breaker of the feeder. 
             tₛ += t_f
@@ -272,11 +272,12 @@ function binary_fault_search(
             # Find all neighbors to the center vertex or the pair of center vertices
             switches = Vector{Tuple{KeyType,KeyType}}()
             nbrs = Vector{KeyType}()
-            for src in s_bus
+            for src in setdiff(s_bus)
                 nbr = collect(neighbor_labels(network, src))
                 switches = vcat([(src, dst) for dst in nbr if dst != src])
                 nbrs = vcat(nbrs, nbr)
             end
+
 
             if length(unique(nbrs)) < 2
                 return (tₛ, attempts - 1)
@@ -286,16 +287,9 @@ function binary_fault_search(
             s_times = Vector{Real}()
             s_buses = Vector{String}()
             nbr_buses = Vector{KeyType}()
-            brn_frm_fdr = sum(feeder .∈ switches)
             for temp_s in switches
                 temp_switches = network[temp_s...].switches
-                if brn_frm_fdr > 1
-                    # More than one branch from the feeder bus. Allow switching at feeder.
-                    tmp_times = [s.switching_time for s in temp_switches]
-                else
-                    # Only one branch from feeder, we don't attempt the feeder.
-                    tmp_times = [s.switching_time for s in temp_switches if s.bus != feeder]
-                end
+                tmp_times = [s.switching_time for s in temp_switches]
                 if !isempty(tmp_times)
                     temp_time, j = findmin(tmp_times)
                     push!(s_times, temp_time)
